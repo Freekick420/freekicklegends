@@ -145,6 +145,16 @@ const CAMPOS = [
   { chave: 'cenario.festaDuracao', rotulo: 'Torcida: tempo para acalmar (s)', min: 1, max: 8, passo: 0.5 },
   { chave: 'cenario.festaPlacas', rotulo: 'Placas GOOOL: duração (s)', min: 0.5, max: 2, passo: 0.1 },
 
+  { secao: 'Luz e sombras dos refletores' },
+  { chave: 'cenario.sombras', rotulo: 'Quatro sombras dos refletores (desligado: só um borrão, mais leve)', tipo: 'liga' },
+  { chave: 'cenario.sombraForca', rotulo: 'Sombras: quanto escurecem o gramado', min: 0.1, max: 0.7, passo: 0.02 },
+  { chave: 'cenario.sombraComprimento', rotulo: 'Sombras: comprimento (1 = a altura do jogador)', min: 0.5, max: 2, passo: 0.05 },
+  { chave: 'cenario.luzRefletores', rotulo: 'Luz dos refletores (jogadores, bola e gramado)', min: 0.5, max: 1.5, passo: 0.05 },
+  { chave: 'cenario.luzAmbiente', rotulo: 'Luz espalhada (clareia o lado sem refletor)', min: 0, max: 3, passo: 0.1 },
+  { chave: 'cenario.luzContraluz', rotulo: 'Contraluz (recorta os jogadores vistos de trás)', min: 0, max: 2, passo: 0.05 },
+  { chave: 'cenario.flashes', rotulo: 'Flashes de câmera na torcida (0 = nenhum)', min: 0, max: 3, passo: 0.1 },
+  { chave: 'cenario.vinheta', rotulo: 'Cantos da tela mais escuros (0 = nada)', min: 0, max: 1, passo: 0.05 },
+
   { secao: 'Ar e gravidade' },
   { chave: 'gravidade', rotulo: 'Gravidade', min: 5, max: 15, passo: 0.1 },
   { chave: 'arrasto', rotulo: 'Resistência do ar', min: 0, max: 0.03, passo: 0.001 },

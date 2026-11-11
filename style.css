@@ -30,6 +30,17 @@ body {
   display: block;
 }
 
+/* Vinheta: os cantos da tela um pouco mais escuros, por cima do campo e por baixo dos botões.
+   A força vem do painel de ajuste (--vinheta, posta pelo js/estadio.js). */
+#jogo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 125% 88% at 50% 46%, rgba(2, 5, 12, 0) 52%, rgba(2, 5, 12, 0.62) 100%);
+  opacity: var(--vinheta, 0.55);
+}
+
 #hud {
   position: fixed;
   inset: 0;

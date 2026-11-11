@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Teste das sombras, da luz e da bola</title>
+  <!-- Mesmo import map do jogo: Three.js em versão fixa -->
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #000; font-family: system-ui, sans-serif; }
+    #tela canvas { display: block; touch-action: none; }
+    #botoes { position: fixed; left: 8px; top: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+    #botoes button {
+      font: 600 13px system-ui, sans-serif; color: #fff; background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 8px; padding: 7px 10px;
+    }
+    #botoes button.ativo { background: #f7d84a; color: #111; }
+    #botoes .nivel { background: rgba(20, 70, 140, 0.7); }
+    #info { position: fixed; left: 8px; bottom: 8px; color: #fff; font: 12px ui-monospace, monospace; background: rgba(0, 0, 0, 0.55); padding: 4px 8px; border-radius: 6px; white-space: pre; }
+    .sem-ui #botoes, .sem-ui #info { display: none; }
+  </style>
+</head>
+<body>
+  <div id="tela"></div>
+  <div id="botoes">
+    <button data-camera="a" type="button">Atrás (a do jogo)</button>
+    <button data-camera="b" type="button">De cima</button>
+    <button data-camera="c" type="button">Replay lateral</button>
+    <button data-camera="d" type="button">Bolas de luz</button>
+    <button data-camera="e" type="button">Perto do corredor</button>
+    <button data-camera="f" type="button">Bola quicando</button>
+    <button data-camera="g" type="button">Barreira</button>
+    <button class="nivel" data-nivel="1" type="button">Sombras completas</button>
+    <button class="nivel" data-nivel="0.5" type="button">Em cruz (borrões)</button>
+    <button class="nivel" data-nivel="0" type="button">Um borrão</button>
+    <button id="refletores" type="button">Refletores: ligados</button>
+    <button id="tempo" type="button">Parar o tempo</button>
+  </div>
+  <div id="info"></div>
+
+  <script type="module">
+    // Página de teste das sombras (js/sombras.js), da luz dos refletores (js/estadio.js) e da bola (js/bola.js).
+    // Bonecos de js/jogadores.js em várias situações: correndo no lugar (o "cobrador", com destaque), parado,
+    // três da barreira pulando, o goleiro mergulhando, bolas de referência para ver a luz e uma bola quicando.
+    // Endereço: testes/sombras.html?cam=a (a..g) · &ui=0 esconde os botões · &teste: cada quadro vale 1/60 s
+    // · &pausa: o tempo só anda com avancar() · &qualidade=1 | 0.5 | 0 · &t=1.2 começa nesse instante
+    // · &silhuetas=destaque | todos | nenhuma (quem ganha a silhueta provisória; lido pelo js/sombras.js)
+    // · &simular=1: cada boneco ganha um criarSilhueta de mentira (o caminho rápido, como o boneco novo terá)
+    // · &sombras=0: refletores desligados (CONFIG.cenario.sombras)
+    // · &orcamento=30000: teto de triângulos de silhueta por quadro (os mais longe da câmera ficam com a cruz)
+    // No console: avancar(segundos), posicionar(pos, alvo, fov), definirCamera(letra), qualidade(n), info(),
+    // medirSilhueta() (ms para montar a silhueta provisória de um boneco).
+    import * as THREE from 'three';
+    import { CONFIG } from '../js/config.js';
+    import { criarCenario, PADRAO_CENARIO } from '../js/estadio.js';
+    import { criarSombras, silhuetaDasPecas } from '../js/sombras.js';
+    import { criarBolaVisual } from '../js/bola.js';
+    import {
+      criarPersonagem, posePadrao, poseBarreira, poseGoleiroMergulho, visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, UNIFORMES,
+    } from '../js/jogadores.js';
+
+    const parametros = new URLSearchParams(location.search);
+    if (parametros.get('ui') === '0') document.body.classList.add('sem-ui');
+    CONFIG.cenario = { ...PADRAO_CENARIO, ...(CONFIG.cenario || {}) };
+    if (parametros.get('sombras') === '0') CONFIG.cenario.sombras = false;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.getElementById('tela').appendChild(renderer.domElement);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 300);
+    const cenario = criarCenario(scene, renderer, CONFIG);
+    const sombras = criarSombras(scene, { refletores: cenario.refletores, orcamento: Number(parametros.get('orcamento')) || undefined });
+    if (parametros.has('qualidade')) sombras.qualidade(Number(parametros.get('qualidade')));
+
+    // ----- Bonecos -----
+    const SIMULAR = parametros.get('simular') === '1';
+    const Z = 20;
+    const bonecos = [];
+    function boneco(opcoes, x, z, giro, destaque, animar) {
+      const personagem = criarPersonagem(opcoes);
+      // O caminho rápido: o boneco novo terá este método (aqui, de mentira, com as peças do boneco de hoje)
+      if (SIMULAR) personagem.criarSilhueta = (material, copias) => silhuetaDasPecas(personagem.grupo, material, copias);
+      personagem.grupo.position.set(x, 0, z);
+      personagem.grupo.rotation.y = giro;
+      scene.add(personagem.grupo);
+      const sombra = sombras.boneco(personagem, { raio: 0.4, destaque });
+      const b = { personagem, sombra, x, z, animar };
+      bonecos.push(b);
+      return b;
+    }
+    const brancos = { camisa: '#f8f8f8', calcao: '#f8f8f8', meiao: '#f8f8f8', numero: '#3b2a70', gola: '#d4af37' };
+    // Correndo no lugar (o "cobrador"): pernas e braços têm de mexer na sombra
+    boneco({ visual: { ...visualAdversario(0, 1.8), chuteira: '#ff7a00' }, uniforme: brancos, numero: 7, nome: 'TESTE' }, -3, Z, Math.PI, true, (p, t) => {
+      const f = Math.sin(t * 9);
+      const g = Math.cos(t * 9);
+      p.aplicarPose({
+        tronco: { frente: 0.2, giro: 0.12 * f }, cabeca: { frente: -0.1 },
+        bracoE: { frente: -0.7 * f, lado: 0.12, cotovelo: 1.3 }, bracoD: { frente: 0.7 * f, lado: 0.12, cotovelo: 1.3 },
+        pernaE: { frente: 0.75 * f, joelho: 0.5 + 0.7 * Math.max(0, -g) }, pernaD: { frente: -0.75 * f, joelho: 0.5 + 0.7 * Math.max(0, g) },
+        pulo: 0.04 * Math.abs(g),
+      });
+      return 0;
+    });
+    // Parado
+    boneco({ visual: visualAdversario(3, 1.86), uniforme: UNIFORMES.lendas, numero: 10, nome: '' }, -1.2, Z, Math.PI, false, (p, t) => {
+      p.aplicarPose(posePadrao(t));
+      return 0;
+    });
+    // Três da barreira: pulam juntos de tempos em tempos (como em js/barreira.js: os pés sobem até 0,45 m)
+    for (let i = 0; i < 3; i++) {
+      boneco({ visual: visualAdversario(i + 4, 1.82 + 0.03 * i), uniforme: UNIFORMES.adversario, numero: 4 + i, nome: '' }, 0.9 + i * 0.52, Z - 1.5, 0, false, (p, t) => {
+        const ciclo = (t % 2.4) / 0.7;
+        const progresso = ciclo < 1 ? ciclo : 0;
+        const altura = progresso > 0 ? 0.45 * 4 * progresso * (1 - progresso) : 0;
+        p.grupo.position.y = altura;
+        p.aplicarPose(poseBarreira(progresso, t + i));
+        return altura;
+      });
+    }
+    // Goleiro mergulhando para o lado (tomba e volta)
+    boneco({ visual: VISUAL_GOLEIRO_ADVERSARIO, uniforme: UNIFORMES.goleiroAdversario, numero: 1, nome: '' }, 4.6, Z, Math.PI, false, (p, t) => {
+      const k = 0.5 - 0.5 * Math.cos((t % 3) / 3 * Math.PI * 2);
+      p.aplicarPose(poseGoleiroMergulho(k, 1, 0.4));
+      p.grupo.rotation.set(0, Math.PI, -1.35 * k);
+      p.grupo.position.set(4.6 - 1.2 * k, 0.55 * Math.sin(Math.PI * k) + 0.25 * k, Z);
+      return 0;
+    });
+
+    // ----- Bolas de referência para ver a luz (branca, cinza, pele e preta brilhante) e um "manequim" branco -----
+    const referencia = new THREE.Group();
+    [['#f4f4f4', false], ['#808080', false], ['#d9a57a', false], ['#151515', true]].forEach(([cor, brilho], i) => {
+      const material = brilho
+        ? new THREE.MeshPhongMaterial({ color: cor, shininess: 40, specular: 0x555555 })
+        : new THREE.MeshLambertMaterial({ color: cor });
+      const esfera = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 20), material);
+      esfera.position.set(-7.4 + i * 0.75, 1.0, Z);
+      referencia.add(esfera);
+    });
+    const manequim = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 1.3, 8, 24), new THREE.MeshLambertMaterial({ color: '#f4f4f4' }));
+    manequim.position.set(-8.4, 0.87, Z);
+    referencia.add(manequim);
+    scene.add(referencia);
+
+    // ----- Bolas: uma parada e uma quicando (as quatro sombrinhas se juntam quando ela desce) -----
+    const bolaParada = criarBolaVisual(scene, CONFIG);
+    const bolaQuica = criarBolaVisual(scene, CONFIG);
+    const sombraParada = sombras.bola(0.3);
+    const sombraQuica = sombras.bola(0.3);
+    const fisicaParada = { pos: { x: -2.2, y: CONFIG.raioBola, z: Z + 1.2 }, giro: { x: 0, y: 0, z: 0 } };
+    const fisicaQuica = { pos: { x: 2.4, y: 1, z: Z + 2.2 }, giro: { x: 14, y: 6, z: 0 } };
+
+    // ----- Câmeras -----
+    const CAMERAS = {
+      a: { pos: [-0.6, 2.2, 28], olhar: [0.3, 0.6, Z - 3], fov: 0 },
+      b: { pos: [0.5, 12, Z + 7], olhar: [0.5, 0, Z - 0.5], fov: 38 },
+      c: { pos: [26, 12, Z - 6], olhar: [0, 0.8, Z - 0.5], fov: 14 },
+      d: { pos: [-7.2, 1.5, Z + 4.2], olhar: [-7, 0.95, Z], fov: 30 },
+      e: { pos: [-1.2, 1.4, Z + 3.6], olhar: [-2.6, 0.7, Z], fov: 34 },
+      f: { pos: [5.5, 2.4, Z + 6], olhar: [2.4, 0.5, Z + 2.2], fov: 32 },
+      g: { pos: [3.4, 1.5, Z + 3], olhar: [1.4, 0.7, Z - 1.5], fov: 34 },
+    };
+    let cameraAtual = parametros.get('cam') || 'a';
+    function ajustarTela() {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      posicionarCamera();
+    }
+    function posicionarCamera() {
+      const c = CAMERAS[cameraAtual];
+      if (c) {
+        camera.position.set(...c.pos);
+        camera.lookAt(...c.olhar);
+        // Sem fov: o do jogo (no celular em pé, abre para o gol caber)
+        const GRAUS = Math.PI / 180;
+        const doJogo = Math.max(CONFIG.camera.fovMin, 2 * Math.atan(Math.tan((CONFIG.camera.larguraVisivel * GRAUS) / 2) / camera.aspect) / GRAUS);
+        camera.fov = c.fov || doJogo;
+      }
+      camera.updateProjectionMatrix();
+      for (const b of document.querySelectorAll('[data-camera]')) b.classList.toggle('ativo', b.dataset.camera === cameraAtual);
+    }
+    window.addEventListener('resize', ajustarTela);
+    for (const b of document.querySelectorAll('[data-camera]')) {
+      b.addEventListener('click', () => {
+        cameraAtual = b.dataset.camera;
+        posicionarCamera();
+      });
+    }
+    for (const b of document.querySelectorAll('[data-nivel]')) b.addEventListener('click', () => sombras.qualidade(Number(b.dataset.nivel)));
+    const botaoRefletores = document.getElementById('refletores');
+    botaoRefletores.addEventListener('click', () => {
+      CONFIG.cenario.sombras = !CONFIG.cenario.sombras;
+      botaoRefletores.textContent = `Refletores: ${CONFIG.cenario.sombras ? 'ligados' : 'desligados'}`;
+    });
+    document.getElementById('tempo').addEventListener('click', () => { window.pausado = !window.pausado; });
+
+    // ----- Tempo -----
+    let t = Number(parametros.get('t')) || 0;
+    function avancar(dt) {
+      t += dt;
+      for (const b of bonecos) {
+        const altura = b.animar(b.personagem, t) || 0;
+        b.sombra.atualizar({ x: b.personagem.grupo.position.x, z: b.personagem.grupo.position.z, altura });
+      }
+      // Bola quicando: sobe a 3 m e desce, andando de leve para o lado
+      const fase = (t % 1.6) / 1.6;
+      fisicaQuica.pos.y = CONFIG.raioBola + 3 * 4 * fase * (1 - fase);
+      fisicaQuica.pos.x = 2.4 + 0.5 * Math.sin(t * 0.7);
+      bolaParada.atualizar(fisicaParada, camera, dt);
+      bolaQuica.atualizar(fisicaQuica, camera, dt);
+      sombraParada.atualizar(fisicaParada.pos, CONFIG.raioBola);
+      sombraQuica.atualizar(fisicaQuica.pos, CONFIG.raioBola);
+      sombras.atualizar(dt);
+      cenario.atualizar(dt);
+    }
+    window.avancar = (segundos) => {
+      for (let s = 0; s < segundos - 1e-6; s += 1 / 60) avancar(1 / 60);
+      avancar(0);
+      renderer.render(scene, camera);
+      return t;
+    };
+    window.posicionar = (pos, alvo, fov) => {
+      cameraAtual = 'livre';
+      camera.position.set(...pos);
+      camera.lookAt(...alvo);
+      if (fov) camera.fov = fov;
+      camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+    };
+    window.definirCamera = (letra) => {
+      cameraAtual = letra;
+      posicionarCamera();
+      renderer.render(scene, camera);
+    };
+    window.qualidade = (n) => {
+      sombras.qualidade(n);
+      window.avancar(0);
+    };
+    window.refletores = (ligados) => {
+      CONFIG.cenario.sombras = Boolean(ligados);
+      window.avancar(0);
+    };
+    window.info = () => ({
+      desenho: { chamadas: renderer.info.render.calls, triangulos: renderer.info.render.triangles },
+      sombras: sombras.estado(), geometrias: renderer.info.memory.geometries, texturas: renderer.info.memory.textures,
+    });
+    // Quanto custa montar a silhueta provisória de um boneco (ms, média de n vezes)
+    window.medirSilhueta = (n = 20) => {
+      const grupo = bonecos[0].personagem.grupo;
+      const material = new THREE.MeshBasicMaterial();
+      const t0 = performance.now();
+      let triangulos = 0;
+      for (let i = 0; i < n; i++) {
+        const malha = silhuetaDasPecas(grupo, material, 4);
+        triangulos = malha.geometry.index.count / 3;
+        grupo.remove(malha);
+        malha.geometry.dispose();
+        malha.skeleton.dispose();
+      }
+      return { ms: (performance.now() - t0) / n, triangulos };
+    };
+    window.sombras = sombras;
+    window.cenario = cenario;
+    window.CONFIG = CONFIG;
+    window.pausado = parametros.has('pausa');
+
+    ajustarTela();
+    avancar(0);
+    const MODO_TESTE = parametros.has('teste');
+    const relogio = new THREE.Clock();
+    const info = document.getElementById('info');
+    let quadros = 0;
+    let acumulado = 0;
+    window.tempoDeJogo = 0;
+    function quadro() {
+      requestAnimationFrame(quadro);
+      const dtReal = Math.min(relogio.getDelta(), 0.05);
+      const dt = window.pausado ? 0 : MODO_TESTE ? 1 / 60 : dtReal;
+      window.tempoDeJogo += dt;
+      avancar(dt);
+      renderer.render(scene, camera);
+      quadros++;
+      acumulado += dtReal;
+      if (acumulado > 0.5) {
+        const e = sombras.estado();
+        info.textContent = `${Math.round(quadros / acumulado)} quadros/s · ${renderer.info.render.calls} desenhos · ${renderer.info.render.triangles} triângulos\n`
+          + `sombras: ${e.modo} · ${e.silhuetas} silhuetas (${e.provisorias} provisórias, ${e.triangulos} triângulos) · ${e.borroes} borrões`;
+        quadros = 0;
+        acumulado = 0;
+      }
+    }
+    window.sombrasPronto = true;
+    requestAnimationFrame(quadro);
+  </script>
+</body>
+</html>

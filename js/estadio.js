@@ -243,18 +243,116 @@ function criarCeu(scene) {
   scene.fog = new THREE.Fog(COR_NEBLINA, 25, 230);
 }
 
-// Jogo à noite: luz dos refletores quente vindo de trás de quem cobra, e uma luz fria mais fraca do outro lado
-function criarLuzes(scene) {
-  scene.add(new THREE.HemisphereLight(0xc6d4ff, 0x2a4a24, 1.45));
-  const principal = new THREE.DirectionalLight(0xfff0dc, 2.4);
-  principal.position.set(-30, 55, 45);
-  scene.add(principal);
-  const contraluz = new THREE.DirectionalLight(0xbcd0ff, 0.75);
-  contraluz.position.set(40, 45, -40);
-  scene.add(contraluz);
+// Jogo à noite sob refletores. A luz chega dos quatro cantos do estádio (as torres e as lâmpadas da
+// cobertura); cada canto é uma luz direcional e faz uma das quatro sombras de cada jogador (js/sombras.js).
+//   lado: de que lado a luz vem, no chão (x, z); elevacao: altura da luz nos bonecos (graus)
+//   luz: força nos bonecos, na bola e no gramado (parte da cor que a superfície virada para ela devolve)
+//   papel: 'principal' (atrás e à direita de quem cobra: ilumina as costas do cobrador e a frente da barreira,
+//          tanto na câmera de trás quanto na do replay, que fica do lado direito), 'preenche' (clareia de leve
+//          o que a principal não pega) ou 'contraluz' (vem do lado do gol, baixa e forte: acende a beirada
+//          dos bonecos vistos de trás e os recorta contra a arquibancada)
+//   sombra: quanto a sombra deste canto escurece (vezes sombraForca); comprimento: tamanho da sombra em
+//          "alturas do jogador" (vezes sombraComprimento). A luz das torres de verdade chega bem deitada e
+//          daria sombras de 3 a 5 m; nos jogos de futebol elas têm mais ou menos a altura do jogador.
+const REFLETORES = [
+  { lado: [0.6, 0.8], elevacao: 38, luz: 0.8, cor: '#fff0dc', papel: 'principal', sombra: 1, comprimento: 1.25 },
+  { lado: [-0.6, 0.8], elevacao: 30, luz: 0.14, cor: '#eef2ff', papel: 'preenche', sombra: 0.62, comprimento: 1.25 },
+  { lado: [-0.76, -0.65], elevacao: 20, luz: 1, cor: '#dce7ff', papel: 'contraluz', sombra: 0.94, comprimento: 0.8 },
+  { lado: [0.76, -0.65], elevacao: 20, luz: 0.3, cor: '#dce7ff', papel: 'contraluz', sombra: 0.7, comprimento: 0.8 },
+];
+// Luz espalhada (parte da cor, como em REFLETORES): branca e um pouco fria vinda de cima; de baixo, o
+// reflexo verde do gramado iluminado (o lado de baixo dos corpos e da bola pega esse verde)
+const LUZ_AMBIENTE = { forca: 0.13, ceu: '#d3ddff', chao: '#b4dca4' };
+// Quanto de luz chega num chão virado para cima, com os ajustes no padrão (vezes a cor do chão). O gramado
+// foi pintado para aparecer com a cor da textura: o material dele divide por isto.
+const LUZ_NO_CHAO = REFLETORES.reduce((soma, r) => soma + r.luz * Math.sin(r.elevacao * GRAUS), LUZ_AMBIENTE.forca * 0.85);
+
+// Devolve { refletores, atualizar() }. refletores: [{ direcao: { x, y, z }, forca }], um por canto: direção
+// (unitária, do chão para a luz) ao longo da qual a sombra cai e quanto ela escurece (0 = sem sombra).
+// atualizar() relê os ajustes do painel (CONFIG.cenario) e acerta as luzes e os refletores.
+function criarLuzes(scene, CONFIG) {
+  const ambiente = new THREE.HemisphereLight(LUZ_AMBIENTE.ceu, LUZ_AMBIENTE.chao, 1);
+  scene.add(ambiente);
+  const luzes = REFLETORES.map((r) => {
+    const luz = new THREE.DirectionalLight(r.cor, 1);
+    const h = Math.hypot(r.lado[0], r.lado[1]);
+    const e = r.elevacao * GRAUS;
+    luz.position.set((r.lado[0] / h) * Math.cos(e), Math.sin(e), (r.lado[1] / h) * Math.cos(e)).multiplyScalar(90);
+    scene.add(luz);
+    return luz;
+  });
+  const refletores = REFLETORES.map(() => ({ direcao: { x: 0, y: 1, z: 0 }, forca: 0 }));
+
+  function atualizar() {
+    // As intensidades do Three.js são "luz que chega"; a superfície devolve 1/π disso
+    const geral = Math.max(0, ajuste(CONFIG, 'luzRefletores')) * Math.PI;
+    const contraluz = Math.max(0, ajuste(CONFIG, 'luzContraluz'));
+    ambiente.intensity = LUZ_AMBIENTE.forca * Math.max(0, ajuste(CONFIG, 'luzAmbiente')) * geral;
+    const ligadas = ligado(CONFIG, 'sombras');
+    const forca = limitar(ajuste(CONFIG, 'sombraForca'), 0, 1);
+    const comprimento = Math.max(0.1, ajuste(CONFIG, 'sombraComprimento'));
+    REFLETORES.forEach((r, i) => {
+      luzes[i].intensity = r.luz * geral * (r.papel === 'contraluz' ? contraluz : 1);
+      // Sombra: a mesma direção no chão, com a inclinação que dá o comprimento pedido
+      const c = r.comprimento * comprimento;
+      const h = Math.hypot(r.lado[0], r.lado[1]) * Math.hypot(1, c);
+      const d = refletores[i].direcao;
+      d.x = (r.lado[0] * c) / h;
+      d.y = Math.hypot(r.lado[0], r.lado[1]) / h;
+      d.z = (r.lado[1] * c) / h;
+      refletores[i].forca = ligadas ? Math.min(1, r.sombra * forca) : 0;
+    });
+  }
+  atualizar();
+  return { refletores, atualizar };
 }
 
 // ---------- Gramado ----------
+
+// Fiapos de grama: milhares de risquinhos claros e escuros, quase todos no mesmo sentido, num quadrado que
+// se repete sem emenda. Só o brilho importa (cinza médio = não muda a cor do gramado).
+function texturaFiapos(anisotropia) {
+  const T = 512;
+  const [canvas, ctx] = novoCanvas(T, T);
+  const s = criarSorteio(11);
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, T, T);
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 15000; i++) {
+    const x = s() * T;
+    const y = s() * T;
+    const comprimento = entre(5, 15, s);
+    const angulo = entre(-0.42, 0.42, s) + (s() < 0.12 ? entre(-0.9, 0.9, s) : 0);
+    const dx = Math.sin(angulo) * comprimento;
+    const dy = Math.cos(angulo) * comprimento;
+    const claro = s() < 0.5;
+    const tom = Math.round(claro ? entre(160, 235, s) : entre(25, 100, s));
+    ctx.strokeStyle = `rgba(${tom},${tom},${tom},${entre(0.35, 0.8, s).toFixed(2)})`;
+    ctx.lineWidth = entre(0.9, 1.9, s);
+    // repete o risco do outro lado quando ele passa da borda (a textura emenda)
+    for (const ox of [0, x + dx > T ? -T : x + dx < 0 ? T : null]) {
+      for (const oy of [0, y + dy > T ? -T : null]) {
+        if (ox === null || oy === null) continue;
+        ctx.beginPath();
+        ctx.moveTo(x + ox, y + oy);
+        ctx.lineTo(x + ox + dx, y + oy + dy);
+        ctx.stroke();
+      }
+    }
+  }
+  // Acerta a média em cinza médio (128): de longe, a textura reduzida não clareia nem escurece o gramado
+  const imagem = ctx.getImageData(0, 0, T, T);
+  const d = imagem.data;
+  let soma = 0;
+  for (let i = 0; i < d.length; i += 4) soma += d[i];
+  const desvio = 128 - soma / (d.length / 4);
+  for (let i = 0; i < d.length; i += 4) d[i] = d[i + 1] = d[i + 2] = Math.min(255, Math.max(0, d[i] + desvio));
+  ctx.putImageData(imagem, 0, 0);
+  const t = new THREE.CanvasTexture(canvas);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.anisotropy = anisotropia;
+  return t;
+}
 
 // A textura cobre meio campo (de trás do nosso gol até o meio de campo). A outra metade usa a mesma
 // textura girada, porque o campo é simétrico: o dobro de detalhe sem gastar mais memória.
@@ -417,30 +515,23 @@ function criarGramado(scene, anisotropia) {
     const cantos = [[X0, 0, zb], [X1, 0, zb], [X1, 0, za], [X0, 0, za]];
     b.quad(...cantos, { uv: cantos.map(([x, , z]) => uvDe(x, z)), frente: cima });
   }
-  const material = new THREE.MeshLambertMaterial({ map: mapa });
-  // Detalhe fino da grama perto da câmera (ruído calculado na hora, some com a distância)
+  // (a cor do material desfaz a soma das luzes: o gramado aparece com a cor pintada na textura)
+  const material = new THREE.MeshLambertMaterial({ map: mapa, color: new THREE.Color().setScalar(1 / LUZ_NO_CHAO) });
+  // Detalhe da grama: uma textura de fiapos (texturaFiapos) repetida no chão em dois tamanhos. De perto
+  // aparecem as folhas; de longe a própria textura se desfaz em cinza médio (mipmaps) e não muda nada.
+  const fiapos = { value: texturaFiapos(anisotropia) };
   material.onBeforeCompile = (shader) => {
+    shader.uniforms.uFiapos = fiapos;
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vMundo;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMundo = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      .replace('#include <common>', '#include <common>\nvarying vec2 vChao;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvChao = (modelMatrix * vec4(transformed, 1.0)).xz;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>
-        varying vec3 vMundo;
-        float acaso(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-        float ruidoSuave(vec2 p) {
-          vec2 i = floor(p);
-          vec2 f = fract(p);
-          f = f * f * (3.0 - 2.0 * f);
-          return mix(mix(acaso(i), acaso(i + vec2(1.0, 0.0)), f.x), mix(acaso(i + vec2(0.0, 1.0)), acaso(i + vec2(1.0, 1.0)), f.x), f.y);
-        }`)
+      .replace('#include <common>', '#include <common>\nvarying vec2 vChao;\nuniform sampler2D uFiapos;')
       .replace('#include <map_fragment>', `#include <map_fragment>
-        // (o smoothstep precisa da borda menor primeiro: invertido, o resultado é indefinido no Safari)
-        float perto = 1.0 - smoothstep(5.0, 30.0, distance(vMundo, cameraPosition));
-        if (perto > 0.0) {
-          vec2 p = vMundo.xz * vec2(14.0, 6.0);
-          float n = ruidoSuave(p) * 0.6 + ruidoSuave(p * 2.7) * 0.4;
-          diffuseColor.rgb *= 1.0 + (n - 0.5) * 0.24 * perto;
-        }`);
+        // folhas (1,6 m x 2,3 m por repetição, deitadas ao longo do campo) e tufos maiores, girados
+        float folhas = texture2D(uFiapos, vChao * vec2(0.62, 0.43)).g;
+        float tufos = texture2D(uFiapos, mat2(0.153, 0.077, -0.077, 0.153) * vChao + 0.37).g;
+        diffuseColor.rgb *= 1.0 + (folhas - 0.5) * 0.62 + (tufos - 0.5) * 0.3;`);
   };
   material.customProgramCacheKey = () => 'gramado-fkl';
   const gramado = new THREE.Mesh(b.criar(), material);
@@ -1071,6 +1162,76 @@ function criarLuzesAcesas(scene, contorno) {
   pontos(luminarias, 1.3, 0xffe6c0, 0.75);
 }
 
+// ---------- Flashes de câmera na torcida ----------
+
+// Pontinhos brancos espalhados pelas arquibancadas; cada um acende por um instante de tempos em tempos
+// (a conta é feita na placa de vídeo, com o relógio do cenário). Na comemoração do gol, piscam muito mais.
+function criarFlashes(scene, contorno, uniformes, CONFIG) {
+  const s = criarSorteio(77);
+  const QUANTOS = 600;
+  const posicoes = [];
+  const fases = [];
+  const aneis = [PERFIL.baixo, PERFIL.alto];
+  for (let n = 0; n < QUANTOS; n++) {
+    const anel = aneis[s() < 0.55 ? 0 : 1];
+    const fileira = Math.floor(entre(1, anel.fileiras - 1, s));
+    const d = anel.d + fileira * anel.fundo + 0.3;
+    const i = Math.floor(s() * contorno.length);
+    const t = s();
+    const [x0, z0] = noContorno(contorno, i, d);
+    const [x1, z1] = noContorno(contorno, i + 1, d);
+    posicoes.push(x0 + (x1 - x0) * t, anel.y + fileira * anel.degrau + 0.8, z0 + (z1 - z0) * t);
+    fases.push(s(), entre(10, 30, s)); // em que momento do ciclo ele pisca e de quantos em quantos segundos
+  }
+  const geometria = new THREE.BufferGeometry();
+  geometria.setAttribute('position', new THREE.Float32BufferAttribute(posicoes, 3));
+  geometria.setAttribute('aFlash', new THREE.Float32BufferAttribute(fases, 2));
+  const quanto = { value: 1 };
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uTempo: uniformes.tempo, uFesta: uniformes.festa, uQuanto: quanto, uAltura: { value: 800 } },
+    vertexShader: /* glsl */ `
+      attribute vec2 aFlash;
+      uniform float uTempo;
+      uniform float uFesta;
+      uniform float uQuanto;
+      uniform float uAltura;
+      varying float vBrilho;
+      void main() {
+        // na festa do gol o ciclo encurta em degraus (cada degrau embaralha quem pisca: vira uma chuva de flashes)
+        float periodo = aFlash.y / (uQuanto * (1.0 + 4.0 * floor(uFesta * 3.0 + 0.5)));
+        float f = fract(uTempo / periodo + aFlash.x) * periodo; // segundos desde o último flash deste ponto
+        float k = f / 0.12;
+        vBrilho = step(k, 1.0) * (1.0 - k * k);                // acende de uma vez e apaga em 0,12 s
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = vBrilho > 0.0 ? max(6.0, uAltura * 1.5 / -mv.z) : 0.0;
+        if (vBrilho <= 0.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+      }`,
+    fragmentShader: /* glsl */ `
+      varying float vBrilho;
+      void main() {
+        float r = length(gl_PointCoord - 0.5) * 2.0;
+        float nucleo = 1.0 - smoothstep(0.12, 0.5, r);
+        float halo = max(0.0, 1.0 - r);
+        gl_FragColor = vec4(vec3(0.92, 0.96, 1.0) * (nucleo * 1.4 + halo * halo * 0.7) * vBrilho, 1.0);
+      }`,
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const pontos = new THREE.Points(geometria, material);
+  pontos.frustumCulled = false;
+  pontos.onBeforeRender = (renderer) => {
+    material.uniforms.uAltura.value = renderer.domElement.height; // o tamanho do ponto acompanha a tela
+  };
+  scene.add(pontos);
+  return {
+    atualizar() {
+      const v = Math.max(0, ajuste(CONFIG, 'flashes'));
+      pontos.visible = v > 0;
+      quanto.value = Math.max(0.01, v);
+    },
+  };
+}
+
 // ---------- Faixa de LED na frente do anel de cima ----------
 
 // A faixa de LED e as placas mostram "GOL!" só em festa acima disto (o "uuuh" da trave não chega)
@@ -1418,12 +1579,26 @@ export const PADRAO_CENARIO = {
   redeBarriga: 1,     // quanto o fundo inteiro estufa junto com a bolsa (0 = só a bolsa em volta da bola)
   redeBalanco: 1,     // tranco no teto e nas laterais quando o fundo estufa (mais = o gol inteiro balança mais)
   traveTremor: 1,     // quanto o gol treme quando a bola bate na trave ou no travessão (0 = nada)
+  // Luz e sombras dos refletores (js/sombras.js desenha as sombras com o que cenario.refletores informa)
+  sombras: true,          // as quatro sombras dos refletores embaixo de cada jogador e da bola (desligado: só um borrão)
+  sombraForca: 0.36,      // quanto as sombras escurecem o gramado (0 a 1)
+  sombraComprimento: 1,   // tamanho das sombras (1 = mais ou menos a altura do jogador; 2 = o dobro)
+  luzRefletores: 1,       // força da luz dos refletores nos jogadores, na bola e no gramado
+  luzAmbiente: 1,         // luz espalhada: clareia o lado que os refletores não pegam (0 = sombra própria bem escura)
+  luzContraluz: 1,        // luz que vem do lado do gol e recorta os jogadores vistos de trás (0 = sem)
+  flashes: 1,             // flashes de câmera na torcida (0 = nenhum; 2 = o dobro)
+  vinheta: 0.55,          // cantos da tela um pouco mais escuros (0 = nada); é uma camada por cima do jogo (CSS)
 };
 
 // Lê um número do CONFIG.cenario; se faltar ou não for número, usa o padrão
 function ajuste(CONFIG, nome) {
   const v = CONFIG.cenario ? CONFIG.cenario[nome] : undefined;
   return Number.isFinite(v) ? v : PADRAO_CENARIO[nome];
+}
+// O mesmo para os liga/desliga
+function ligado(CONFIG, nome) {
+  const v = CONFIG.cenario ? CONFIG.cenario[nome] : undefined;
+  return typeof v === 'boolean' ? v : PADRAO_CENARIO[nome];
 }
 const limitar = (v, a, b) => Math.min(b, Math.max(a, v));
 
@@ -2395,6 +2570,26 @@ function criarGols(CONFIG) {
   return { metal, metalPerto, redeLa };
 }
 
+// As peças finas que fazem sombra no gramado (js/sombras.js desenha uma faixa por refletor para cada uma):
+// traves, travessão e estrutura de trás do nosso gol e as hastes das bandeirinhas de escanteio deste lado.
+// forca: quanto da sombra aparece (as peças finas quase não fazem sombra).
+function pecasQueFazemSombra(CONFIG) {
+  const { golLargura: L, golAltura: A, golProfundidade: P, raioTrave: R } = CONFIG;
+  const meia = L / 2;
+  const fino = 0.025;
+  const pecas = [];
+  const peca = (a, b, raio, forca = 1) => pecas.push({ a, b, raio, forca });
+  for (const lado of [-1, 1]) {
+    peca([lado * (meia + R), 0, 0], [lado * (meia + R), A + R, 0], R);         // trave
+    peca([lado * meia, 0, -P], [lado * meia, A, -P], fino, 0.45);             // poste de trás
+    peca([lado * meia, A, -R], [lado * meia, A, -P], fino, 0.45);             // em cima, da trave para trás
+    peca([lado * CAMPO.meiaLargura, 0, 0], [lado * CAMPO.meiaLargura, 1.5, 0], 0.022, 0.7); // bandeirinha
+  }
+  peca([-(meia + 2 * R), A + R, 0], [meia + 2 * R, A + R, 0], R);              // travessão
+  peca([-meia, A, -P], [meia, A, -P], fino, 0.45);                             // em cima, atrás
+  return pecas;
+}
+
 const CELULA_REDE = 0.13; // m: tamanho de cada quadradinho da textura da rede (dois losangos)
 
 // Ferros do nosso gol: o mesmo brilho de tinta dos outros, mais o tremor (calculado na placa de vídeo)
@@ -2488,12 +2683,13 @@ export function criarCenario(scene, renderer, CONFIG) {
   const uniformes = { tempo: { value: 0 }, festa: { value: 0 } };
 
   criarCeu(scene);
-  criarLuzes(scene);
+  const luzes = criarLuzes(scene, CONFIG);
   criarGramado(scene, anisotropia);
   const contorno = criarContorno();
   criarEstrutura(scene, contorno, anisotropia);
   criarTorcida(scene, contorno, anisotropia, uniformes);
   criarLuzesAcesas(scene, contorno);
+  const flashes = criarFlashes(scene, contorno, uniformes, CONFIG);
   const faixaLed = criarFaixaLed(scene, contorno);
   const placas = criarPlacas(scene, anisotropia);
 
@@ -2512,6 +2708,7 @@ export function criarCenario(scene, renderer, CONFIG) {
   ferroPerto.geometry.boundingSphere.radius += 0.3; // o tremor tira o ferro um pouquinho do lugar
   scene.add(ferroPerto);
   const rede = montarRede(scene, CONFIG, gols.redeLa, anisotropia, uniformesFerro);
+  luzes.refletores.segmentos = pecasQueFazemSombra(CONFIG);
 
   // Comemoração da torcida: sobe rápido, fica no auge um tempo e vai acalmando.
   // As placas e a faixa de LED mostram "GOOOL!" só no começo, e param na hora com festa(0).
@@ -2551,6 +2748,15 @@ export function criarCenario(scene, renderer, CONFIG) {
       uniformes.festa.value = festa.nivel;
     },
   };
+  // Vinheta: a camada escura nos cantos da tela é do CSS (#jogo::after, em style.css); aqui só vai a força
+  let vinheta = -1;
+  const atualizarVinheta = () => {
+    const v = limitar(ajuste(CONFIG, 'vinheta'), 0, 1);
+    if (v === vinheta || typeof document === 'undefined') return;
+    vinheta = v;
+    document.documentElement.style.setProperty('--vinheta', String(v));
+  };
+  atualizarVinheta();
   // "GOOOL!" nas placas: só em festa de gol, e sempre acaba antes da próxima cobrança (espera do gol)
   const mostrarGol = () => {
     const espera = Number.isFinite(CONFIG.esperaGol) ? CONFIG.esperaGol : 2.2;
@@ -2561,6 +2767,13 @@ export function criarCenario(scene, renderer, CONFIG) {
   return {
     rede,
     torcida,
+    // De onde vem a luz, para as sombras no gramado (js/sombras.js): [{ direcao: { x, y, z }, forca }], um por
+    // canto do estádio. direcao: unitária, do chão para a luz (a sombra cai para o lado contrário; quanto mais
+    // deitada, mais comprida); forca: quanto a sombra escurece, de 0 a 1 (0 = sombras dos refletores desligadas).
+    // É sempre a mesma lista: os valores acompanham os ajustes do painel a cada cenario.atualizar().
+    // refletores.segmentos: as peças finas do cenário que fazem sombra (traves, travessão e estrutura do nosso
+    // gol, hastes das bandeirinhas), cada uma { a: [x, y, z], b: [x, y, z], raio, forca }.
+    refletores: luzes.refletores,
     // Bola na trave ou no travessão: o gol treme de leve (intensidade de 0 a 1), com a rede junto
     trave(intensidade = 1) {
       rede.tremer(intensidade);
@@ -2571,6 +2784,9 @@ export function criarCenario(scene, renderer, CONFIG) {
       dt = Math.min(dt, 0.1);   // e um quadro enorme (ou Infinity) vale no máximo 0,1 s
       tempo = (tempo + dt) % 1000;
       uniformes.tempo.value = tempo;
+      luzes.atualizar();
+      flashes.atualizar();
+      atualizarVinheta();
       rede.atualizar(dt);
       torcida.atualizar(dt);
       const gol = mostrarGol();
