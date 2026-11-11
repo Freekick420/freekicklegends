@@ -222,6 +222,29 @@ export const ELENCO = [
 ];
 
 // Overall: média simples das 5 notas. É só referência; não entra na física.
+// Rivais: a barreira e o goleiro vestem as cores de um rival do clube do cobrador (só cores e padrões, sem
+// escudo). A chave é o uniforme.clube da lenda; nome é o que aparece na tela ("vs Real Madrid").
+export const RIVAIS = {
+  'Barcelona': { nome: 'Real Madrid', padrao: 'liso', camisa: '#f4f4f4', cores: [], calcao: '#f4f4f4', meiao: '#f4f4f4', numero: '#1b1b1b', gola: '#1b1b1b' },
+  'Real Madrid': { nome: 'Barcelona', padrao: 'listras', camisa: '#a50044', cores: ['#004d98'], calcao: '#004d98', meiao: '#004d98', numero: '#f7d84a', gola: '#004d98' },
+  'Milan': { nome: 'Inter', padrao: 'listras', camisa: '#0b2a8a', cores: ['#151515'], calcao: '#151515', meiao: '#151515', numero: '#ffffff', gola: '#151515' },
+  'Manchester United': { nome: 'Manchester City', padrao: 'liso', camisa: '#6cabdd', cores: [], calcao: '#f4f4f4', meiao: '#1c2c5b', numero: '#1c2c5b', gola: '#1c2c5b' },
+  'Flamengo': { nome: 'Vasco', padrao: 'diagonal', camisa: '#f4f4f4', cores: ['#151515'], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
+  'Vasco': { nome: 'Flamengo', padrao: 'aros', camisa: '#c4142b', cores: ['#151515'], calcao: '#f4f4f4', meiao: '#c4142b', numero: '#ffffff', gola: '#151515' },
+  'Botafogo': { nome: 'Flamengo', padrao: 'aros', camisa: '#c4142b', cores: ['#151515'], calcao: '#f4f4f4', meiao: '#c4142b', numero: '#ffffff', gola: '#151515' },
+  'São Paulo (goleiro)': { nome: 'Corinthians', padrao: 'liso', camisa: '#f4f4f4', cores: [], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
+  'Palmeiras': { nome: 'Corinthians', padrao: 'liso', camisa: '#f4f4f4', cores: [], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
+  'Santos': { nome: 'Palmeiras', padrao: 'liso', camisa: '#0a7a3f', cores: [], calcao: '#f4f4f4', meiao: '#0a7a3f', numero: '#ffffff', gola: '#ffffff' },
+  'Cruzeiro': { nome: 'Atlético-MG', padrao: 'listras', camisa: '#151515', cores: ['#f4f4f4'], calcao: '#151515', meiao: '#f4f4f4', numero: '#ffffff', gola: '#f4f4f4' },
+  'Vélez (goleiro)': { nome: 'San Lorenzo', padrao: 'listras', camisa: '#1b3f8f', cores: ['#8a1538'], calcao: '#151515', meiao: '#1b3f8f', numero: '#ffffff', gola: '#8a1538' },
+  'Lazio': { nome: 'Roma', padrao: 'liso', camisa: '#8e1b1b', cores: [], calcao: '#f4f4f4', meiao: '#8e1b1b', numero: '#f7c948', gola: '#f7c948' },
+  'Juventus': { nome: 'Torino', padrao: 'liso', camisa: '#7a1a2b', cores: [], calcao: '#f4f4f4', meiao: '#7a1a2b', numero: '#ffffff', gola: '#ffffff' },
+  'Liverpool': { nome: 'Everton', padrao: 'liso', camisa: '#1b3f8f', cores: [], calcao: '#f4f4f4', meiao: '#f4f4f4', numero: '#ffffff', gola: '#ffffff' },
+  'Brasil': { nome: 'Argentina', padrao: 'listras', camisa: '#f4f4f4', cores: ['#6cabdd'], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
+  'Argentina': { nome: 'Brasil', padrao: 'liso', camisa: '#f7d20a', cores: [], calcao: '#1b3f8f', meiao: '#f4f4f4', numero: '#0a7a3f', gola: '#0a7a3f' },
+  'Alemanha': { nome: 'Holanda', padrao: 'liso', camisa: '#f08c00', cores: [], calcao: '#f4f4f4', meiao: '#f08c00', numero: '#151515', gola: '#151515' },
+};
+
 export function overall(jogador) {
   const a = jogador.atributos;
   return Math.round((a.FOR + a.CUR + a.QUE + a.PRE + a.FRI) / 5);

@@ -39,11 +39,12 @@
   <script type="module">
     import * as THREE from 'three';
     import {
-      criarPersonagem, UNIFORMES, posePadrao, poseCorrida, poseChute, poseBarreira, poseGoleiroPronto,
-      poseGoleiroMergulho, poseComemoracao, poseLamento, poseCobradorPronto, criarSombraBlob,
-      visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, bolaNoContato, criarCobranca, TEMPO_CONTATO,
-      posicionarBarreira, posicionarGoleiro, estatisticasCache,
+      criarPersonagem, UNIFORMES, posePadrao, poseBarreira, poseGoleiroPronto, poseGoleiroMergulho, criarSombraBlob,
+      visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, posicionarBarreira, posicionarGoleiro, estatisticasCache,
     } from '../js/jogadores.js';
+    import {
+      poseCorrida, poseChute, poseComemoracao, poseLamento, poseCobradorPronto, bolaNoContato, criarCobranca, TEMPO_CONTATO,
+    } from '../js/cobranca.js';
     import { ELENCO } from '../js/elenco.js';
 
     const params = new URLSearchParams(location.search);

@@ -165,7 +165,7 @@ export const CONFIG = {
   video: true,            // botão para gravar o replay em vídeo e salvar/compartilhar (some se o navegador não gravar)
 
   // Goleiro, barreira, cobrador, cenário e som: os padrões ficam nos próprios módulos
-  // (PADRAO_GOLEIRO em js/goleiro.js, PADRAO_BARREIRA em js/barreira.js, PADRAO_COBRANCA em js/jogadores.js,
+  // (PADRAO_GOLEIRO em js/goleiro.js, PADRAO_BARREIRA em js/barreira.js, PADRAO_COBRANCA em js/cobranca.js,
   // PADRAO_AUDIO em js/audio.js) e são copiados para cá quando o jogo abre. Para mudar um padrão, escreva aqui,
   // por exemplo: goleiro: { reflexo: 0.35 },
 

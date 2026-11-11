@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import { CONFIG, VERSAO } from './config.js?v=9';
 import { criarBola, chutar, passo, noChao, coneDeErro, preverTecnica } from './physics.js?v=9';
-import { ELENCO, sugerirCobradores } from './elenco.js?v=9';
+import { ELENCO, RIVAIS, sugerirCobradores } from './elenco.js?v=9';
 import { criarCenario, PADRAO_CENARIO } from './estadio.js?v=9';
 import { montarBarreira, semBarreira, atualizarBarreira, colidirBolaBarreira, PADRAO_BARREIRA } from './barreira.js?v=9';
 import { criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, PADRAO_GOLEIRO, PADRAO_PENALTI } from './goleiro.js?v=9';
 import {
-  criarPersonagem, criarSombraBlob, criarCobranca, PADRAO_COBRANCA,
-  visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, UNIFORMES, poseChute, poseComemoracao, poseLamento, misturarPoses,
+  criarPersonagem, criarSombraBlob, visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, UNIFORMES, misturarPoses,
 } from './jogadores.js?v=9';
+import { criarCobranca, PADRAO_COBRANCA, poseChute, poseComemoracao, poseLamento } from './cobranca.js?v=9';
 import { criarAnimadorGoleiro, criarAnimadorBarreira } from './animacaoDefesa.js?v=9';
 import { criarAudio, PADRAO_AUDIO } from './audio.js?v=9';
 import { criarGravador, salvarVideo } from './replay.js?v=9';
@@ -274,28 +274,7 @@ function uniformeDaLenda(jogador) {
   };
 }
 
-// Barreira e goleiro com as cores de um rival do clube do cobrador (só cores e padrões, sem escudo)
-const RIVAIS = {
-  'Barcelona': { nome: 'Real Madrid', padrao: 'liso', camisa: '#f4f4f4', cores: [], calcao: '#f4f4f4', meiao: '#f4f4f4', numero: '#1b1b1b', gola: '#1b1b1b' },
-  'Real Madrid': { nome: 'Barcelona', padrao: 'listras', camisa: '#a50044', cores: ['#004d98'], calcao: '#004d98', meiao: '#004d98', numero: '#f7d84a', gola: '#004d98' },
-  'Milan': { nome: 'Inter', padrao: 'listras', camisa: '#0b2a8a', cores: ['#151515'], calcao: '#151515', meiao: '#151515', numero: '#ffffff', gola: '#151515' },
-  'Manchester United': { nome: 'Manchester City', padrao: 'liso', camisa: '#6cabdd', cores: [], calcao: '#f4f4f4', meiao: '#1c2c5b', numero: '#1c2c5b', gola: '#1c2c5b' },
-  'Flamengo': { nome: 'Vasco', padrao: 'diagonal', camisa: '#f4f4f4', cores: ['#151515'], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
-  'Vasco': { nome: 'Flamengo', padrao: 'aros', camisa: '#c4142b', cores: ['#151515'], calcao: '#f4f4f4', meiao: '#c4142b', numero: '#ffffff', gola: '#151515' },
-  'Botafogo': { nome: 'Flamengo', padrao: 'aros', camisa: '#c4142b', cores: ['#151515'], calcao: '#f4f4f4', meiao: '#c4142b', numero: '#ffffff', gola: '#151515' },
-  'São Paulo (goleiro)': { nome: 'Corinthians', padrao: 'liso', camisa: '#f4f4f4', cores: [], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
-  'Palmeiras': { nome: 'Corinthians', padrao: 'liso', camisa: '#f4f4f4', cores: [], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
-  'Santos': { nome: 'Palmeiras', padrao: 'liso', camisa: '#0a7a3f', cores: [], calcao: '#f4f4f4', meiao: '#0a7a3f', numero: '#ffffff', gola: '#ffffff' },
-  'Cruzeiro': { nome: 'Atlético-MG', padrao: 'listras', camisa: '#151515', cores: ['#f4f4f4'], calcao: '#151515', meiao: '#f4f4f4', numero: '#ffffff', gola: '#f4f4f4' },
-  'Vélez (goleiro)': { nome: 'San Lorenzo', padrao: 'listras', camisa: '#1b3f8f', cores: ['#8a1538'], calcao: '#151515', meiao: '#1b3f8f', numero: '#ffffff', gola: '#8a1538' },
-  'Lazio': { nome: 'Roma', padrao: 'liso', camisa: '#8e1b1b', cores: [], calcao: '#f4f4f4', meiao: '#8e1b1b', numero: '#f7c948', gola: '#f7c948' },
-  'Juventus': { nome: 'Torino', padrao: 'liso', camisa: '#7a1a2b', cores: [], calcao: '#f4f4f4', meiao: '#7a1a2b', numero: '#ffffff', gola: '#ffffff' },
-  'Liverpool': { nome: 'Everton', padrao: 'liso', camisa: '#1b3f8f', cores: [], calcao: '#f4f4f4', meiao: '#f4f4f4', numero: '#ffffff', gola: '#ffffff' },
-  'Brasil': { nome: 'Argentina', padrao: 'listras', camisa: '#f4f4f4', cores: ['#6cabdd'], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
-  'Argentina': { nome: 'Brasil', padrao: 'liso', camisa: '#f7d20a', cores: [], calcao: '#1b3f8f', meiao: '#f4f4f4', numero: '#0a7a3f', gola: '#0a7a3f' },
-  'Alemanha': { nome: 'Holanda', padrao: 'liso', camisa: '#f08c00', cores: [], calcao: '#f4f4f4', meiao: '#f08c00', numero: '#151515', gola: '#151515' },
-};
-
+// Barreira e goleiro com as cores de um rival do clube do cobrador (RIVAIS, em js/elenco.js)
 function nomeDoRival(jogador) {
   const rival = jogador.uniforme && RIVAIS[jogador.uniforme.clube];
   return rival ? rival.nome : '';
@@ -310,7 +289,7 @@ function uniformeAdversario(jogador) {
 // ---------- Jogadores ----------
 
 let cobradorBoneco = null;
-let animacao = null;   // corrida e chute do cobrador (js/jogadores.js)
+let animacao = null;   // corrida e chute do cobrador (js/cobranca.js)
 const sombraCobrador = criarSombraBlob(0.4);
 scene.add(sombraCobrador);
 let bonecosBarreira = [];
@@ -515,7 +494,25 @@ function poseAerea(inicio) {
   return { pos, olhar };
 }
 
+// Câmera dos testes automáticos (jogoTeste.camera): parada num ponto, ou presa ao cobrador
+let cameraTeste = null;
+function aplicarCameraTeste() {
+  const t = cameraTeste;
+  const base = t.seguir && cobradorBoneco ? cobradorBoneco.grupo.position : { x: 0, y: 0, z: 0 };
+  camera.position.set(base.x + t.pos[0], t.pos[1], base.z + t.pos[2]);
+  olharAtual.set(base.x + t.olhar[0], t.olhar[1], base.z + t.olhar[2]);
+  camera.lookAt(olharAtual);
+  if (t.fov && camera.fov !== t.fov) {
+    camera.fov = t.fov;
+    camera.updateProjectionMatrix();
+  }
+}
+
 function atualizarCamera(dt) {
+  if (cameraTeste) {
+    aplicarCameraTeste();
+    return;
+  }
   const c = CONFIG.camera;
   const inicio = posicaoDaFalta(falta);
   const emJogo = estado.fase === 'voo' || estado.fase === 'fim';
@@ -1509,8 +1506,10 @@ function simular(dt) {
   processarEventos();
 }
 
-function quadro() {
-  const dtReal = MODO_TESTE ? 1 / 60 : Math.min(relogio.getDelta(), 0.05);
+// Um quadro do jogo: dtReal segundos de relógio. desenhar = false só anda o tempo (os testes automáticos
+// avançam vários quadros de uma vez sem esperar o desenho de cada um).
+let testePausado = false;
+function passoDoJogo(dtReal, desenhar = true) {
   window.tempoDeJogo += dtReal;
   ajustarQualidade(dtReal);
 
@@ -1563,7 +1562,12 @@ function quadro() {
   cenario.atualizar(dt);
   audio.atualizar(dt);
   rastro.visivel = CONFIG.rastro;
-  renderer.render(scene, camera);
+  if (desenhar) renderer.render(scene, camera);
+}
+
+function quadro() {
+  const dtReal = MODO_TESTE ? (testePausado ? 0 : 1 / 60) : Math.min(relogio.getDelta(), 0.05);
+  passoDoJogo(dtReal);
   requestAnimationFrame(quadro);
 }
 
@@ -1600,6 +1604,38 @@ if (MODO_TESTE) {
     registro: () => registro && { ...registro, cobrador: registro.cobrador.numero },
     cruzamento: () => bola.cruzamento && { x: bola.cruzamento.x, y: bola.cruzamento.y },
     modo: (nome) => trocarModo(nome),
+    // Tempo: pausar(true) congela o jogo (os quadros continuam desenhando); avancar(s) anda s segundos de
+    // jogo de uma vez, em quadros de 1/60 s, sem desenhar (funciona pausado ou não)
+    pausar: (sim = true) => {
+      testePausado = Boolean(sim);
+    },
+    avancar: (segundos) => {
+      const n = Math.max(0, Math.round(segundos * 60));
+      for (let i = 0; i < n; i++) passoDoJogo(1 / 60, false);
+      return window.tempoDeJogo;
+    },
+    // Avança quadro a quadro até a condição (função sem argumentos) valer, no máximo limite segundos
+    avancarAte: (condicao, limite = 10) => {
+      const n = Math.round(limite * 60);
+      for (let i = 0; i < n && !condicao(); i++) passoDoJogo(1 / 60, false);
+      return condicao();
+    },
+    // Câmera: camera({ pos: [x, y, z], olhar: [x, y, z], fov, seguir }) põe a câmera num ponto do campo;
+    // com seguir: true, pos e olhar são relativos ao cobrador (x e z); camera(null) devolve a do jogo
+    camera: (c) => {
+      cameraTeste = c ? { pos: c.pos, olhar: c.olhar, fov: c.fov || 0, seguir: Boolean(c.seguir) } : null;
+      if (!c) ajustarTela();
+    },
+    hud: (visivel) => {
+      document.getElementById('hud').style.display = visivel ? '' : 'none';
+    },
+    tempos: () => ({
+      fase: estado.fase, tCobranca: estado.tCobranca, tempoContato: animacao.tempoContato, duracao: animacao.duracao,
+      tempoVoo: estado.tempo, tempoDeJogo: window.tempoDeJogo,
+    }),
+    desenho: () => ({ ...renderer.info.render, geometrias: renderer.info.memory.geometries, texturas: renderer.info.memory.textures }),
+    cobradorPos: () => cobradorBoneco && { x: cobradorBoneco.grupo.position.x, z: cobradorBoneco.grupo.position.z, giro: cobradorBoneco.grupo.rotation.y },
+    bolaPos: () => ({ ...bola.pos }),
     desafio: () => ({ ...desafio, cobrador: desafio.cobrador && desafio.cobrador.numero }),
     goleiro: () => (goleiro.penalti ? { ...goleiro.penalti } : null),
     placar: () => placar(),
