@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Teste dos figurantes</title>
+  <!-- Mesmo import map do index.html -->
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0d2b16; color: #eef; font: 13px system-ui, sans-serif; overflow: hidden; }
+    canvas { display: block; }
+    #painel { position: fixed; left: 6px; top: 6px; right: 6px; display: flex; flex-wrap: wrap; gap: 4px; z-index: 2; }
+    #painel button, #painel select, #painel input { font: inherit; padding: 4px 7px; border-radius: 6px; border: 0; background: rgba(0,0,0,0.55); color: #fff; }
+    #painel input { width: 3.2em; }
+    #info { position: fixed; left: 6px; bottom: 6px; right: 6px; font: 11px monospace; white-space: pre-wrap; background: rgba(0,0,0,0.5); padding: 4px; border-radius: 6px; z-index: 2; }
+    .rotulo { position: fixed; font: bold 11px monospace; color: #fff; background: rgba(0,0,0,0.55); padding: 1px 4px; border-radius: 3px; z-index: 3; pointer-events: none; transform: translate(-50%, 0); white-space: nowrap; }
+    body.captura #painel, body.captura #info { display: none; }
+  </style>
+</head>
+<body>
+  <!--
+    Página de inspeção dos figurantes (js/figurantes.js e js/animacaoFigurantes.js): os outros jogadores em campo.
+    Para abrir:  python3 -m http.server 8782   (na pasta do projeto)   e   http://localhost:8782/testes/figurantes.html
+    Modos (no menu ou no endereço, ?modo=NOME):
+      campo     a montagem de verdade de uma falta: corredor do chute (amarelo), faixa da câmera (azul), barreira,
+                goleiro e cobrador (bonecos parados). Opções: dist, ang, pe (D | E), n (quantidade), semente,
+                penalti=1, vista (cima | celular | lado | area)
+      jeitos    todos os jeitos de esperar, lado a lado (normal e espelhado)
+      gestos    um boneco para cada gesto, repetindo
+      reacoes   as reações ao resultado (resultado=gol | fora), ataque na frente e defesa atrás
+      passos    andando, trotando e correndo (para conferir se o pé escorrega)
+    Outras opções: ?teste (cada quadro vale 1/60 s), ?captura (esconde os botões).
+    Para os testes automáticos: window.jogoTeste (veja no fim do arquivo).
+  -->
+  <div id="painel">
+    <select id="modo"></select>
+    <select id="vista"></select>
+    <button id="fase-pronto" type="button">Esperando</button>
+    <button id="fase-corrida" type="button">Corrida</button>
+    <button id="fase-voo" type="button">Chute</button>
+    <button id="fase-gol" type="button">Gol</button>
+    <button id="fase-fora" type="button">Fora</button>
+    <button id="outra" type="button">Outra falta</button>
+    <button id="pausa" type="button">Pausa</button>
+  </div>
+  <div id="info">carregando…</div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { CONFIG } from '../js/config.js';
+    import { montarBarreira, semBarreira, PADRAO_BARREIRA } from '../js/barreira.js';
+    import { criarGoleiro, PADRAO_GOLEIRO, PADRAO_PENALTI } from '../js/goleiro.js';
+    import { montarFigurantes, atualizarFigurantes, corredorDoChute, cameraDeTras, PADRAO_FIGURANTES } from '../js/figurantes.js';
+    import { criarAnimadorFigurantes } from '../js/animacaoFigurantes.js';
+    import { criarPersonagem, criarSombraBlob, visualAdversario, UNIFORMES, posePadrao, poseBarreira, poseGoleiroPronto, SOLA } from '../js/jogadores.js';
+    import { ELENCO, RIVAIS } from '../js/elenco.js';
+
+    const params = new URLSearchParams(location.search);
+    const TESTE = params.has('teste');
+    if (params.has('captura')) document.body.classList.add('captura');
+    const num = (nome, padrao) => (params.has(nome) && Number.isFinite(Number(params.get(nome))) ? Number(params.get(nome)) : padrao);
+    const GRAUS = Math.PI / 180;
+    const cfg = {
+      ...CONFIG,
+      goleiro: { ...PADRAO_GOLEIRO }, penalti: { ...PADRAO_PENALTI, ...(CONFIG.penalti || {}) },
+      barreira: { ...PADRAO_BARREIRA }, figurantes: { ...PADRAO_FIGURANTES, quantidade: num('n', 10) },
+    };
+
+    // Sorteio com semente (o mesmo do jogo)
+    function criarSorteio(semente) {
+      let a = Math.floor(semente * 4294967296) | 0;
+      return () => {
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const sorteioDaJogada = (s, n) => criarSorteio((s + n * 0.6180339887) % 1);
+
+    // ---------- Cena ----------
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(1);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x16233f);
+    // As mesmas luzes do jogo (js/estadio.js)
+    scene.add(new THREE.HemisphereLight(0xc6d4ff, 0x2a4a24, 1.45));
+    const principal = new THREE.DirectionalLight(0xfff0dc, 2.4);
+    principal.position.set(-30, 55, 45);
+    scene.add(principal);
+    const contraluz = new THREE.DirectionalLight(0xbcd0ff, 0.75);
+    contraluz.position.set(40, 45, -40);
+    scene.add(contraluz);
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 300);
+
+    // Gramado com faixas e as linhas da área
+    {
+      const c = document.createElement('canvas');
+      c.width = 64;
+      c.height = 64;
+      const x = c.getContext('2d');
+      x.fillStyle = '#2f8a3c';
+      x.fillRect(0, 0, 64, 64);
+      x.fillStyle = '#2a7f37';
+      x.fillRect(0, 0, 64, 32);
+      const t = new THREE.CanvasTexture(c);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(1, 16);
+      t.colorSpace = THREE.SRGBColorSpace;
+      const chao = new THREE.Mesh(new THREE.PlaneGeometry(90, 110), new THREE.MeshLambertMaterial({ map: t }));
+      chao.rotation.x = -Math.PI / 2;
+      chao.position.z = 45;
+      scene.add(chao);
+      const branco = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const linha = (w, d, x0, z0) => {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), branco);
+        m.rotation.x = -Math.PI / 2;
+        m.position.set(x0, 0.004, z0);
+        scene.add(m);
+      };
+      linha(68, 0.12, 0, 0);
+      linha(18.32, 0.12, 0, 5.5);
+      linha(0.12, 5.5, -9.16, 2.75);
+      linha(0.12, 5.5, 9.16, 2.75);
+      linha(40.32, 0.12, 0, 16.5);
+      linha(0.12, 16.5, -20.16, 8.25);
+      linha(0.12, 16.5, 20.16, 8.25);
+      linha(0.3, 0.3, 0, 11);
+      // Meia-lua
+      const pontos = [];
+      const ab = Math.acos(5.5 / 9.15);
+      for (let i = 0; i <= 40; i++) {
+        const a = -ab + (i / 40) * 2 * ab;
+        pontos.push(new THREE.Vector3(9.15 * Math.sin(a), 0.006, 11 + 9.15 * Math.cos(a)));
+      }
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pontos), new THREE.LineBasicMaterial({ color: 0xffffff })));
+      // Traves e travessão
+      const trave = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      for (const xp of [-3.66, 3.66]) {
+        const p = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.44, 10), trave);
+        p.position.set(xp, 1.22, 0);
+        scene.add(p);
+      }
+      const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 7.44, 10), trave);
+      tr.rotation.z = Math.PI / 2;
+      tr.position.set(0, 2.44, 0);
+      scene.add(tr);
+    }
+    const bolaMalha = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), new THREE.MeshLambertMaterial({ color: 0xffffff }));
+    scene.add(bolaMalha);
+
+    // Sombra simples (um borrão), no formato que o animador espera
+    const criarSombra = (personagem, { raio = 0.4 } = {}) => {
+      const malha = criarSombraBlob(raio);
+      scene.add(malha);
+      return {
+        atualizar({ x, z, altura = 0 }) {
+          malha.position.set(x, 0.012, z);
+          const e = Math.max(0.45, 1 - altura * 1.2);
+          malha.scale.set(2 * raio * e, 1, 2 * raio * e);
+        },
+        remover() {
+          scene.remove(malha);
+        },
+      };
+    };
+    const animador = criarAnimadorFigurantes(scene, { criarSombra });
+
+    // Coisas da montagem atual que saem de cena na próxima (marcas no chão, bonecos parados, rótulos)
+    let descartaveis = [];
+    let rotulos = [];
+    function limparCena() {
+      for (const d of descartaveis) d();
+      descartaveis = [];
+      for (const r of rotulos) r.el.remove();
+      rotulos = [];
+    }
+    function rotulo(texto, x, y, z) {
+      const el = document.createElement('div');
+      el.className = 'rotulo';
+      el.textContent = texto;
+      document.body.appendChild(el);
+      rotulos.push({ el, p: new THREE.Vector3(x, y, z) });
+    }
+    function bonecoParado(visual, uniforme, numero, x, z, yaw, pose) {
+      const per = criarPersonagem({ visual, uniforme, numero, nome: '' });
+      per.grupo.position.set(x, 0, z);
+      per.grupo.rotation.y = yaw;
+      per.aplicarPose(pose);
+      scene.add(per.grupo);
+      const sombra = criarSombra(per, { raio: 0.4 });
+      sombra.atualizar({ x, z });
+      descartaveis.push(() => {
+        sombra.remover();
+        per.dispose();
+      });
+      return per;
+    }
+    function faixaNoChao(pontos, cor, opacidade = 0.9) {
+      const g = new THREE.BufferGeometry().setFromPoints(pontos.map(([x, z]) => new THREE.Vector3(x, 0.02, z)));
+      const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color: cor, transparent: true, opacity: opacidade }));
+      scene.add(l);
+      descartaveis.push(() => {
+        scene.remove(l);
+        g.dispose();
+      });
+    }
+
+    // ---------- Estado ----------
+    const MODOS = ['campo', 'jeitos', 'gestos', 'reacoes', 'passos'];
+    const VISTAS = ['cima', 'celular', 'lado', 'area', 'frente'];
+    const est = {
+      modo: MODOS.includes(params.get('modo')) ? params.get('modo') : 'campo',
+      vista: VISTAS.includes(params.get('vista')) ? params.get('vista') : null,
+      fase: 'pronto', resultado: null, tChute: 0, tFase: 0, t: 0, pausado: false,
+      figurantes: null, bola: { pos: { x: 0, y: 0.11, z: 22 }, vel: { x: 0, y: 0, z: 0 } }, bola0: { x: 0, z: 22 },
+      semente: num('semente', 0.31), dist: num('dist', 22), ang: num('ang', 0), pe: params.get('pe') === 'E' ? 'E' : 'D',
+      penalti: params.get('penalti') === '1', cobrador: null, camLivre: null, jogador: null,
+    };
+    window.tempoDeJogo = 0;
+
+    const uniformeDe = (u) => ({ ...u, listras: u.padrao === 'listras' ? u.cores[0] : null });
+    function uniformes() {
+      const jogador = ELENCO.find((j) => j.numero === num('cobrador', est.pe === 'E' ? 10 : 8)) || ELENCO[0];
+      est.jogador = jogador;
+      const u = jogador.uniforme;
+      const rival = RIVAIS[u.clube];
+      return {
+        ataque: uniformeDe(u.linha ? { ...u, ...u.linha } : u),
+        defesa: rival ? { ...UNIFORMES.adversario, ...uniformeDe(rival), faixaMeiao: rival.calcao } : { ...UNIFORMES.adversario },
+      };
+    }
+
+    // ---------- Modo campo: a montagem de verdade ----------
+    function montarCampo() {
+      const penalti = est.penalti;
+      const B = penalti ? { x: 0, z: 11 } : { x: est.dist * Math.sin(est.ang * GRAUS), z: est.dist * Math.cos(est.ang * GRAUS) };
+      const u = uniformes();
+      const jog = est.jogador;
+      const barreira = penalti ? semBarreira(B) : montarBarreira(B, cfg, sorteioDaJogada(est.semente, 0));
+      const goleiro = penalti
+        ? criarGoleiro(B, null, cfg, { penalti: { historico: [], aleatorio: sorteioDaJogada(est.semente, 2) } })
+        : criarGoleiro(B, barreira, cfg);
+      // Onde o cobrador espera (aproximação da corrida de js/cobranca.js)
+      const c = jog.cobranca || {};
+      const lado = est.pe === 'D' ? 1 : -1;
+      const yawCorrida = Math.atan2(-B.x, -B.z) - lado * (c.angulo ?? 30) * GRAUS;
+      const d = (c.distancia ?? 2) + 0.45;
+      est.cobrador = { x: B.x - Math.sin(yawCorrida) * d, z: B.z - Math.cos(yawCorrida) * d };
+      est.bola0 = B;
+      est.figurantes = montarFigurantes(B, barreira, cfg, sorteioDaJogada(est.semente, 3), {
+        penalti, cobrador: est.cobrador, pe: est.pe, goleiro: { x: goleiro.base.x, z: goleiro.z },
+      });
+      // Bonecos parados: cobrador, barreira e goleiro
+      bonecoParado(jog.visual, uniformeDe(jog.uniforme), jog.numero, est.cobrador.x, est.cobrador.z, yawCorrida, posePadrao(0));
+      barreira.jogadores.forEach((j, i) => bonecoParado(visualAdversario(i, j.altura), u.defesa, [4, 5, 6, 8, 3][i], j.x, j.z, j.rotacaoY, poseBarreira(0, i)));
+      bonecoParado({ ...visualAdversario(3, 1.9), goleiro: true }, UNIFORMES.goleiroAdversario, 1, goleiro.base.x, goleiro.z, Math.atan2(B.x - goleiro.base.x, B.z - goleiro.z), poseGoleiroPronto(0));
+      // Corredor do chute (amarelo) e faixa da câmera (azul)
+      const corr = corredorDoChute(B, cfg);
+      for (const s of [-1, 1]) {
+        const pts = [];
+        for (let z = 0.1; z < B.z - 0.2; z += 0.3) {
+          const ox = (B.x * z) / B.z;
+          pts.push([ox + s * corr.borda(ox, z, s, 0, 0), z]);
+        }
+        faixaNoChao(pts, 0xf7d84a);
+      }
+      const dist = Math.hypot(B.x, B.z);
+      const ax = B.x / dist;
+      const az = B.z / dist;
+      const q = (lat, at) => [B.x + az * lat + ax * at, B.z - ax * lat + az * at];
+      faixaNoChao([q(5, 0), q(-5, 0), q(-5, 16), q(5, 16), q(5, 0)], 0x7aa8ff, 0.7);
+      animador.montar(est.figurantes, { uniformeAtaque: u.ataque, uniformeDefesa: u.defesa, semente: est.semente });
+      est.figurantes.jogadores.forEach((j, i) => rotulo(`${i} ${j.papel}`, j.x, j.altura + 0.25, j.z));
+    }
+
+    // ---------- Modos de fila: bonecos lado a lado, cada um com uma coisa forçada ----------
+    function fila(itens, { espaco = 1.35, z = 6, olharZ = 22, time = () => 'ataque' } = {}) {
+      const u = uniformes();
+      const n = itens.length;
+      est.bola0 = { x: 0, z: olharZ };
+      const jogadores = itens.map((item, i) => {
+        const x = (i - (n - 1) / 2) * espaco;
+        const zi = item.z ?? z;
+        return {
+          x, z: zi, rotacaoY: item.yaw ?? 0, time: item.time || time(i), altura: [1.84, 1.78, 1.88, 1.81][i % 4], raio: 0.24,
+          papel: item.papel || 'solto', par: item.par ?? -1, lado: 1, numero: 2 + i, aparencia: i * 3 + 1,
+          base: { x, z: zi }, plano: item.plano || null, vx: 0, vz: 0, andando: 0, jeito: 0.5, visto: 1, yPes: 0, batida: 0,
+          forcar: item.forcar || null, rotuloTexto: item.rotulo,
+        };
+      });
+      est.figurantes = { jogadores, bola: est.bola0, penalti: false, batidas: 0, ultimaBatida: null, fimDoMovimento: 8, caixa: null, _t: null };
+      animador.montar(est.figurantes, { uniformeAtaque: u.ataque, uniformeDefesa: u.defesa, semente: est.semente });
+      jogadores.forEach((j) => rotulo(j.rotuloTexto || '', j.x, -0.12, j.z + 0.4));
+    }
+    const JEITOS = ['pronto', 'cintura', 'solto', 'joelhos', 'cruzados', 'marcando'];
+    const GESTOS = ['apontar', 'pedir', 'olhar', 'pulinhos', 'sacudir', 'ajeitar', 'pescoco', 'meiao', 'palmas', 'empurrar', 'levantar'];
+    const REACOES_GOL = { ataque: ['bracosAoAlto', 'soco', 'bracosAbertos', 'palmas'], defesa: ['maosNaCabeca', 'cabisbaixo', 'bracosAbertos', 'dobrado', 'olhaParaCima'] };
+    const REACOES_ERRO = { ataque: ['maosNaCabeca', 'olhaParaCima', 'cabisbaixo', 'alivio'], defesa: ['punho', 'palmas', 'alivio'] };
+
+    function montarJeitos() {
+      const itens = [];
+      for (const jeito of JEITOS) {
+        for (const espelho of [false, true]) {
+          if (jeito === 'marcando') continue;
+          itens.push({ forcar: { jeito, espelho, gesto: 'nenhum' }, rotulo: `${jeito}${espelho ? ' (esp.)' : ''}` });
+        }
+      }
+      // A dupla de marcação: o marcador com a mão no atacante
+      const n = itens.length;
+      itens.push({ forcar: { jeito: 'pronto', espelho: false }, papel: 'area', par: n + 1, rotulo: 'atacante', time: 'ataque' });
+      itens.push({ forcar: { jeito: 'marcando', espelho: false }, papel: 'marca', par: n, rotulo: 'marcando', time: 'defesa', z: 5.6, yaw: -0.3 });
+      fila(itens, { espaco: 1.25 });
+      // A dupla fica colada (0,75 m), como no jogo
+      const js = est.figurantes.jogadores;
+      js[n + 1].x = js[n].x + 0.62;
+      js[n + 1].base.x = js[n + 1].x;
+    }
+    function montarGestos() {
+      const itens = GESTOS.map((gesto) => ({
+        forcar: { jeito: gesto === 'levantar' ? 'joelhos' : gesto === 'empurrar' ? 'marcando' : gesto === 'meiao' || gesto === 'pescoco' ? 'cintura' : gesto === 'pulinhos' || gesto === 'pedir' ? 'pronto' : 'solto', espelho: false, gesto },
+        rotulo: gesto,
+      }));
+      // O empurrão precisa de um atacante ao lado
+      const k = GESTOS.indexOf('empurrar');
+      itens[k].par = itens.length;
+      itens[k].papel = 'marca';
+      itens[k].time = 'defesa';
+      itens.push({ forcar: { jeito: 'pronto', espelho: false, gesto: 'nenhum' }, papel: 'area', par: k, rotulo: 'empurrado', time: 'ataque' });
+      fila(itens, { espaco: 1.3 });
+      const js = est.figurantes.jogadores;
+      const a = js[js.length - 1];
+      a.x = js[k].x - 0.7;
+      a.z = js[k].z + 0.25;
+      a.base = { x: a.x, z: a.z };
+    }
+    function montarReacoes() {
+      const gol = (params.get('resultado') || 'gol') === 'gol';
+      const tabela = gol ? REACOES_GOL : REACOES_ERRO;
+      const itens = [];
+      for (const time of ['ataque', 'defesa']) {
+        tabela[time].forEach((reacao, i) => {
+          itens.push({ forcar: { jeito: 'solto', reacao, pulos: reacao === 'bracosAoAlto' || reacao === 'soco', espelho: i % 2 === 1 }, time, rotulo: `${time[0].toUpperCase()}: ${reacao}` });
+        });
+      }
+      fila(itens, { espaco: 1.3 });
+      est.resultadoModo = gol ? 'gol' : 'fora';
+    }
+    function montarPassos() {
+      // Cada um anda 7 m para −z com uma velocidade (o plano da lógica: sai parado, acelera, freia e para)
+      const vels = [1.1, 1.8, 2.6, 3.4, 4.6, 5.6];
+      const itens = vels.map((v) => ({ forcar: { jeito: 'pronto', gesto: 'nenhum' }, yaw: Math.PI, rotulo: `${v} m/s`, z: 10, plano: { x: 0, z: 3, atraso: 0.3, duracao: 7 / v + 0.3 } }));
+      fila(itens, { espaco: 1.6, z: 10, olharZ: -5 });
+      for (const j of est.figurantes.jogadores) j.plano.x = j.x;
+    }
+
+    function remontar() {
+      limparCena();
+      est.fase = 'pronto';
+      est.resultado = null;
+      est.tChute = 0;
+      est.tFase = 0;
+      if (est.modo === 'campo') montarCampo();
+      else if (est.modo === 'jeitos') montarJeitos();
+      else if (est.modo === 'gestos') montarGestos();
+      else if (est.modo === 'reacoes') montarReacoes();
+      else montarPassos();
+      est.bola.pos.x = est.bola0.x;
+      est.bola.pos.y = 0.11;
+      est.bola.pos.z = est.bola0.z;
+      est.bola.vel.x = est.bola.vel.y = est.bola.vel.z = 0;
+      if (!est.vista) est.vista = est.modo === 'campo' ? 'cima' : est.modo === 'passos' ? 'lado' : 'frente';
+      // As reações já começam no fim do lance; os passos, no chute
+      if (est.modo === 'reacoes') {
+        est.fase = 'fim';
+        est.resultado = est.resultadoModo;
+      }
+      if (est.modo === 'passos') est.fase = 'voo';
+      preencherMenus();
+    }
+
+    function mudarFase(fase, resultado = null) {
+      est.fase = fase;
+      est.resultado = resultado;
+      est.tFase = 0;
+      if (fase === 'voo') est.tChute = 0;
+      if (fase === 'pronto') remontar();
+    }
+
+    // ---------- Câmera ----------
+    function posicionarCamera() {
+      const B = est.bola0;
+      const v = est.camLivre ? 'livre' : est.vista;
+      const n = est.figurantes ? est.figurantes.jogadores.length : 10;
+      if (v === 'livre') {
+        camera.position.set(...est.camLivre.pos);
+        camera.fov = est.camLivre.fov || 40;
+        camera.updateProjectionMatrix();
+        camera.lookAt(...est.camLivre.olhar);
+      } else if (v === 'celular' && est.cobrador) {
+        // A câmera de trás do jogo num celular em pé (a mesma conta que a montagem usa para escolher os lugares)
+        const cam = cameraDeTras(B, est.cobrador, cfg.golLargura, cfg.golAltura);
+        // (numa janela em pé, o mesmo campo de visão do celular; deitada, o do jogo no computador)
+        camera.fov = camera.aspect < 1 ? cam.fov : 40;
+        camera.updateProjectionMatrix();
+        camera.position.set(cam.pos.x, cam.pos.y, cam.pos.z);
+        camera.lookAt(cam.olhar.x, cam.olhar.y, cam.olhar.z);
+      } else if (v === 'cima') {
+        camera.fov = 45;
+        camera.updateProjectionMatrix();
+        camera.position.set(B.x * 0.4, 34, B.z * 0.5 + 16);
+        camera.lookAt(B.x * 0.4, 0, B.z * 0.5 - 1);
+      } else if (v === 'lado') {
+        camera.fov = est.modo === 'campo' ? 36 : 26;
+        camera.updateProjectionMatrix();
+        if (est.modo === 'campo') {
+          camera.position.set(Math.max(0, B.x) + 24, 12, B.z * 0.5);
+          camera.lookAt(0, 1, B.z * 0.4);
+        } else {
+          camera.position.set(16, 2.2, 6.5);
+          camera.lookAt(0, 0.9, 6.5);
+        }
+      } else if (v === 'area') {
+        camera.fov = 34;
+        camera.updateProjectionMatrix();
+        camera.position.set(B.x * 0.5, 3.2, B.z * 0.72);
+        camera.lookAt(0, 0.9, 5);
+      } else {
+        // frente: a fila inteira de frente, do tamanho que couber
+        const largura = n * 1.35 + 1.5;
+        camera.fov = 22;
+        camera.updateProjectionMatrix();
+        const dist = Math.max(8, largura / (2 * Math.tan((11 * GRAUS)) * camera.aspect));
+        camera.position.set(0, 1.5, 6 + dist);
+        camera.lookAt(0, 0.95, 6);
+      }
+    }
+
+    // ---------- Laço ----------
+    function passo(dt) {
+      window.tempoDeJogo += dt;
+      est.t += dt;
+      est.tFase += dt;
+      const fase = est.fase;
+      const voando = fase === 'voo' || fase === 'fim';
+      if (voando) est.tChute += dt;
+      // A bola de mentira: sai da falta e vai para o gol em ~1 s
+      if (voando && est.modo === 'campo') {
+        const k = Math.min(1, est.tChute / 1.05);
+        est.bola.pos.x = est.bola0.x + (2.6 - est.bola0.x) * k;
+        est.bola.pos.z = est.bola0.z * (1 - k) - 0.6 * k;
+        est.bola.pos.y = 0.11 + 6.2 * k * (1 - k) + 1.4 * k;
+        est.bola.vel.z = -est.bola0.z;
+      }
+      atualizarFigurantes(est.figurantes, voando ? est.tChute : -1);
+      const info = {
+        fase,
+        tempoDesdeChute: fase === 'corrida' ? est.tFase - 1 : voando ? est.tChute : null,
+        bola: est.bola,
+        resultado: fase === 'fim' ? est.resultado : null,
+      };
+      animador.atualizar(est.figurantes, est.t, dt, info);
+      bolaMalha.position.set(est.bola.pos.x, est.bola.pos.y, est.bola.pos.z);
+    }
+    function desenhar() {
+      posicionarCamera();
+      renderer.render(scene, camera);
+      const v = new THREE.Vector3();
+      for (const r of rotulos) {
+        v.copy(r.p).project(camera);
+        const fora = v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05 || !r.el.textContent;
+        r.el.style.display = fora ? 'none' : '';
+        r.el.style.left = `${(v.x * 0.5 + 0.5) * window.innerWidth}px`;
+        r.el.style.top = `${(0.5 - v.y * 0.5) * window.innerHeight}px`;
+      }
+      const d = animador.diagnostico();
+      document.getElementById('info').textContent =
+        `${est.modo} · fase ${est.fase}${est.resultado ? ` (${est.resultado})` : ''} · t ${est.t.toFixed(2)} s · ${d.comBoneco}/${d.atores} bonecos · `
+        + `desenhos ${renderer.info.render.calls} · triângulos ${renderer.info.render.triangles}`
+        + (est.modo === 'campo' ? ` · falta ${est.penalti ? 'pênalti' : `${est.dist} m ${est.ang}°`} pé ${est.pe} semente ${est.semente.toFixed(3)}` : '');
+    }
+    const relogio = new THREE.Clock();
+    function quadro() {
+      const dt = TESTE ? 1 / 60 : Math.min(relogio.getDelta(), 0.05);
+      if (!est.pausado) passo(dt);
+      desenhar();
+      requestAnimationFrame(quadro);
+    }
+
+    // ---------- Botões ----------
+    function preencherMenus() {
+      const sm = document.getElementById('modo');
+      const sv = document.getElementById('vista');
+      sm.innerHTML = MODOS.map((m) => `<option${m === est.modo ? ' selected' : ''}>${m}</option>`).join('');
+      sv.innerHTML = VISTAS.map((m) => `<option${m === est.vista ? ' selected' : ''}>${m}</option>`).join('');
+    }
+    document.getElementById('modo').addEventListener('change', (e) => {
+      est.modo = e.target.value;
+      est.vista = null;
+      remontar();
+    });
+    document.getElementById('vista').addEventListener('change', (e) => {
+      est.vista = e.target.value;
+      est.camLivre = null;
+    });
+    document.getElementById('fase-pronto').addEventListener('click', () => mudarFase('pronto'));
+    document.getElementById('fase-corrida').addEventListener('click', () => mudarFase('corrida'));
+    document.getElementById('fase-voo').addEventListener('click', () => mudarFase('voo'));
+    document.getElementById('fase-gol').addEventListener('click', () => mudarFase('fim', 'gol'));
+    document.getElementById('fase-fora').addEventListener('click', () => mudarFase('fim', 'fora'));
+    document.getElementById('outra').addEventListener('click', () => {
+      est.semente = (est.semente * 7.13 + 0.137) % 1;
+      const r = criarSorteio(est.semente);
+      if (!params.has('dist')) est.dist = 18 + Math.round(r() * 15);
+      if (!params.has('ang')) est.ang = Math.round((r() * 2 - 1) * 32);
+      if (!params.has('pe')) est.pe = r() < 0.75 ? 'D' : 'E';
+      remontar();
+    });
+    document.getElementById('pausa').addEventListener('click', () => {
+      est.pausado = !est.pausado;
+    });
+    window.addEventListener('resize', () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    });
+
+    // ---------- Ganchos para os testes automáticos ----------
+    window.jogoTeste = {
+      modo: (m, opcoes = {}) => {
+        Object.assign(est, opcoes);
+        est.modo = m;
+        if (!opcoes.vista) est.vista = null;
+        est.camLivre = null;
+        if (opcoes.resultado) params.set('resultado', opcoes.resultado);
+        remontar();
+      },
+      falta: (dist, ang, pe = 'D', semente = est.semente, penalti = false) => {
+        Object.assign(est, { modo: 'campo', dist, ang, pe, semente, penalti });
+        remontar();
+      },
+      vista: (v) => {
+        est.vista = v;
+        est.camLivre = null;
+      },
+      camera: (c) => {
+        est.camLivre = c;
+      },
+      fase: (f, resultado = null) => mudarFase(f, resultado),
+      pausar: (sim = true) => {
+        est.pausado = Boolean(sim);
+      },
+      avancar: (segundos) => {
+        const n = Math.max(0, Math.round(segundos * 60));
+        for (let i = 0; i < n; i++) passo(1 / 60);
+        return est.t;
+      },
+      figurantes: () => est.figurantes.jogadores.map((j) => ({ x: j.x, z: j.z, time: j.time, papel: j.papel, visto: j.visto })),
+      diagnostico: () => animador.diagnostico(),
+      personagens: () => animador.personagens(),
+      desenho: () => ({ ...renderer.info.render }),
+      // Quanto os pés escorregam: anda `segundos` quadro a quadro e mede, para cada boneco, quanto o pé que
+      // está no chão (sola a menos de 3 mm do gramado) andou de lado. Devolve por boneco: andou (m que o
+      // corpo andou), escorregou (m somados dos pés no chão) e o pé mais enterrado (m).
+      escorrega: (segundos = 2) => {
+        const v = new THREE.Vector3();
+        // Os três pontos da sola (calcanhar, meio e bico) de cada pé, no mundo
+        const medir = (per) => ['E', 'D'].map((lado) => {
+          per.grupo.updateMatrixWorld(true);
+          return SOLA.map((s) => {
+            v.set(s[0], s[1], s[2]).applyMatrix4(per.juntas[`tornozelo${lado}`].matrixWorld);
+            return { x: v.x, y: v.y, z: v.z };
+          });
+        });
+        const soma = [];
+        const n = Math.round(segundos * 60);
+        for (let i = 0; i < n; i++) {
+          passo(1 / 60);
+          animador.personagens().forEach((per, k) => {
+            if (!per) return;
+            const pes = medir(per);
+            const r = soma[k] || (soma[k] = { andou: 0, escorregou: 0, menorY: 0, pos: per.grupo.position.clone(), pes });
+            r.andou += Math.hypot(per.grupo.position.x - r.pos.x, per.grupo.position.z - r.pos.z);
+            r.pos.copy(per.grupo.position);
+            for (let p = 0; p < 2; p++) {
+              // O ponto da sola que ficou apoiado (a menos de 3 mm do chão) nos dois quadros e andou menos:
+              // é o que "pisa" (o pé que já está saindo do chão não conta)
+              let menor = Infinity;
+              let subiu = 0;
+              for (let q = 0; q < 3; q++) {
+                const a = r.pes[p][q];
+                const b = pes[p][q];
+                r.menorY = Math.min(r.menorY, b.y);
+                subiu = Math.max(subiu, b.y - a.y);
+                if (a.y < 0.003 && b.y < 0.003) menor = Math.min(menor, Math.hypot(b.x - a.x, b.z - a.z));
+              }
+              if (menor < Infinity && subiu < 0.03) r.escorregou += menor;
+            }
+            r.pes = pes;
+          });
+        }
+        return soma.map((r) => ({ andou: +r.andou.toFixed(2), escorregou: +r.escorregou.toFixed(2), menorY: +r.menorY.toFixed(3) }));
+      },
+      // Custo de um quadro de animação (ms), medido em n repetições
+      custo: (n = 300) => {
+        const info = { fase: est.fase, tempoDesdeChute: null, bola: est.bola, resultado: est.resultado };
+        const t0 = performance.now();
+        for (let i = 0; i < n; i++) animador.atualizar(est.figurantes, est.t + i / 60, 1 / 60, info);
+        return (performance.now() - t0) / n;
+      },
+    };
+
+    remontar();
+    requestAnimationFrame(quadro);
+  </script>
+</body>
+</html>
