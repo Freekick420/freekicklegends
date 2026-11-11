@@ -311,8 +311,22 @@ function vestirCobrador(jogador) {
     nome: jogador.nomeCamisa || jogador.apelido,
   });
   scene.add(cobradorBoneco.grupo);
+  // estilo: o jeito de bater da lenda (js/elenco.js, campo cobranca), para a animação
   animacao = criarCobranca(cobradorBoneco, {
     bola: { x: bola.pos.x, z: bola.pos.z }, alvo: { x: 0, z: 0 }, pe: jogador.pe, cfg: configDaCobranca(jogador),
+    estilo: jogador.cobranca || {},
+  });
+}
+
+// Na hora de correr para a bola a animação fica sabendo o chute escolhido (força, onde o pé pega, para onde
+// vai e a técnica prevista), para o corpo bater do jeito certo. Depois disso animacao.tempoContato vale.
+function prepararCobranca() {
+  if (!animacao.preparar) return;
+  animacao.preparar({
+    forca: estado.forca,
+    contato: { ...contato },
+    alvo: { x: mira.x, z: 0 },
+    tecnica: preverTecnica({ forca: estado.forca, contato, cobrador }, CONFIG),
   });
 }
 
@@ -1015,6 +1029,7 @@ function novaCobranca() {
     estado.tCobranca = -PAUSA_REPLAY;
     sorteioChute = criarSorteio(registro.sementeChute);
     elementos.dica.style.visibility = 'hidden';
+    prepararCobranca();
     audio.torcidaTensao(animacao.tempoContato + PAUSA_REPLAY);
     if (replay.gravar) gravador.comecar();
   } else {
@@ -1093,6 +1108,7 @@ function soltarChute() {
   estado.forca = estado.carga;
   estado.fase = 'corrida';
   estado.tCobranca = 0;
+  prepararCobranca();
   audio.torcidaTensao(animacao.tempoContato);
   // Guarda a cobrança para o replay (a nova substitui a anterior e o vídeo dela)
   const sementeChute = estado.modo === 'desafio' ? desafio.sementeChute : aleatorio();
@@ -1110,7 +1126,9 @@ function executarChute() {
   tiro = chutar(bola, { alvo: { x: mira.x, z: 0 }, forca: estado.forca, contato, cobrador, pressao: registro.pressao || 0 }, CONFIG, sorteioChute);
   estado.fase = 'voo';
   estado.tempo = 0;
-  restoFisica = 0;
+  // O contato cai entre dois quadros: a bola já sai com o tempo que passou desde o toque do pé (no máximo
+  // um quadro), para o pé não atravessar a bola parada. Os passos da física são os mesmos; só começam antes.
+  restoFisica = Math.min(1 / 30, Math.max(0, estado.tCobranca - animacao.tempoContato));
   mostrarMira(false);
   ui.emJogo(true);
   ui.mostrarMensagem(`Força ${Math.round(estado.forca * 100)}% · ${Math.round(tiro.velocidade * 3.6)} km/h`);
@@ -1385,10 +1403,17 @@ function animarCobrador(t) {
   if (estado.fase === 'pronto' || estado.fase === 'carregando') {
     animacao.parado(t);
   } else {
-    const r = animacao.atualizar(estado.tCobranca);
-    if (r.contato && estado.fase === 'corrida') executarChute();
-    // Depois do chute: comemora o gol ou lamenta o erro
-    if (estado.fase === 'fim' && estado.tFim > 0.3 && r.etapa === 'fim') {
+    // A animação recebe a bola (para o cobrador acompanhar com a cabeça) e, no fim, o resultado do lance
+    const fim = estado.fase === 'fim';
+    const r = animacao.atualizar(estado.tCobranca, {
+      bola: bola.pos, resultado: fim ? jogada.resultado : null, tFim: fim ? estado.tFim : 0,
+    });
+    if (r.contato && estado.fase === 'corrida') {
+      executarChute();
+      simular(0); // anda já a sobra de tempo desde o contato: a bola aparece saindo do pé neste quadro
+    }
+    // Depois do chute: comemora o gol ou lamenta o erro (se a animação não cuidar disso sozinha: animacao.reage)
+    if (!animacao.reage && fim && estado.tFim > 0.3 && r.etapa === 'fim') {
       const k = Math.min(1, (estado.tFim - 0.3) * 4);
       const reacao = jogada.resultado === 'gol' ? poseComemoracao(estado.tFim) : poseLamento(estado.tFim);
       cobradorBoneco.aplicarPose(misturarPoses(poseChute(1, cobrador.pe), reacao, k));
