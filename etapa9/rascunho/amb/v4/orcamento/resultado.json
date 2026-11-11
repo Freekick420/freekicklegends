@@ -1,0 +1,344 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/amb/rot/orcamento.json",
+  "url": "http://127.0.0.1:8831/testes/sombras.html?teste&pausa&ui=0&simular=1&cam=a&t=0.35&orcamento=30000",
+  "raiz": "/home/user/fkl-amb",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 6
+  },
+  "porta": 8831,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/amb/v4/orcamento",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1280,
+    "altura": 720
+  },
+  "congelar": true,
+  "versaoDoJogo": null,
+  "navegador": "chromium 153.0.8010.12",
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:15:53.805Z",
+  "segundosReais": 12,
+  "quadros": 12,
+  "quadrosPorSegundo": 71.9,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.sombrasPronto === true",
+        "limiteReal": 300
+      },
+      "ok": true,
+      "ms": 2174,
+      "quadros": 0,
+      "tempoDeJogo": 0,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 2,
+      "tipo": "js",
+      "passo": {
+        "js": "window.avancar(0.2)"
+      },
+      "ok": true,
+      "ms": 252
+    },
+    {
+      "n": 3,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 28,
+      "quadros": 2,
+      "tempoDeJogo": 0,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 4,
+      "tipo": "js",
+      "passo": {
+        "js": "window.avancar(0.1)"
+      },
+      "ok": true,
+      "ms": 39
+    },
+    {
+      "n": 5,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 26,
+      "quadros": 2,
+      "tempoDeJogo": 0,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 6,
+      "tipo": "foto",
+      "passo": {
+        "foto": "orc-a"
+      },
+      "ok": true,
+      "ms": 2739,
+      "quadros": 0,
+      "tempoDeJogo": 0,
+      "foto": {
+        "nome": "orc-a",
+        "arquivo": "orc-a.png",
+        "bytes": 1109979,
+        "tempoDeJogo": 0,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 88.3,
+        "desvioLuminancia": 43.8,
+        "cores": 88862,
+        "corDominante": 0.096,
+        "corDominanteHex": "#4c8c3c",
+        "fracaoEscura": 0.029,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 7,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.info())",
+        "guardar": "infoA"
+      },
+      "ok": true,
+      "ms": 12,
+      "guardado": "infoA",
+      "valor": "{\"desenho\":{\"chamadas\":152,\"triangulos\":71476},\"sombras\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":2,\"provisorias\":0,\"triangulos\":24384,\"borroes\":76,\"estencil\":true},\"geometrias\":45,\"texturas\":37}"
+    },
+    {
+      "n": 8,
+      "tipo": "js",
+      "passo": {
+        "js": "window.definirCamera('b'); window.avancar(0.1)"
+      },
+      "ok": true,
+      "ms": 24
+    },
+    {
+      "n": 9,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 34,
+      "quadros": 2,
+      "tempoDeJogo": 0,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 10,
+      "tipo": "js",
+      "passo": {
+        "js": "window.avancar(0.1)"
+      },
+      "ok": true,
+      "ms": 23
+    },
+    {
+      "n": 11,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 34,
+      "quadros": 2,
+      "tempoDeJogo": 0,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 12,
+      "tipo": "foto",
+      "passo": {
+        "foto": "orc-b"
+      },
+      "ok": true,
+      "ms": 1396,
+      "quadros": 0,
+      "tempoDeJogo": 0,
+      "foto": {
+        "nome": "orc-b",
+        "arquivo": "orc-b.png",
+        "bytes": 1155354,
+        "tempoDeJogo": 0,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 110,
+        "desvioLuminancia": 18.7,
+        "cores": 26597,
+        "corDominante": 0.168,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.001,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 13,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.info())",
+        "guardar": "infoB"
+      },
+      "ok": true,
+      "ms": 12,
+      "guardado": "infoB",
+      "valor": "{\"desenho\":{\"chamadas\":153,\"triangulos\":71474},\"sombras\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":2,\"provisorias\":0,\"triangulos\":24384,\"borroes\":75,\"estencil\":true},\"geometrias\":49,\"texturas\":37}"
+    },
+    {
+      "n": 14,
+      "tipo": "js",
+      "passo": {
+        "js": "window.posicionar([8, 3, 21], [3, 0.5, 20], 40); window.avancar(0.1)"
+      },
+      "ok": true,
+      "ms": 22
+    },
+    {
+      "n": 15,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 38,
+      "quadros": 2,
+      "tempoDeJogo": 0,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 16,
+      "tipo": "js",
+      "passo": {
+        "js": "window.avancar(0.1)"
+      },
+      "ok": true,
+      "ms": 12
+    },
+    {
+      "n": 17,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 35,
+      "quadros": 2,
+      "tempoDeJogo": 0,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 18,
+      "tipo": "foto",
+      "passo": {
+        "foto": "orc-goleiro"
+      },
+      "ok": true,
+      "ms": 1441,
+      "quadros": 0,
+      "tempoDeJogo": 0,
+      "foto": {
+        "nome": "orc-goleiro",
+        "arquivo": "orc-goleiro.png",
+        "bytes": 1103309,
+        "tempoDeJogo": 0,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 107.7,
+        "desvioLuminancia": 23,
+        "cores": 34756,
+        "corDominante": 0.166,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.003,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 19,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.info())",
+        "guardar": "infoGoleiro"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "infoGoleiro",
+      "valor": "{\"desenho\":{\"chamadas\":152,\"triangulos\":68402},\"sombras\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":2,\"provisorias\":0,\"triangulos\":23112,\"borroes\":75,\"estencil\":true},\"geometrias\":50,\"texturas\":38}"
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "orc-a",
+      "arquivo": "orc-a.png",
+      "bytes": 1109979,
+      "tempoDeJogo": 0,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 88.3,
+      "desvioLuminancia": 43.8,
+      "cores": 88862,
+      "corDominante": 0.096,
+      "corDominanteHex": "#4c8c3c",
+      "fracaoEscura": 0.029,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "orc-b",
+      "arquivo": "orc-b.png",
+      "bytes": 1155354,
+      "tempoDeJogo": 0,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 110,
+      "desvioLuminancia": 18.7,
+      "cores": 26597,
+      "corDominante": 0.168,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.001,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "orc-goleiro",
+      "arquivo": "orc-goleiro.png",
+      "bytes": 1103309,
+      "tempoDeJogo": 0,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 107.7,
+      "desvioLuminancia": 23,
+      "cores": 34756,
+      "corDominante": 0.166,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.003,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "infoA": "{\"desenho\":{\"chamadas\":152,\"triangulos\":71476},\"sombras\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":2,\"provisorias\":0,\"triangulos\":24384,\"borroes\":76,\"estencil\":true},\"geometrias\":45,\"texturas\":37}",
+    "infoB": "{\"desenho\":{\"chamadas\":153,\"triangulos\":71474},\"sombras\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":2,\"provisorias\":0,\"triangulos\":24384,\"borroes\":75,\"estencil\":true},\"geometrias\":49,\"texturas\":37}",
+    "infoGoleiro": "{\"desenho\":{\"chamadas\":152,\"triangulos\":68402},\"sombras\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":2,\"provisorias\":0,\"triangulos\":23112,\"borroes\":75,\"estencil\":true},\"geometrias\":50,\"texturas\":38}"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

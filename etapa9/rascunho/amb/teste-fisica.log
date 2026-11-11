@@ -1,0 +1,25 @@
+ok - chute reto no centro com força média entra no gol, por cima da barreira
+ok - pé no lado direito da bola curva para a esquerda
+ok - pé no lado esquerdo da bola curva para a direita
+ok - pé embaixo sobe mais; pé em cima cai mais (folha seca)
+ok - bola sem rotação muda de trajetória a cada chute; com efeito, não
+ok - gol: a bola estufa a rede, fica dentro do gol e para
+ok - chute na trave volta e não é gol
+ok - chute por cima do travessão não é gol
+ok - bola que vem de fora bate na rede lateral e não entra
+ok - rasteiro: pé no topo da bola, ela vai pelo chão até a linha do gol
+ok - folha seca (pé em cima, y 0,5): passa a barreira, sobe e despenca para entrar sob o travessão
+ok - cavadinha: pé bem embaixo e pouca força passa a barreira e cai dentro do gol
+ok - quique: giro para a frente mantém a velocidade; giro para trás segura a bola
+ok - quique: batida forte volta proporcionalmente menos que batida fraca
+ok - rolando: o giro acompanha a velocidade e a bola para
+ok - o resultado quase não depende do tamanho do passo (1/120 x 1/240 s)
+ok - trivela de quem não é especialista curva menos que a de especialista
+ok - trivela de especialista: sai mais reta e curva mais no fim que a curva com o pé natural
+ok - lado natural do pé não tem penalidade (destro e canhoto espelhados)
+ok - bola sem rotação: a do especialista dança mais
+ok - cone de erro: cresce acima do ponto ideal de força (barra cheia ~3x)
+ok - PRE alta espalha menos; FRI alta segura o erro sob pressão
+ok - FOR alta chuta mais rápido (dentro do limite de ~15%)
+ok - determinismo: o mesmo sorteio dá exatamente o mesmo chute
+ok - nome da jogada: cada região da bola tem o seu, e a previsão bate com o chute

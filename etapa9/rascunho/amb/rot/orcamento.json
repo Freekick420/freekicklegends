@@ -1,0 +1,10 @@
+{ "descricao": "Orçamento de triângulos: com teto de 30 mil, só os mais perto da câmera têm silhueta",
+  "perfil": "computador", "escala": 1, "url": "testes/sombras.html?teste&pausa&ui=0&simular=1&cam=a&t=0.35&orcamento=30000", "saida": "x", "passos": [
+  { "esperarAte": "window.sombrasPronto === true", "limiteReal": 300 },
+  { "js": "window.avancar(0.2)" }, { "esperarQuadros": 2 }, { "js": "window.avancar(0.1)" }, { "esperarQuadros": 2 }, { "foto": "orc-a" },
+  { "avaliar": "JSON.stringify(window.info())", "guardar": "infoA" },
+  { "js": "window.definirCamera('b'); window.avancar(0.1)" }, { "esperarQuadros": 2 }, { "js": "window.avancar(0.1)" }, { "esperarQuadros": 2 }, { "foto": "orc-b" },
+  { "avaliar": "JSON.stringify(window.info())", "guardar": "infoB" },
+  { "js": "window.posicionar([8, 3, 21], [3, 0.5, 20], 40); window.avancar(0.1)" }, { "esperarQuadros": 2 }, { "js": "window.avancar(0.1)" }, { "esperarQuadros": 2 }, { "foto": "orc-goleiro" },
+  { "avaliar": "JSON.stringify(window.info())", "guardar": "infoGoleiro" }
+] }

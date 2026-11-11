@@ -1,0 +1,898 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/anim/cap/t1-kaine-corrida/roteiro.json",
+  "url": "http://127.0.0.1:8811/index.html?teste",
+  "raiz": "/home/user/fkl-anim",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 3
+  },
+  "porta": 8811,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/anim/cap/t1-kaine-corrida",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 640,
+    "altura": 480
+  },
+  "congelar": true,
+  "versaoDoJogo": "v0.1 · etapa 8.1",
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:24:43.909Z",
+  "segundosReais": 16.6,
+  "quadros": 25,
+  "quadrosPorSegundo": 51.8,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "esperarJogo",
+      "passo": {
+        "esperarJogo": true
+      },
+      "ok": true,
+      "ms": 4550,
+      "quadros": 1,
+      "tempoDeJogo": 0.016666666666666666
+    },
+    {
+      "n": 2,
+      "tipo": "tamanho",
+      "passo": {
+        "tamanho": {
+          "largura": 640,
+          "altura": 480
+        }
+      },
+      "ok": true,
+      "ms": 46
+    },
+    {
+      "n": 3,
+      "tipo": "js",
+      "passo": {
+        "js": "const t = window.jogoTeste; t.hud(false); t.falta(22, 0); t.cobrador(9); t.mirar(1.5); t.contato(0.4, 0.1); t.pausar(true);"
+      },
+      "ok": true,
+      "ms": 312
+    },
+    {
+      "n": 4,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera((() => { const c = window.jogoTeste.cobradorPos(); const y = c.giro; const fx = Math.sin(y), fz = Math.cos(y); const rx = -Math.cos(y), rz = Math.sin(y); const D = 4.6;\n  const v = { dir: [rx * D, 1.0, rz * D], esq: [-rx * D, 1.0, -rz * D], frente: [fx * D, 1.1, fz * D], tras: [-fx * D, 1.4, -fz * D], cima: [0.01, 6.5, 0], diag: [fx * D * 0.6 + rx * D * 0.75, 1.3, fz * D * 0.6 + rz * D * 0.75] }['dir'];\n  return { pos: v, olhar: 'dir' === 'cima' ? [0, 0, 0] : [0, 0.85, 0], seguir: true, fov: 30 }; })())"
+      },
+      "ok": true,
+      "ms": 347
+    },
+    {
+      "n": 5,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.chutar(0.8); window.__tc = window.jogoTeste.tempos().tempoContato; window.__dur = window.jogoTeste.tempos().duracao;"
+      },
+      "ok": true,
+      "ms": 5
+    },
+    {
+      "n": 6,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.jogoTeste.tempos())",
+        "guardar": "tempos"
+      },
+      "ok": true,
+      "ms": 49,
+      "guardado": "tempos",
+      "valor": "{\"fase\":\"corrida\",\"tCobranca\":0,\"tempoContato\":1.3965032937999442,\"duracao\":2.530275333703389,\"tempoVoo\":0,\"tempoDeJogo\":0.016666666666666666}"
+    },
+    {
+      "n": 7,
+      "tipo": "js",
+      "passo": {
+        "js": "window.__t = 0"
+      },
+      "ok": true,
+      "ms": 7
+    },
+    {
+      "n": 8,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 12
+    },
+    {
+      "n": 9,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 24,
+      "quadros": 2,
+      "tempoDeJogo": 0.016666666666666666,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 10,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q00"
+      },
+      "ok": true,
+      "ms": 3091,
+      "quadros": 0,
+      "tempoDeJogo": 0.016666666666666666,
+      "foto": {
+        "nome": "q00",
+        "arquivo": "q00.png",
+        "bytes": 380980,
+        "tempoDeJogo": 0.016666666666666666,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 80.9,
+        "desvioLuminancia": 42.2,
+        "cores": 45512,
+        "corDominante": 0.159,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.016,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 11,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.09090909090909091 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 18
+    },
+    {
+      "n": 12,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 14,
+      "quadros": 2,
+      "tempoDeJogo": 0.15,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 13,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q01"
+      },
+      "ok": true,
+      "ms": 568,
+      "quadros": 0,
+      "tempoDeJogo": 0.15,
+      "foto": {
+        "nome": "q01",
+        "arquivo": "q01.png",
+        "bytes": 378806,
+        "tempoDeJogo": 0.15,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81.2,
+        "desvioLuminancia": 42.2,
+        "cores": 44988,
+        "corDominante": 0.163,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.016,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 14,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.18181818181818182 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 24
+    },
+    {
+      "n": 15,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 12,
+      "quadros": 2,
+      "tempoDeJogo": 0.26666666666666666,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 16,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q02"
+      },
+      "ok": true,
+      "ms": 529,
+      "quadros": 0,
+      "tempoDeJogo": 0.26666666666666666,
+      "foto": {
+        "nome": "q02",
+        "arquivo": "q02.png",
+        "bytes": 381768,
+        "tempoDeJogo": 0.26666666666666666,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81,
+        "desvioLuminancia": 42.3,
+        "cores": 45563,
+        "corDominante": 0.163,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.016,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 17,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.2727272727272727 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 8
+    },
+    {
+      "n": 18,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 28,
+      "quadros": 2,
+      "tempoDeJogo": 0.39999999999999997,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 19,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q03"
+      },
+      "ok": true,
+      "ms": 453,
+      "quadros": 0,
+      "tempoDeJogo": 0.39999999999999997,
+      "foto": {
+        "nome": "q03",
+        "arquivo": "q03.png",
+        "bytes": 380120,
+        "tempoDeJogo": 0.39999999999999997,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81.3,
+        "desvioLuminancia": 42.3,
+        "cores": 44807,
+        "corDominante": 0.164,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.016,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 20,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.36363636363636365 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 14
+    },
+    {
+      "n": 21,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 24,
+      "quadros": 2,
+      "tempoDeJogo": 0.5166666666666666,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 22,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q04"
+      },
+      "ok": true,
+      "ms": 463,
+      "quadros": 0,
+      "tempoDeJogo": 0.5166666666666666,
+      "foto": {
+        "nome": "q04",
+        "arquivo": "q04.png",
+        "bytes": 381808,
+        "tempoDeJogo": 0.5166666666666666,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 80.9,
+        "desvioLuminancia": 42.6,
+        "cores": 45376,
+        "corDominante": 0.158,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.016,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 23,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.45454545454545453 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 4
+    },
+    {
+      "n": 24,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 26,
+      "quadros": 2,
+      "tempoDeJogo": 0.6500000000000004,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 25,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q05"
+      },
+      "ok": true,
+      "ms": 332,
+      "quadros": 0,
+      "tempoDeJogo": 0.6500000000000004,
+      "foto": {
+        "nome": "q05",
+        "arquivo": "q05.png",
+        "bytes": 380952,
+        "tempoDeJogo": 0.6500000000000004,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81.1,
+        "desvioLuminancia": 42.7,
+        "cores": 45541,
+        "corDominante": 0.153,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.017,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 26,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.5454545454545454 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 6
+    },
+    {
+      "n": 27,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 17,
+      "quadros": 2,
+      "tempoDeJogo": 0.7833333333333341,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 28,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q06"
+      },
+      "ok": true,
+      "ms": 328,
+      "quadros": 0,
+      "tempoDeJogo": 0.7833333333333341,
+      "foto": {
+        "nome": "q06",
+        "arquivo": "q06.png",
+        "bytes": 380905,
+        "tempoDeJogo": 0.7833333333333341,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81.2,
+        "desvioLuminancia": 42.9,
+        "cores": 45877,
+        "corDominante": 0.148,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.018,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 29,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.6363636363636364 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 8
+    },
+    {
+      "n": 30,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 36,
+      "quadros": 2,
+      "tempoDeJogo": 0.9000000000000011,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 31,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q07"
+      },
+      "ok": true,
+      "ms": 297,
+      "quadros": 0,
+      "tempoDeJogo": 0.9000000000000011,
+      "foto": {
+        "nome": "q07",
+        "arquivo": "q07.png",
+        "bytes": 384020,
+        "tempoDeJogo": 0.9000000000000011,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81.2,
+        "desvioLuminancia": 43.3,
+        "cores": 46767,
+        "corDominante": 0.141,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.018,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 32,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.7272727272727273 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "n": 33,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 10,
+      "quadros": 2,
+      "tempoDeJogo": 1.0333333333333345,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 34,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q08"
+      },
+      "ok": true,
+      "ms": 395,
+      "quadros": 0,
+      "tempoDeJogo": 1.0333333333333345,
+      "foto": {
+        "nome": "q08",
+        "arquivo": "q08.png",
+        "bytes": 383384,
+        "tempoDeJogo": 1.0333333333333345,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81.5,
+        "desvioLuminancia": 43.2,
+        "cores": 46700,
+        "corDominante": 0.136,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.017,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 35,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.8181818181818182 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "n": 36,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 109,
+      "quadros": 2,
+      "tempoDeJogo": 1.1666666666666674,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 37,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q09"
+      },
+      "ok": true,
+      "ms": 235,
+      "quadros": 0,
+      "tempoDeJogo": 1.1666666666666674,
+      "foto": {
+        "nome": "q09",
+        "arquivo": "q09.png",
+        "bytes": 382170,
+        "tempoDeJogo": 1.1666666666666674,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81,
+        "desvioLuminancia": 43.5,
+        "cores": 46902,
+        "corDominante": 0.122,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.018,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 38,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 0.9090909090909091 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "n": 39,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 5,
+      "quadros": 2,
+      "tempoDeJogo": 1.2833333333333337,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 40,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q10"
+      },
+      "ok": true,
+      "ms": 301,
+      "quadros": 0,
+      "tempoDeJogo": 1.2833333333333337,
+      "foto": {
+        "nome": "q10",
+        "arquivo": "q10.png",
+        "bytes": 379373,
+        "tempoDeJogo": 1.2833333333333337,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81.1,
+        "desvioLuminancia": 43.5,
+        "cores": 46519,
+        "corDominante": 0.116,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.018,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 41,
+      "tipo": "js",
+      "passo": {
+        "js": "{ const alvo = 1 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+      },
+      "ok": true,
+      "ms": 6
+    },
+    {
+      "n": 42,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 11,
+      "quadros": 2,
+      "tempoDeJogo": 1.4166666666666665,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 43,
+      "tipo": "foto",
+      "passo": {
+        "foto": "q11"
+      },
+      "ok": true,
+      "ms": 305,
+      "quadros": 0,
+      "tempoDeJogo": 1.4166666666666665,
+      "foto": {
+        "nome": "q11",
+        "arquivo": "q11.png",
+        "bytes": 379052,
+        "tempoDeJogo": 1.4166666666666665,
+        "largura": 640,
+        "altura": 480,
+        "luminanciaMedia": 81.6,
+        "desvioLuminancia": 43.5,
+        "cores": 46457,
+        "corDominante": 0.114,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.019,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 44,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ e: window.jogoTeste.estado(), t: window.jogoTeste.tempos() })",
+        "guardar": "fim"
+      },
+      "ok": true,
+      "ms": 5,
+      "guardado": "fim",
+      "valor": "{\"e\":{\"fase\":\"voo\",\"falta\":{\"distancia\":22,\"angulo\":0},\"mira\":1.5,\"resultado\":null,\"tecnica\":\"curva\",\"gols\":0,\"cobrancas\":0},\"t\":{\"fase\":\"voo\",\"tCobranca\":1.4,\"tempoContato\":1.3965032937999442,\"duracao\":2.530275333703389,\"tempoVoo\":0,\"tempoDeJogo\":1.4166666666666665}}"
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "q00",
+      "arquivo": "q00.png",
+      "bytes": 380980,
+      "tempoDeJogo": 0.016666666666666666,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 80.9,
+      "desvioLuminancia": 42.2,
+      "cores": 45512,
+      "corDominante": 0.159,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.016,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q01",
+      "arquivo": "q01.png",
+      "bytes": 378806,
+      "tempoDeJogo": 0.15,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81.2,
+      "desvioLuminancia": 42.2,
+      "cores": 44988,
+      "corDominante": 0.163,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.016,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q02",
+      "arquivo": "q02.png",
+      "bytes": 381768,
+      "tempoDeJogo": 0.26666666666666666,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81,
+      "desvioLuminancia": 42.3,
+      "cores": 45563,
+      "corDominante": 0.163,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.016,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q03",
+      "arquivo": "q03.png",
+      "bytes": 380120,
+      "tempoDeJogo": 0.39999999999999997,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81.3,
+      "desvioLuminancia": 42.3,
+      "cores": 44807,
+      "corDominante": 0.164,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.016,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q04",
+      "arquivo": "q04.png",
+      "bytes": 381808,
+      "tempoDeJogo": 0.5166666666666666,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 80.9,
+      "desvioLuminancia": 42.6,
+      "cores": 45376,
+      "corDominante": 0.158,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.016,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q05",
+      "arquivo": "q05.png",
+      "bytes": 380952,
+      "tempoDeJogo": 0.6500000000000004,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81.1,
+      "desvioLuminancia": 42.7,
+      "cores": 45541,
+      "corDominante": 0.153,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.017,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q06",
+      "arquivo": "q06.png",
+      "bytes": 380905,
+      "tempoDeJogo": 0.7833333333333341,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81.2,
+      "desvioLuminancia": 42.9,
+      "cores": 45877,
+      "corDominante": 0.148,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.018,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q07",
+      "arquivo": "q07.png",
+      "bytes": 384020,
+      "tempoDeJogo": 0.9000000000000011,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81.2,
+      "desvioLuminancia": 43.3,
+      "cores": 46767,
+      "corDominante": 0.141,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.018,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q08",
+      "arquivo": "q08.png",
+      "bytes": 383384,
+      "tempoDeJogo": 1.0333333333333345,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81.5,
+      "desvioLuminancia": 43.2,
+      "cores": 46700,
+      "corDominante": 0.136,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.017,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q09",
+      "arquivo": "q09.png",
+      "bytes": 382170,
+      "tempoDeJogo": 1.1666666666666674,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81,
+      "desvioLuminancia": 43.5,
+      "cores": 46902,
+      "corDominante": 0.122,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.018,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q10",
+      "arquivo": "q10.png",
+      "bytes": 379373,
+      "tempoDeJogo": 1.2833333333333337,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81.1,
+      "desvioLuminancia": 43.5,
+      "cores": 46519,
+      "corDominante": 0.116,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.018,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "q11",
+      "arquivo": "q11.png",
+      "bytes": 379052,
+      "tempoDeJogo": 1.4166666666666665,
+      "largura": 640,
+      "altura": 480,
+      "luminanciaMedia": 81.6,
+      "desvioLuminancia": 43.5,
+      "cores": 46457,
+      "corDominante": 0.114,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.019,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "tempos": "{\"fase\":\"corrida\",\"tCobranca\":0,\"tempoContato\":1.3965032937999442,\"duracao\":2.530275333703389,\"tempoVoo\":0,\"tempoDeJogo\":0.016666666666666666}",
+    "fim": "{\"e\":{\"fase\":\"voo\",\"falta\":{\"distancia\":22,\"angulo\":0},\"mira\":1.5,\"resultado\":null,\"tecnica\":\"curva\",\"gols\":0,\"cobrancas\":0},\"t\":{\"fase\":\"voo\",\"tCobranca\":1.4,\"tempoContato\":1.3965032937999442,\"duracao\":2.530275333703389,\"tempoVoo\":0,\"tempoDeJogo\":1.4166666666666665}}"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

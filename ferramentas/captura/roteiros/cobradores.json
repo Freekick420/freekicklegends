@@ -1,0 +1,16 @@
+{
+  "descricao": "Oito cobradores parados, de costas, na câmera do jogo (celular, escala 1): falta de 24 m pela esquerda. Para cada número: jogoTeste.falta(24, -10) + jogoTeste.cobrador(n) e foto 0,4 s depois.",
+  "perfil": "celular",
+  "escala": 1,
+  "url": "index.html?teste",
+  "saida": "capturas/cobradores",
+  "passos": [
+    { "esperarJogo": true },
+    { "repetir": [1, 3, 7, 10, 30, 80, 23, 21], "passos": [
+      { "js": "window.jogoTeste.falta(24, -10); window.jogoTeste.cobrador({{v}});" },
+      { "esperarSegundos": 0.4 },
+      { "foto": "cobrador-{{v}}" }
+    ] },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" }
+  ]
+}

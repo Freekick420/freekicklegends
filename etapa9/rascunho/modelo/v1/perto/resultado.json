@@ -1,0 +1,391 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/modelo/rot/perto.json",
+  "url": "http://127.0.0.1:8821/testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&corpo&largura=1400",
+  "raiz": "/home/user/fkl-modelo",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 2
+  },
+  "porta": 8821,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/modelo/v1/perto",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1440,
+    "altura": 900
+  },
+  "congelar": true,
+  "versaoDoJogo": null,
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:19:30.225Z",
+  "segundosReais": 24.8,
+  "quadros": 0,
+  "quadrosPorSegundo": null,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "tamanho",
+      "passo": {
+        "tamanho": {
+          "largura": 1440,
+          "altura": 900
+        }
+      },
+      "ok": true,
+      "ms": 709
+    },
+    {
+      "n": 2,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 7,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 3,
+      "tipo": "foto",
+      "passo": {
+        "foto": "corpo-juninho",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 487,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "corpo-juninho",
+        "arquivo": "corpo-juninho.png",
+        "bytes": 411943,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 120.2,
+        "desvioLuminancia": 66.2,
+        "cores": 20080,
+        "corDominante": 0.268,
+        "corDominanteHex": "#9cd4f4",
+        "fracaoEscura": 0.155,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 4,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&tronco&largura=1400"
+      },
+      "ok": true,
+      "ms": 2870
+    },
+    {
+      "n": 5,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 436,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 6,
+      "tipo": "foto",
+      "passo": {
+        "foto": "tronco-juninho",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 501,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "tronco-juninho",
+        "arquivo": "tronco-juninho.png",
+        "bytes": 677300,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 81.1,
+        "desvioLuminancia": 81.6,
+        "cores": 17619,
+        "corDominante": 0.26,
+        "corDominanteHex": "#0c0c0c",
+        "fracaoEscura": 0.438,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 7,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&pernas&largura=1400"
+      },
+      "ok": true,
+      "ms": 2373
+    },
+    {
+      "n": 8,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 2499,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 9,
+      "tipo": "foto",
+      "passo": {
+        "foto": "pernas-juninho",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 426,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "pernas-juninho",
+        "arquivo": "pernas-juninho.png",
+        "bytes": 485746,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 74,
+        "desvioLuminancia": 58,
+        "cores": 18624,
+        "corDominante": 0.199,
+        "corDominanteHex": "#449444",
+        "fracaoEscura": 0.346,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 10,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&corpo&malha&largura=1400"
+      },
+      "ok": true,
+      "ms": 3879
+    },
+    {
+      "n": 11,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 1142,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 12,
+      "tipo": "foto",
+      "passo": {
+        "foto": "malha-juninho",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 377,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "malha-juninho",
+        "arquivo": "malha-juninho.png",
+        "bytes": 562179,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 118,
+        "desvioLuminancia": 66.6,
+        "cores": 24878,
+        "corDominante": 0.266,
+        "corDominanteHex": "#9cd4f4",
+        "fracaoEscura": 0.162,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 13,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=dobras&quem=Rei%20da%20Falta&largura=1400"
+      },
+      "ok": true,
+      "ms": 3071
+    },
+    {
+      "n": 14,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 2070,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 15,
+      "tipo": "foto",
+      "passo": {
+        "foto": "dobras-juninho",
+        "seletor": "#dobras img"
+      },
+      "ok": true,
+      "ms": 337,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "dobras-juninho",
+        "arquivo": "dobras-juninho.png",
+        "bytes": 269160,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 157.2,
+        "desvioLuminancia": 73.9,
+        "cores": 18314,
+        "corDominante": 0.677,
+        "corDominanteHex": "#9cd4f4",
+        "fracaoEscura": 0.141,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 16,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.errosDasSecoes || [])",
+        "guardar": "erros"
+      },
+      "ok": true,
+      "ms": 3,
+      "guardado": "erros",
+      "valor": "[]"
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "corpo-juninho",
+      "arquivo": "corpo-juninho.png",
+      "bytes": 411943,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 120.2,
+      "desvioLuminancia": 66.2,
+      "cores": 20080,
+      "corDominante": 0.268,
+      "corDominanteHex": "#9cd4f4",
+      "fracaoEscura": 0.155,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "tronco-juninho",
+      "arquivo": "tronco-juninho.png",
+      "bytes": 677300,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 81.1,
+      "desvioLuminancia": 81.6,
+      "cores": 17619,
+      "corDominante": 0.26,
+      "corDominanteHex": "#0c0c0c",
+      "fracaoEscura": 0.438,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "pernas-juninho",
+      "arquivo": "pernas-juninho.png",
+      "bytes": 485746,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 74,
+      "desvioLuminancia": 58,
+      "cores": 18624,
+      "corDominante": 0.199,
+      "corDominanteHex": "#449444",
+      "fracaoEscura": 0.346,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "malha-juninho",
+      "arquivo": "malha-juninho.png",
+      "bytes": 562179,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 118,
+      "desvioLuminancia": 66.6,
+      "cores": 24878,
+      "corDominante": 0.266,
+      "corDominanteHex": "#9cd4f4",
+      "fracaoEscura": 0.162,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "dobras-juninho",
+      "arquivo": "dobras-juninho.png",
+      "bytes": 269160,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 157.2,
+      "desvioLuminancia": 73.9,
+      "cores": 18314,
+      "corDominante": 0.677,
+      "corDominanteHex": "#9cd4f4",
+      "fracaoEscura": 0.141,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "erros": "[]"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

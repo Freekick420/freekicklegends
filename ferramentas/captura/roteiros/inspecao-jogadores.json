@@ -1,0 +1,37 @@
+{
+  "descricao": "Página de inspeção dos bonecos (testes/jogadores.html). Ela não tem botões: os 'controles' são opções no endereço (?so=SEÇÃO, ?quem=apelidos, ?zoom, ?corpo, ?pes, ?maos, ?cobrador=, ?vista=lado, ?largura=). Primeiro a página inteira (todas as seções), depois os retratos de dois bonecos (Juninho e Ronaldinho) de frente, 3/4, perfil e costas em vários enquadramentos.",
+  "perfil": "computador",
+  "escala": 1,
+  "url": "testes/jogadores.html?largura=1400",
+  "saida": "capturas/inspecao-jogadores",
+  "passos": [
+    { "tamanho": { "largura": 1440, "altura": 900 } },
+    { "nota": "A página avisa que acabou de desenhar com window.pronto", "esperarAte": "window.pronto === true", "limiteReal": 600 },
+    { "avaliar": "document.getElementById('info').textContent", "guardar": "checagensDaPagina" },
+    { "avaliar": "[...document.querySelectorAll('.secao')].map((s) => s.id)", "guardar": "secoes" },
+    { "foto": "01-elenco-de-frente", "seletor": "#frente1 img" },
+    { "foto": "02-poses-de-frente-lado-costas", "seletor": "#poses-perto img" },
+    { "foto": "03-corrida-de-lado", "seletor": "#poses img" },
+    { "foto": "04-chute-de-lado", "seletor": "#chute-lado img" },
+
+    { "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta,Bruxo&largura=1400" },
+    { "esperarAte": "window.pronto === true", "limiteReal": 300 },
+    { "foto": "05-retrato-busto", "seletor": "#retrato img" },
+    { "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta,Bruxo&zoom&largura=1400" },
+    { "esperarAte": "window.pronto === true", "limiteReal": 300 },
+    { "foto": "06-rosto-de-perto", "seletor": "#retrato img" },
+    { "nota": "?corpo: a página chama de corpo inteiro, mas o enquadramento vai do peito à canela", "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta,Bruxo&corpo&largura=1400" },
+    { "esperarAte": "window.pronto === true", "limiteReal": 300 },
+    { "foto": "07-tronco-e-pernas", "seletor": "#retrato img" },
+    { "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta,Bruxo&pes&largura=1400" },
+    { "esperarAte": "window.pronto === true", "limiteReal": 300 },
+    { "foto": "08-pes", "seletor": "#retrato img" },
+    { "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta,Bruxo&maos&largura=1400" },
+    { "esperarAte": "window.pronto === true", "limiteReal": 300 },
+    { "foto": "09-maos", "seletor": "#retrato img" },
+
+    { "nota": "Corrida e chute do Juninho no tempo, de lado (a página usa o tempo padrão da cobrança, não o de cada lenda)", "abrir": "testes/jogadores.html?so=sequencia&cobrador=Rei%20da%20Falta&vista=lado&largura=1400" },
+    { "esperarAte": "window.pronto === true", "limiteReal": 300 },
+    { "foto": "10-corrida-e-chute-no-tempo-de-lado", "seletor": "#sequencia img" }
+  ]
+}

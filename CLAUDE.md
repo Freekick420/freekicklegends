@@ -2,6 +2,8 @@
 
 A especificação completa (escopo, mecânica, ordem de construção) está em `PROJETO.md`. Leia antes de mudar qualquer coisa: ela é a fonte da verdade.
 
+**Etapa 9 em pausa (11/11/2026).** Este ramo tem trabalho pela metade e não está pronto para publicar. Antes de qualquer coisa, leia `etapa9/RETOMAR.md`: ele diz o que está feito, o que falta e como continuar. (Apague este aviso e a pasta `etapa9/` quando a etapa 9 for publicada.)
+
 ## Como trabalhar neste projeto
 
 - Quem conduz o projeto não programa. Responda em português simples; ao usar um termo técnico, explique em uma frase.

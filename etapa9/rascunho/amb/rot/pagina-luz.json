@@ -1,0 +1,10 @@
+{ "descricao": "Página de teste: só a luz (bolas de referência, corredor, barreira de frente)",
+  "perfil": "computador", "escala": 1, "url": "testes/sombras.html?teste&pausa&ui=0&simular=1&cam=d&t=0.35", "saida": "x", "passos": [
+  { "esperarAte": "window.sombrasPronto === true", "limiteReal": 300 },
+  { "js": "window.avancar(0.2)" }, { "esperarQuadros": 2 }, { "foto": "l-d-luz" },
+  { "js": "window.posicionar([-3.2, 1.3, 23.2], [-3, 0.95, 20], 30)" }, { "esperarQuadros": 2 }, { "foto": "l-corredor-costas" },
+  { "js": "window.posicionar([0.6, 1.3, 23.2], [-0.6, 0.95, 20], 34)" }, { "esperarQuadros": 2 }, { "foto": "l-costas-dir" },
+  { "js": "window.posicionar([1.4, 1.5, 21.6], [1.4, 1.0, 18.5], 36)" }, { "esperarQuadros": 2 }, { "foto": "l-barreira-frente" },
+  { "js": "window.posicionar([-7.2, 1.5, 15.8], [-7, 0.95, 20], 30)" }, { "esperarQuadros": 2 }, { "foto": "l-luz-frente" },
+  { "js": "window.posicionar([-2.8, 1.5, 20], [-7.4, 0.95, 20], 30)" }, { "esperarQuadros": 2 }, { "foto": "l-luz-direita" }
+] }

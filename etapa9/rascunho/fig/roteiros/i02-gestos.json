@@ -1,0 +1,16 @@
+{ "descricao": "Página de inspeção: gestos de quem espera, em vários instantes",
+  "perfil": "computador", "escala": 1, "url": "testes/figurantes.html?modo=gestos&teste&captura", "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/capturas/i02",
+  "passos": [
+  { "esperarJogo": true },
+  { "js": "window.jogoTeste.camera({ pos: [-3.6, 1.5, 14.5], olhar: [-3.6, 0.95, 6], fov: 28 })" },
+  { "js": "window.jogoTeste.avancar(0.55)" }, { "esperarQuadros": 1 }, { "foto": "a-055" },
+  { "js": "window.jogoTeste.avancar(0.3)" }, { "esperarQuadros": 1 }, { "foto": "a-085" },
+  { "js": "window.jogoTeste.avancar(0.3)" }, { "esperarQuadros": 1 }, { "foto": "a-115" },
+  { "js": "window.jogoTeste.avancar(0.35)" }, { "esperarQuadros": 1 }, { "foto": "a-150" },
+  { "js": "window.jogoTeste.modo('gestos'); window.jogoTeste.camera({ pos: [3.9, 1.5, 14.5], olhar: [3.9, 0.95, 6], fov: 28 })" },
+  { "js": "window.jogoTeste.avancar(0.55)" }, { "esperarQuadros": 1 }, { "foto": "b-055" },
+  { "js": "window.jogoTeste.avancar(0.3)" }, { "esperarQuadros": 1 }, { "foto": "b-085" },
+  { "js": "window.jogoTeste.avancar(0.3)" }, { "esperarQuadros": 1 }, { "foto": "b-115" },
+  { "js": "window.jogoTeste.avancar(0.35)" }, { "esperarQuadros": 1 }, { "foto": "b-150" },
+  { "js": "window.jogoTeste.avancar(0.5)" }, { "esperarQuadros": 1 }, { "foto": "b-200" }
+] }

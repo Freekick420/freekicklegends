@@ -1,0 +1,30 @@
+{
+  "descricao": "Treino no computador (1280x720, escala 1): a mesma cobrança do treino-celular, com 6 fotos da corrida (5 a cada 13 quadros = 0,217 s de jogo, mais o quadro do contato), voo e fim.",
+  "perfil": "computador",
+  "escala": 1,
+  "url": "index.html?teste",
+  "saida": "capturas/treino-computador",
+  "passos": [
+    { "esperarJogo": true },
+    { "js": "window.jogoTeste.falta(22, 12); window.jogoTeste.cobrador(8);" },
+    { "esperarSegundos": 0.5 },
+    { "foto": "01-pronto" },
+
+    { "nota": "02-corrida-00 = parado, já com a mira no lugar (o instante em que a corrida começa)", "js": "window.jogoTeste.mirar(2.4); window.jogoTeste.contato(0.45, 0.1);" },
+    { "foto": "02-corrida-00" },
+    { "js": "window.jogoTeste.chutar(0.8);" },
+    { "nota": "01 a 04: 13, 26, 39 e 52 quadros depois do começo da corrida", "repetir": 4, "inicio": 1, "passos": [
+      { "esperarQuadros": 13 },
+      { "foto": "02-corrida-{{i}}" }
+    ] },
+    { "nota": "05 = o quadro exato do contato", "esperarAte": "window.jogoTeste.estado().fase === 'voo'", "limiteSegundos": 5 },
+    { "foto": "02-corrida-05-contato" },
+
+    { "esperarSegundos": 0.35 },
+    { "foto": "03-voo" },
+    { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 8 },
+    { "esperarSegundos": 0.3 },
+    { "foto": "04-fim" },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" }
+  ]
+}

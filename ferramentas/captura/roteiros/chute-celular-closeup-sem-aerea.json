@@ -1,0 +1,29 @@
+{
+  "descricao": "EXTRA: o chute de perto (escala 2, recorte no cobrador) com a câmera aérea DESLIGADA pelo painel de ajuste do próprio jogo (Câmera aérea depois do chute = não), para a terminação da perna aparecer de trás. Mesma falta e mesmo chute do treino-celular. Uma foto a cada 4 quadros (0,067 s de jogo), de 28 quadros antes do contato até 28 depois.",
+  "perfil": "celular",
+  "escala": 2,
+  "url": "index.html?teste",
+  "saida": "capturas/chute-celular-closeup-sem-aerea",
+  "passos": [
+    { "esperarJogo": true },
+    { "nota": "Desliga a câmera aérea como o jogador faria: pela caixa de marcar do painel de ajuste", "js": "(() => { const linha = [...document.querySelectorAll('#painel-campos label')].find((e) => e.textContent.includes('Câmera aérea depois do chute')); if (!linha) throw new Error('não achei o ajuste \"Câmera aérea depois do chute\" no painel'); const caixa = linha.querySelector('input'); caixa.checked = false; caixa.dispatchEvent(new Event('input', { bubbles: true })); })()" },
+    { "js": "window.jogoTeste.falta(22, 12); window.jogoTeste.cobrador(8);" },
+    { "esperarSegundos": 0.5 },
+    { "js": "window.jogoTeste.mirar(2.4); window.jogoTeste.contato(0.45, 0.1); window.jogoTeste.chutar(0.8);" },
+    { "nota": "chute-00 = 35 quadros depois do começo da corrida (com o Juninho o contato cai no quadro 63)", "esperarQuadros": 35 },
+    { "foto": "chute-00", "recorte": { "x": 110, "y": 300, "largura": 240, "altura": 400 } },
+    { "repetir": 6, "inicio": 1, "passos": [
+      { "esperarQuadros": 4 },
+      { "foto": "chute-{{i}}", "recorte": { "x": 110, "y": 300, "largura": 240, "altura": 400 } }
+    ] },
+    { "nota": "o quadro exato do contato", "esperarAte": "window.jogoTeste.estado().fase === 'voo'", "limiteSegundos": 5 },
+    { "foto": "chute-07-contato", "recorte": { "x": 110, "y": 300, "largura": 240, "altura": 400 } },
+    { "foto": "tela-contato" },
+    { "nota": "08 a 14: 4, 8 ... 28 quadros depois do contato (a terminação acaba perto do 20)", "repetir": 7, "inicio": 8, "passos": [
+      { "esperarQuadros": 4 },
+      { "foto": "chute-{{i}}", "recorte": { "x": 110, "y": 300, "largura": 240, "altura": 400 } }
+    ] },
+    { "foto": "tela-terminacao" },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" }
+  ]
+}

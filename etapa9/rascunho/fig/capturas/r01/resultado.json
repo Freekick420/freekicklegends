@@ -1,0 +1,466 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/roteiros/r01-frontal.json",
+  "url": "http://127.0.0.1:8841/index.html?teste",
+  "raiz": "/home/user/fkl-fig",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 3
+  },
+  "porta": 8841,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/capturas/r01",
+  "perfil": "celular",
+  "escala": 1,
+  "tela": {
+    "largura": 390,
+    "altura": 844
+  },
+  "congelar": true,
+  "versaoDoJogo": "v0.1 · etapa 8.1",
+  "navegador": "chromium 153.0.8010.12",
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:09:13.516Z",
+  "segundosReais": 54.6,
+  "quadros": 316,
+  "quadrosPorSegundo": 9.5,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "esperarJogo",
+      "passo": {
+        "esperarJogo": true
+      },
+      "ok": true,
+      "ms": 3442,
+      "quadros": 1,
+      "tempoDeJogo": 0.016666666666666666
+    },
+    {
+      "n": 2,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.falta(22, 0); window.jogoTeste.cobrador(8);"
+      },
+      "ok": true,
+      "ms": 117
+    },
+    {
+      "n": 3,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.5
+      },
+      "ok": true,
+      "ms": 3066,
+      "quadros": 30,
+      "tempoDeJogo": 0.5166666666666666,
+      "segundosDeJogo": 0.49999999999999994
+    },
+    {
+      "n": 4,
+      "tipo": "foto",
+      "passo": {
+        "foto": "01-pronto"
+      },
+      "ok": true,
+      "ms": 3557,
+      "quadros": 0,
+      "tempoDeJogo": 0.5166666666666666,
+      "foto": {
+        "nome": "01-pronto",
+        "arquivo": "01-pronto.png",
+        "bytes": 434409,
+        "tempoDeJogo": 0.5166666666666666,
+        "largura": 390,
+        "altura": 844,
+        "luminanciaMedia": 96.6,
+        "desvioLuminancia": 56,
+        "cores": 55925,
+        "corDominante": 0.104,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.047,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 5,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), f: window.jogoTeste.figurantes() })",
+        "guardar": "pronto"
+      },
+      "ok": true,
+      "ms": 4,
+      "guardado": "pronto",
+      "valor": "{\"d\":{\"frame\":31,\"calls\":330,\"triangles\":66102,\"points\":296,\"lines\":1,\"geometrias\":48,\"texturas\":65},\"f\":[{\"x\":-4.96409809589386,\"z\":5.622934855084867,\"time\":\"ataque\"},{\"x\":-5.708685064473245,\"z\":5.565159999722556,\"time\":\"defesa\"},{\"x\":-4.563788890838623,\"z\":12.279392149702247,\"time\":\"ataque\"},{\"x\":-5.307616190046132,\"z\":12.076052405389534,\"time\":\"defesa\"},{\"x\":-5.174188256263733,\"z\":2.4925950542581266,\"time\":\"defesa\"},{\"x\":4.57417106628418,\"z\":7.515671153639444,\"time\":\"ataque\"},{\"x\":4.442589443753967,\"z\":6.73677970151552,\"time\":\"defesa\"},{\"x\":-6.1111239194869995,\"z\":7.980725966293247,\"time\":\"ataque\"},{\"x\":3.8328606486320496,\"z\":12.684497879572746,\"time\":\"defesa\"},{\"x\":6.5682203269156165,\"z\":24.81029683256056,\"time\":\"ataque\"}]}"
+    },
+    {
+      "n": 6,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 2
+      },
+      "ok": true,
+      "ms": 13605,
+      "quadros": 120,
+      "tempoDeJogo": 2.5166666666666626,
+      "segundosDeJogo": 1.999999999999996
+    },
+    {
+      "n": 7,
+      "tipo": "foto",
+      "passo": {
+        "foto": "02-pronto-2s5"
+      },
+      "ok": true,
+      "ms": 4682,
+      "quadros": 0,
+      "tempoDeJogo": 2.5166666666666626,
+      "foto": {
+        "nome": "02-pronto-2s5",
+        "arquivo": "02-pronto-2s5.png",
+        "bytes": 434595,
+        "tempoDeJogo": 2.5166666666666626,
+        "largura": 390,
+        "altura": 844,
+        "luminanciaMedia": 96.6,
+        "desvioLuminancia": 56,
+        "cores": 55964,
+        "corDominante": 0.104,
+        "corDominanteHex": "#44843c",
+        "fracaoEscura": 0.047,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 8,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.hud(false); window.jogoTeste.camera({ pos: [0, 30, 26], olhar: [0, 0, 9], fov: 50 })"
+      },
+      "ok": true,
+      "ms": 5
+    },
+    {
+      "n": 9,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 48,
+      "quadros": 2,
+      "tempoDeJogo": 2.549999999999996,
+      "segundosDeJogo": 0.033333333333333215
+    },
+    {
+      "n": 10,
+      "tipo": "foto",
+      "passo": {
+        "foto": "03-de-cima"
+      },
+      "ok": true,
+      "ms": 431,
+      "quadros": 0,
+      "tempoDeJogo": 2.549999999999996,
+      "foto": {
+        "nome": "03-de-cima",
+        "arquivo": "03-de-cima.png",
+        "bytes": 460397,
+        "tempoDeJogo": 2.549999999999996,
+        "largura": 390,
+        "altura": 844,
+        "luminanciaMedia": 105.3,
+        "desvioLuminancia": 28,
+        "cores": 21408,
+        "corDominante": 0.184,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.007,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 11,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera({ pos: [-2, 1.7, 15], olhar: [-5.2, 1.0, 6], fov: 32 })"
+      },
+      "ok": true,
+      "ms": 16
+    },
+    {
+      "n": 12,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 15,
+      "quadros": 2,
+      "tempoDeJogo": 2.583333333333329,
+      "segundosDeJogo": 0.033333333333333215
+    },
+    {
+      "n": 13,
+      "tipo": "foto",
+      "passo": {
+        "foto": "04-perto-area"
+      },
+      "ok": true,
+      "ms": 462,
+      "quadros": 0,
+      "tempoDeJogo": 2.583333333333329,
+      "foto": {
+        "nome": "04-perto-area",
+        "arquivo": "04-perto-area.png",
+        "bytes": 313252,
+        "tempoDeJogo": 2.583333333333329,
+        "largura": 390,
+        "altura": 844,
+        "luminanciaMedia": 77,
+        "desvioLuminancia": 46,
+        "cores": 36580,
+        "corDominante": 0.145,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.099,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 14,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera(null); window.jogoTeste.hud(true); window.jogoTeste.mirar(2.4); window.jogoTeste.contato(0.45, 0.1); window.jogoTeste.chutar(0.8);"
+      },
+      "ok": true,
+      "ms": 7
+    },
+    {
+      "n": 15,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.jogoTeste.estado().fase === 'voo'",
+        "limiteSegundos": 5
+      },
+      "ok": true,
+      "ms": 7183,
+      "quadros": 63,
+      "tempoDeJogo": 3.6333333333333253,
+      "segundosDeJogo": 1.0499999999999963
+    },
+    {
+      "n": 16,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.35
+      },
+      "ok": true,
+      "ms": 3704,
+      "quadros": 21,
+      "tempoDeJogo": 3.983333333333324,
+      "segundosDeJogo": 0.34999999999999876
+    },
+    {
+      "n": 17,
+      "tipo": "foto",
+      "passo": {
+        "foto": "05-voo"
+      },
+      "ok": true,
+      "ms": 3738,
+      "quadros": 0,
+      "tempoDeJogo": 3.983333333333324,
+      "foto": {
+        "nome": "05-voo",
+        "arquivo": "05-voo.png",
+        "bytes": 510802,
+        "tempoDeJogo": 3.983333333333324,
+        "largura": 390,
+        "altura": 844,
+        "luminanciaMedia": 92.8,
+        "desvioLuminancia": 43.9,
+        "cores": 54963,
+        "corDominante": 0.105,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.035,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 18,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.jogoTeste.estado().fase === 'fim'",
+        "limiteSegundos": 8
+      },
+      "ok": true,
+      "ms": 578,
+      "quadros": 29,
+      "tempoDeJogo": 4.466666666666656,
+      "segundosDeJogo": 0.48333333333333206
+    },
+    {
+      "n": 19,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.8
+      },
+      "ok": true,
+      "ms": 4791,
+      "quadros": 48,
+      "tempoDeJogo": 5.266666666666653,
+      "segundosDeJogo": 0.7999999999999972
+    },
+    {
+      "n": 20,
+      "tipo": "foto",
+      "passo": {
+        "foto": "06-fim"
+      },
+      "ok": true,
+      "ms": 3340,
+      "quadros": 0,
+      "tempoDeJogo": 5.266666666666653,
+      "foto": {
+        "nome": "06-fim",
+        "arquivo": "06-fim.png",
+        "bytes": 487401,
+        "tempoDeJogo": 5.266666666666653,
+        "largura": 390,
+        "altura": 844,
+        "luminanciaMedia": 84,
+        "desvioLuminancia": 52.8,
+        "cores": 57417,
+        "corDominante": 0.061,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.075,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 21,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ e: window.jogoTeste.estado(), d: window.jogoTeste.desenho() })",
+        "guardar": "fim"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "fim",
+      "valor": "{\"e\":{\"fase\":\"fim\",\"falta\":{\"distancia\":22,\"angulo\":0},\"mira\":2.4,\"resultado\":\"cima\",\"tecnica\":\"curva\",\"gols\":0,\"cobrancas\":1},\"d\":{\"frame\":316,\"calls\":77,\"triangles\":32874,\"points\":345,\"lines\":0,\"geometrias\":48,\"texturas\":66}}"
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "01-pronto",
+      "arquivo": "01-pronto.png",
+      "bytes": 434409,
+      "tempoDeJogo": 0.5166666666666666,
+      "largura": 390,
+      "altura": 844,
+      "luminanciaMedia": 96.6,
+      "desvioLuminancia": 56,
+      "cores": 55925,
+      "corDominante": 0.104,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.047,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "02-pronto-2s5",
+      "arquivo": "02-pronto-2s5.png",
+      "bytes": 434595,
+      "tempoDeJogo": 2.5166666666666626,
+      "largura": 390,
+      "altura": 844,
+      "luminanciaMedia": 96.6,
+      "desvioLuminancia": 56,
+      "cores": 55964,
+      "corDominante": 0.104,
+      "corDominanteHex": "#44843c",
+      "fracaoEscura": 0.047,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "03-de-cima",
+      "arquivo": "03-de-cima.png",
+      "bytes": 460397,
+      "tempoDeJogo": 2.549999999999996,
+      "largura": 390,
+      "altura": 844,
+      "luminanciaMedia": 105.3,
+      "desvioLuminancia": 28,
+      "cores": 21408,
+      "corDominante": 0.184,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.007,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "04-perto-area",
+      "arquivo": "04-perto-area.png",
+      "bytes": 313252,
+      "tempoDeJogo": 2.583333333333329,
+      "largura": 390,
+      "altura": 844,
+      "luminanciaMedia": 77,
+      "desvioLuminancia": 46,
+      "cores": 36580,
+      "corDominante": 0.145,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.099,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "05-voo",
+      "arquivo": "05-voo.png",
+      "bytes": 510802,
+      "tempoDeJogo": 3.983333333333324,
+      "largura": 390,
+      "altura": 844,
+      "luminanciaMedia": 92.8,
+      "desvioLuminancia": 43.9,
+      "cores": 54963,
+      "corDominante": 0.105,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.035,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "06-fim",
+      "arquivo": "06-fim.png",
+      "bytes": 487401,
+      "tempoDeJogo": 5.266666666666653,
+      "largura": 390,
+      "altura": 844,
+      "luminanciaMedia": 84,
+      "desvioLuminancia": 52.8,
+      "cores": 57417,
+      "corDominante": 0.061,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.075,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "pronto": "{\"d\":{\"frame\":31,\"calls\":330,\"triangles\":66102,\"points\":296,\"lines\":1,\"geometrias\":48,\"texturas\":65},\"f\":[{\"x\":-4.96409809589386,\"z\":5.622934855084867,\"time\":\"ataque\"},{\"x\":-5.708685064473245,\"z\":5.565159999722556,\"time\":\"defesa\"},{\"x\":-4.563788890838623,\"z\":12.279392149702247,\"time\":\"ataque\"},{\"x\":-5.307616190046132,\"z\":12.076052405389534,\"time\":\"defesa\"},{\"x\":-5.174188256263733,\"z\":2.4925950542581266,\"time\":\"defesa\"},{\"x\":4.57417106628418,\"z\":7.515671153639444,\"time\":\"ataque\"},{\"x\":4.442589443753967,\"z\":6.73677970151552,\"time\":\"defesa\"},{\"x\":-6.1111239194869995,\"z\":7.980725966293247,\"time\":\"ataque\"},{\"x\":3.8328606486320496,\"z\":12.684497879572746,\"time\":\"defesa\"},{\"x\":6.5682203269156165,\"z\":24.81029683256056,\"time\":\"ataque\"}]}",
+    "fim": "{\"e\":{\"fase\":\"fim\",\"falta\":{\"distancia\":22,\"angulo\":0},\"mira\":2.4,\"resultado\":\"cima\",\"tecnica\":\"curva\",\"gols\":0,\"cobrancas\":1},\"d\":{\"frame\":316,\"calls\":77,\"triangles\":32874,\"points\":345,\"lines\":0,\"geometrias\":48,\"texturas\":66}}"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

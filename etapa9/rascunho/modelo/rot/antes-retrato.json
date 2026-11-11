@@ -1,0 +1,6 @@
+{ "perfil": "computador", "escala": 1, "url": "testes/jogadores.html?so=retrato&quem=Becks,Bruxo&corpo", "passos": [
+  { "esperarAte": "window.pronto === true", "limiteSegundos": 60, "limiteReal": 170 },
+  { "foto": "retrato-corpo", "seletor": "#retrato" },
+  { "avaliar": "JSON.stringify(window.contas)", "guardar": "contas" },
+  { "avaliar": "JSON.stringify(window.checagens)", "guardar": "checagens" }
+] }

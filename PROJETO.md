@@ -212,10 +212,16 @@ Várias ligas, duelo entre jogadores, multiplayer, moedas, loja, anúncios, comp
 12. ~~Etapa 8: ranking do dia na internet (Supabase), painel trancado no desafio, goleiro do desafio mais fraco,
     câmera do replay mais longe e de cima.~~ Feito (10/10/2026); o ranking só liga quando o endereço e a chave
     do Supabase entrarem em `config.js`.
-13. Depois: transformar em PWA para instalar na tela inicial do celular.
+13. Etapa 9 (**em pausa desde 11/11/2026**, ainda não publicada): chute e corrida do cobrador mais realistas,
+    bonecos mais bonitos e mais leves, quatro sombras dos refletores, bola melhor, outros jogadores em campo e
+    elenco novo. O elenco e a preparação estão prontos; as quatro partes grandes estão pela metade, só no ramo de
+    trabalho `claude/peaceful-planck-mfrfig`. Para continuar: `etapa9/RETOMAR.md`.
+14. Depois: transformar em PWA para instalar na tela inicial do celular.
 
-Estado em 10/10/2026: publicado `v0.1 · etapa 8.1` (ranking ligado ao projeto Supabase do dono). Amigos e família já jogam pelo link (o critério de sucesso
-da v0.1 está sendo cumprido na prática). Agora: ligar o ranking (conta Supabase) e ajuste fino no celular.
+Estado em 11/11/2026: no ar continua a `v0.1 · etapa 8.1` (ranking ligado ao projeto Supabase do dono). Amigos e
+família já jogam pelo link (o critério de sucesso da v0.1 está sendo cumprido na prática). A etapa 9 foi pausada
+no meio para poupar o limite de uso; nada foi perdido e o site não mudou. Este ramo de trabalho **não está pronto
+para publicar** (ver item 13).
 
 Ideias anotadas (não construir sem combinar): tipos de rede para escolher (véu de noiva, caixote, triangular).
 A rede é uma simulação presa ao formato do gol e à física da bola na rede; trocar o formato é refazer essa parte.

@@ -1,0 +1,18 @@
+{
+  "descricao": "Página de inspeção do estádio (testes/cenario.html?teste&ui=0): três câmeras fixas. Controles da página: botões de câmera e de lance, ou pelo endereço (?cam=a..j, &ui=0, &teste, &gol=1, &lance=, &bonecos=0, &pausa) e pelas funções window.definirCamera(letra), window.posicionar(pos, alvo, fov), window.lance(nome), window.avancar(segundos).",
+  "perfil": "computador",
+  "escala": 1,
+  "url": "testes/cenario.html?cam=a&ui=0&teste",
+  "saida": "capturas/inspecao-cenario",
+  "passos": [
+    { "esperarAte": "window.cenarioPronto === true", "limiteReal": 300 },
+    { "esperarSegundos": 0.5 },
+    { "foto": "cenario-01-atras-da-bola" },
+    { "js": "window.definirCamera('e');" },
+    { "esperarSegundos": 0.2 },
+    { "foto": "cenario-02-visao-geral" },
+    { "js": "window.definirCamera('g');" },
+    { "esperarSegundos": 0.2 },
+    { "foto": "cenario-03-perto-do-gol" }
+  ]
+}

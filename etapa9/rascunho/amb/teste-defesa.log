@@ -1,0 +1,59 @@
+ok - barreira: quantidade de jogadores pela distância e pelo ângulo (0 ms)
+ok - barreira: a 9,15 m da bola, lado a lado, alturas variadas, alinhada com a trave (0 ms)
+ok - barreira: em falta central cobre uma das metades do gol (vista da bola) (0 ms)
+ok - barreira: o pulo sobe e desce numa parábola, depois do chute (1 ms)
+ok - barreira: com os ajustes do pulo no zero, ninguém pula antes do chute nem afunda no chão (2 ms)
+ok - barreira: chute baixo bate na barreira parada; com ela pulando, o rasteiro passa por baixo (37 ms)
+ok - barreira: bola na altura do peito rebate fraco; por cima, passa direto (1 ms)
+ok - goleiro: começa no meio do ângulo e, antes do chute, dá o passo para o lado que a barreira não cobre (3 ms)
+ok - goleiro: na corrida do cobrador se firma e dá o passinho de prontidão, caindo na base na hora do chute (1 ms)
+    gols: sem barreira 0%, com barreira 0% (90 chutes)
+ok - (1) chute central na altura do peito a 25 m/s é defendido sempre (557 ms)
+    gols: reto 4%; giro 30 4%, giro 45 6%, giro 60 7% (360 chutes cada)
+    curva para o meio: mergulhou a mais de 1 m da bola em 2% (180 chutes)
+ok - (2) chute no meio com curva, de 22 m: no máximo ~1,5x os gols do chute reto (3605 ms)
+    gols: 0% (lado do goleiro 0%, lado da barreira 0%; 120 chutes)
+ok - (5) meia altura, 1,5 m para dentro da trave, a 20 m/s: defendido na maioria (221 ms)
+    gols: 93% (lado do goleiro 87%, por cima da barreira 100%; 360 chutes)
+    no canto do goleiro: sem curva 37% de gols (mergulha em 0.55 s), com curva 95% (em 0.58 s)
+ok - (3) chute no ângulo (x ±3,3, y 2,1) a 28 m/s, de 22 m: gol em pelo menos 65% (1188 ms)
+    gols: 84% (lado do goleiro 68%, lado da barreira 100%; 120 chutes)
+ok - (4) rasteiro no canto (x ±3,2, y 0,3) a 30 m/s: gol em pelo menos 55% (274 ms)
+    no ângulo: 20 m/s 17% de gols, 32 m/s 100%
+    a 1,2 m do meio, a 28 m/s: 8% de gols
+ok - goleiro: o chute mais forte é mais difícil; o colocado no meio do gol quase sempre é defendido (364 ms)
+    erro médio da leitura: normal 0.29 m, sem rotação 0.73 m
+    gols: normal 8%, sem rotação 47%
+ok - (6) bola sem rotação é mais difícil de ler que a equivalente sem oscilação (495 ms)
+    gols atualizando a cada passo 71%, a cada quadro 71%
+ok - (8) mesma semente = mesmo resultado (e quase o mesmo atualizando a cada quadro) (429 ms)
+ok - goleiro: o mergulho é físico (as pernas aceleram o corpo, depois ele voa em parábola) (31 ms)
+ok - goleiro: bola fraca no peito é encaixada; a bola vai com as mãos até o peito, sem pular (93 ms)
+ok - goleiro: bola forte no corpo é espalmada e volta para o campo com um rebote crível (45 ms)
+ok - goleiro: espalmou, a mesma bola não é encaixada logo em seguida (é a outra mão que ainda vem) (0 ms)
+ok - goleiro: as pernas de colisão vão até os pés do boneco, de pé e deitado no mergulho (0 ms)
+ok - goleiro: pose coerente do começo ao fim (estados, rolagem, mergulho) (91 ms)
+ok - goleiro: chute que vai para fora não faz ele mergulhar (29 ms)
+ok - goleiro: bola que passa por cima da barreira atrasa a reação (44 ms)
+ok - goleiro: sem passar a config, usa os padrões do jogo (nada de NaN) (3 ms)
+    40 chutes ao acaso no gol: {"barreira":15,"defesa":22,"gol":3}
+ok - goleiro e barreira juntos: a jogada completa termina em gol, defesa, barreira ou fora (300 ms)
+    de 18 m: 50% de gols (36 faltas)
+    de 22 m: 39% de gols (36 faltas)
+    de 26 m: 42% de gols (36 faltas)
+    de 30 m: 33% de gols (36 faltas)
+ok - jogador bom: 35% a 55% de gols de 18 a 24 m; 15% a 35% de 28 a 32 m (3706 ms)
+ok - pênalti: decide antes do chute com a semente (vai, lado, dica); sem opcoes.penalti nada muda na falta (8 ms)
+    vai para a direita: três chutes à direita 89%, sem histórico 53%, três à esquerda 17%
+ok - pênalti: a memória dos últimos chutes puxa o canto; a dica é verdade na chance combinada (7 ms)
+ok - pênalti: antes do chute insinua um canto (aponta e dá o passinho) e volta; na corrida se firma no meio (7 ms)
+    acertou o canto: meia altura a 1 m da trave a 20 m/s 85% de defesas; forte no ângulo a 30 m/s 100% de gols
+    rasteira no canto: a 22 m/s 10% de gols, a 25 m/s 54% (48 chutes cada)
+ok - pênalti: acertou o canto: pega a bola média; a forte no ângulo entra; a rasteira fica no meio-termo (632 ms)
+    errou o canto a 22 m/s: 100% de gols; se jogou com a bola no meio a 20 m/s: 100%
+ok - pênalti: errou o canto, ou se jogou com a bola no meio: gol (285 ms)
+    ficou: bola no meio a 16 m/s 100% de defesas; no canto a 24 m/s 100% de gols
+ok - pênalti: ficou no meio: pega a bola no meio e sofre no canto (327 ms)
+    às cegas (atraso −0,15 s), acertando o canto, bola a 1 m da trave a 22 m/s: 8 defesas em 8
+ok - pênalti: atraso negativo: se joga às cegas antes do contato e o mergulho continua depois do chute (29 ms)
+ok - pênalti: mesma semente e mesmo histórico, mesmo lance (o replay repete o goleiro) (38 ms)

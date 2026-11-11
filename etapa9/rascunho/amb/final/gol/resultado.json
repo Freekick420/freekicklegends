@@ -1,0 +1,469 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/amb/rot/gol.json",
+  "url": "http://127.0.0.1:8831/index.html?teste&silhuetas=todos",
+  "raiz": "/home/user/fkl-amb",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 6
+  },
+  "porta": 8831,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/amb/final/gol",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1280,
+    "altura": 720
+  },
+  "congelar": true,
+  "versaoDoJogo": "v0.1 · etapa 8.1",
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:27:50.617Z",
+  "segundosReais": 53.1,
+  "quadros": 205,
+  "quadrosPorSegundo": 7.1,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "esperarJogo",
+      "passo": {
+        "esperarJogo": true
+      },
+      "ok": true,
+      "ms": 2847,
+      "quadros": 1,
+      "tempoDeJogo": 0.016666666666666666
+    },
+    {
+      "n": 2,
+      "tipo": "js",
+      "passo": {
+        "js": "const t = window.jogoTeste; t.hud(false); t.falta(20, -8); t.cobrador(7);"
+      },
+      "ok": true,
+      "ms": 47
+    },
+    {
+      "n": 3,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.3
+      },
+      "ok": true,
+      "ms": 312,
+      "quadros": 18,
+      "tempoDeJogo": 0.31666666666666665,
+      "segundosDeJogo": 0.3
+    },
+    {
+      "n": 4,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.pausar(true); window.jogoTeste.camera({ pos: [6, 3.2, 9], olhar: [0, 0.8, 0], fov: 38 })"
+      },
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 5,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 27,
+      "quadros": 2,
+      "tempoDeJogo": 0.31666666666666665,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 6,
+      "tipo": "foto",
+      "passo": {
+        "foto": "gol-1-frente"
+      },
+      "ok": true,
+      "ms": 6302,
+      "quadros": 0,
+      "tempoDeJogo": 0.31666666666666665,
+      "foto": {
+        "nome": "gol-1-frente",
+        "arquivo": "gol-1-frente.png",
+        "bytes": 1300558,
+        "tempoDeJogo": 0.31666666666666665,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 90,
+        "desvioLuminancia": 47.6,
+        "cores": 91898,
+        "corDominante": 0.074,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.052,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 7,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera({ pos: [-7, 5, -7], olhar: [0, 0.8, 1], fov: 40 })"
+      },
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 8,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 11,
+      "quadros": 2,
+      "tempoDeJogo": 0.31666666666666665,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 9,
+      "tipo": "foto",
+      "passo": {
+        "foto": "gol-2-tras"
+      },
+      "ok": true,
+      "ms": 732,
+      "quadros": 0,
+      "tempoDeJogo": 0.31666666666666665,
+      "foto": {
+        "nome": "gol-2-tras",
+        "arquivo": "gol-2-tras.png",
+        "bytes": 1497525,
+        "tempoDeJogo": 0.31666666666666665,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 111.7,
+        "desvioLuminancia": 40.5,
+        "cores": 87143,
+        "corDominante": 0.151,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.012,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 10,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera({ pos: [0, 16, 6], olhar: [0, 0, 0.5], fov: 40 })"
+      },
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 11,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 16,
+      "quadros": 2,
+      "tempoDeJogo": 0.31666666666666665,
+      "segundosDeJogo": 0
+    },
+    {
+      "n": 12,
+      "tipo": "foto",
+      "passo": {
+        "foto": "gol-3-cima"
+      },
+      "ok": true,
+      "ms": 587,
+      "quadros": 0,
+      "tempoDeJogo": 0.31666666666666665,
+      "foto": {
+        "nome": "gol-3-cima",
+        "arquivo": "gol-3-cima.png",
+        "bytes": 1271585,
+        "tempoDeJogo": 0.31666666666666665,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 110.6,
+        "desvioLuminancia": 28.9,
+        "cores": 40803,
+        "corDominante": 0.138,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.004,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 13,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera(null); window.jogoTeste.pausar(false); window.jogoTeste.mirar(-2.6); window.jogoTeste.contato(-0.35, 0.1); window.jogoTeste.chutar(0.82);"
+      },
+      "ok": true,
+      "ms": 12
+    },
+    {
+      "n": 14,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.jogoTeste.estado().fase === 'fim'",
+        "limiteSegundos": 10
+      },
+      "ok": true,
+      "ms": 24573,
+      "quadros": 135,
+      "tempoDeJogo": 2.5666666666666624,
+      "segundosDeJogo": 2.2499999999999956
+    },
+    {
+      "n": 15,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.jogoTeste.estado())",
+        "guardar": "estado"
+      },
+      "ok": true,
+      "ms": 12,
+      "guardado": "estado",
+      "valor": "{\"fase\":\"fim\",\"falta\":{\"distancia\":20,\"angulo\":-8},\"mira\":-2.6,\"resultado\":\"cima\",\"tecnica\":\"trivela\",\"gols\":0,\"cobrancas\":1}"
+    },
+    {
+      "n": 16,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.25
+      },
+      "ok": true,
+      "ms": 3137,
+      "quadros": 15,
+      "tempoDeJogo": 2.8166666666666615,
+      "segundosDeJogo": 0.2499999999999991
+    },
+    {
+      "n": 17,
+      "tipo": "foto",
+      "passo": {
+        "foto": "gol-4-festa-a"
+      },
+      "ok": true,
+      "ms": 4185,
+      "quadros": 0,
+      "tempoDeJogo": 2.8166666666666615,
+      "foto": {
+        "nome": "gol-4-festa-a",
+        "arquivo": "gol-4-festa-a.png",
+        "bytes": 1350534,
+        "tempoDeJogo": 2.8166666666666615,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 82.1,
+        "desvioLuminancia": 44.5,
+        "cores": 79294,
+        "corDominante": 0.08,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.059,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 18,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.1
+      },
+      "ok": true,
+      "ms": 98,
+      "quadros": 6,
+      "tempoDeJogo": 2.916666666666661,
+      "segundosDeJogo": 0.09999999999999964
+    },
+    {
+      "n": 19,
+      "tipo": "foto",
+      "passo": {
+        "foto": "gol-5-festa-b"
+      },
+      "ok": true,
+      "ms": 1182,
+      "quadros": 0,
+      "tempoDeJogo": 2.916666666666661,
+      "foto": {
+        "nome": "gol-5-festa-b",
+        "arquivo": "gol-5-festa-b.png",
+        "bytes": 1347778,
+        "tempoDeJogo": 2.916666666666661,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 80.4,
+        "desvioLuminancia": 45.2,
+        "cores": 79355,
+        "corDominante": 0.073,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.064,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 20,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.4
+      },
+      "ok": true,
+      "ms": 374,
+      "quadros": 24,
+      "tempoDeJogo": 3.3166666666666598,
+      "segundosDeJogo": 0.3999999999999986
+    },
+    {
+      "n": 21,
+      "tipo": "foto",
+      "passo": {
+        "foto": "gol-6-festa-c"
+      },
+      "ok": true,
+      "ms": 3978,
+      "quadros": 0,
+      "tempoDeJogo": 3.3166666666666598,
+      "foto": {
+        "nome": "gol-6-festa-c",
+        "arquivo": "gol-6-festa-c.png",
+        "bytes": 1309646,
+        "tempoDeJogo": 3.3166666666666598,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 74.5,
+        "desvioLuminancia": 47.1,
+        "cores": 73280,
+        "corDominante": 0.057,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.083,
+        "suspeita": false,
+        "motivo": null
+      }
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "gol-1-frente",
+      "arquivo": "gol-1-frente.png",
+      "bytes": 1300558,
+      "tempoDeJogo": 0.31666666666666665,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 90,
+      "desvioLuminancia": 47.6,
+      "cores": 91898,
+      "corDominante": 0.074,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.052,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "gol-2-tras",
+      "arquivo": "gol-2-tras.png",
+      "bytes": 1497525,
+      "tempoDeJogo": 0.31666666666666665,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 111.7,
+      "desvioLuminancia": 40.5,
+      "cores": 87143,
+      "corDominante": 0.151,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.012,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "gol-3-cima",
+      "arquivo": "gol-3-cima.png",
+      "bytes": 1271585,
+      "tempoDeJogo": 0.31666666666666665,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 110.6,
+      "desvioLuminancia": 28.9,
+      "cores": 40803,
+      "corDominante": 0.138,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.004,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "gol-4-festa-a",
+      "arquivo": "gol-4-festa-a.png",
+      "bytes": 1350534,
+      "tempoDeJogo": 2.8166666666666615,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 82.1,
+      "desvioLuminancia": 44.5,
+      "cores": 79294,
+      "corDominante": 0.08,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.059,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "gol-5-festa-b",
+      "arquivo": "gol-5-festa-b.png",
+      "bytes": 1347778,
+      "tempoDeJogo": 2.916666666666661,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 80.4,
+      "desvioLuminancia": 45.2,
+      "cores": 79355,
+      "corDominante": 0.073,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.064,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "gol-6-festa-c",
+      "arquivo": "gol-6-festa-c.png",
+      "bytes": 1309646,
+      "tempoDeJogo": 3.3166666666666598,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 74.5,
+      "desvioLuminancia": 47.1,
+      "cores": 73280,
+      "corDominante": 0.057,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.083,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "estado": "{\"fase\":\"fim\",\"falta\":{\"distancia\":20,\"angulo\":-8},\"mira\":-2.6,\"resultado\":\"cima\",\"tecnica\":\"trivela\",\"gols\":0,\"cobrancas\":1}"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

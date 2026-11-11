@@ -1,0 +1,31 @@
+{
+  "descricao": "Igual ao treino-celular, mas com escala 2 (780x1688) e só o 01-pronto e as fotos da corrida, para ver o boneco de perto. Cada instante em que o cobrador aparece ganha também um recorte só dele (perto-...). Com a câmera padrão do jogo, depois do contato (10 a 13) a câmera aérea assume e o cobrador sai da tela.",
+  "perfil": "celular",
+  "escala": 2,
+  "url": "index.html?teste",
+  "saida": "capturas/treino-celular-closeup",
+  "passos": [
+    { "esperarJogo": true },
+    { "js": "window.jogoTeste.falta(22, 12); window.jogoTeste.cobrador(8);" },
+    { "esperarSegundos": 0.5 },
+    { "foto": "01-pronto" },
+    { "foto": "perto-01-pronto", "recorte": { "x": 60, "y": 300, "largura": 270, "altura": 330 } },
+
+    { "js": "window.jogoTeste.mirar(2.4); window.jogoTeste.contato(0.45, 0.1);" },
+    { "foto": "02-corrida-00" },
+    { "foto": "perto-02-corrida-00", "recorte": { "x": 60, "y": 300, "largura": 270, "altura": 330 } },
+    { "js": "window.jogoTeste.chutar(0.8);" },
+    { "nota": "01 a 08: 7, 14 ... 56 quadros depois do começo da corrida", "repetir": 8, "inicio": 1, "passos": [
+      { "esperarQuadros": 7 },
+      { "foto": "02-corrida-{{i}}" },
+      { "foto": "perto-02-corrida-{{i}}", "recorte": { "x": 60, "y": 300, "largura": 270, "altura": 330 } }
+    ] },
+    { "nota": "09 = o quadro exato do contato", "esperarAte": "window.jogoTeste.estado().fase === 'voo'", "limiteSegundos": 5 },
+    { "foto": "02-corrida-09-contato" },
+    { "foto": "perto-02-corrida-09-contato", "recorte": { "x": 60, "y": 300, "largura": 270, "altura": 330 } },
+    { "nota": "10 a 13: 7, 14, 21 e 28 quadros depois do contato (a câmera aérea já está assumindo)", "repetir": 4, "inicio": 10, "passos": [
+      { "esperarQuadros": 7 },
+      { "foto": "02-corrida-{{i}}" }
+    ] }
+  ]
+}

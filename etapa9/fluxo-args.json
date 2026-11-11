@@ -1,0 +1,76 @@
+{
+  "_leia": "Parâmetros do fluxo etapa9/fluxo-frentes.js. Antes de usar, copie a pasta etapa9 para a pasta de rascunho da sessão e troque PASTA_DE_RASCUNHO pelo caminho dela (veja etapa9/RETOMAR.md).",
+  "briefs": "PASTA_DE_RASCUNHO/etapa9/briefs",
+  "rascunho": "PASTA_DE_RASCUNHO",
+  "trilhas": [
+    {
+      "key": "anim",
+      "nome": "Animação do cobrador (corrida e chute)",
+      "dir": "/home/user/fkl-anim",
+      "ramo": "etapa9-anim",
+      "porta": 8811,
+      "checagens": [
+        "Sequência do chute quadro a quadro (a cada 0,05 s, de 0,35 s antes até 0,35 s depois do contato) com a câmera livre: de lado (os dois lados), de frente e de trás, para as lendas 8 (destro, semGiro), 3 (canhoto, corrida longa), 23 (chapa com braço aberto), 80 (quase sem corrida) e 9; e para chutes diferentes (contato embaixo, em cima, de lado; força 0,5 e 1,0). Parece um jogador batendo falta ou um boneco?",
+        "Pés: escorregam durante a passada? afundam no gramado? flutuam quando deviam estar apoiados? O pé de apoio fica ao lado da bola? No quadro do contato o pé do chute toca a bola no ponto escolhido?",
+        "Corpo: braços, tronco, quadril e cabeça se movem com naturalidade? Algum joelho ou cotovelo dobra ao contrário, algum membro atravessa o corpo, treme ou dá salto entre quadros?",
+        "Tempo do soltar do botão até o contato para cada lenda (jogoTeste.tempos().tempoContato): ficou entre ~0,9 e ~2,0 s, parecido com antes?",
+        "Depois do chute: o cobrador acompanha a bola com a cabeça? A comemoração e o lamento entram suave e parecem de gente?",
+        "O replay repete exatamente a mesma animação do lance; no pênalti nada quebrou; animacao.inicio não muda depois de preparar(); o canhoto é o espelho do destro.",
+        "Os testes novos (testes/cobranca.mjs) existem, medem o que a frente pediu (escorregão, pé na bola, saltos de junta) e passam do jeito documentado."
+      ],
+      "notas": "anim"
+    },
+    {
+      "key": "modelo",
+      "nome": "Boneco dos jogadores (modelo com poucas chamadas de desenho e mais realista)",
+      "dir": "/home/user/fkl-modelo",
+      "ramo": "etapa9-modelo",
+      "porta": 8821,
+      "checagens": [
+        "Chamadas de desenho e triângulos: jogoTeste.desenho() no jogo (antes eram 179 chamadas com cobrador + barreira + goleiro) e as contas por boneco na página testes/jogadores.html?contas. A meta era no máximo 6 chamadas por boneco.",
+        "Elenco inteiro de frente e de costas, e close do corpo e da cabeça (página de inspeção e câmera livre no jogo): as proporções são de atleta? Tem volume de músculo, mãos e pés com forma, uniforme com cara de tecido? Ou ainda parece manequim?",
+        "Dobras: cotovelo, joelho, ombro, quadril, cintura e pescoço em poses extremas (chute, corrida, agachado, mergulho do goleiro, braços para cima): a malha deforma bem? Há buracos, emendas, faces invertidas, um lado do corpo com a luz errada (escala espelhada)?",
+        "Uniformes: cada padrão sai certo (liso, listras, aros, faixa, diagonal, v, faixaVertical do PSG), número e nome legíveis, goleiro com manga longa e luvas, meião e chuteira; o cabelo preso do Ibra (18); os 8 jogadores novos (9, 5, 20, 76, 10, 18, 19, 17) e os genéricos.",
+        "O goleiro continua mergulhando e segurando a bola com as mãos no lugar certo, a barreira continua pulando e se protegendo, o cobrador continua chutando (com o js/cobranca.js da base): capturas no jogo, modo normal e pênalti.",
+        "criarSilhueta(material, copias) existe, devolve uma malha só que acompanha o esqueleto, com o atributo copia; teste na página de inspeção ou no console do jogo com um material simples e copias = 4.",
+        "Tempo para criar os bonecos de uma cobrança (meça), dispose() sem sobras (estatisticasCache), e o módulo ainda importa no Node sem tela (os testes de Node passam).",
+        "A visão normal do jogo no celular (390×844, câmera atrás do cobrador): comparando com as capturas de antes, melhorou de verdade?"
+      ],
+      "notas": "modelo"
+    },
+    {
+      "key": "ambiente",
+      "nome": "Ambiente (sombras dos refletores, luz, bola e acabamento do estádio)",
+      "dir": "/home/user/fkl-amb",
+      "ramo": "etapa9-amb",
+      "porta": 8831,
+      "checagens": [
+        "Sombras dos refletores: cada boneco tem as quatro sombras? Estão ancoradas nos pés (quem pula descola)? No cobrador, a sombra acompanha pernas e braços na corrida e no chute? Onde as sombras se cruzam fica feio (escurece em dobro, pisca, briga com o gramado)? Aparecem bem na câmera do jogo (celular 390×844) e no replay (câmera lateral de cima)?",
+        "Sombra da bola: as quatro sombrinhas se juntam quando ela desce? Ajuda a ler a altura? No chão tem sombra de contato?",
+        "Os dois caminhos da sombra funcionam: com personagem.criarSilhueta (simule um provisório por cima do boneco atual numa página de teste) e sem (plano B); sombras.qualidade(0) cai para o barato; o liga/desliga do painel funciona.",
+        "Luz: os corpos têm volume? As costas do cobrador (o que a câmera vê) estão bem iluminadas? Camisas brancas estouram? As cores do estádio, do gramado e da torcida continuam coerentes (nada lavado, escuro demais ou estourado) comparando com as capturas de antes?",
+        "Bola: parece uma bola de futebol de perto e continua legível de longe e em voo?",
+        "Custo: jogoTeste.desenho() antes e depois (chamadas e triângulos); nada de mapa de sombra nem passada de tela cheia.",
+        "O contrato com o js/main.js está intacto (criarCenario, cenario.refletores, criarBolaVisual, criarSombras com boneco/bola/qualidade/atualizar) e nenhum arquivo fora da frente foi alterado."
+      ],
+      "notas": "amb"
+    },
+    {
+      "key": "figurantes",
+      "nome": "Figurantes (outros jogadores em campo, como num jogo de verdade)",
+      "dir": "/home/user/fkl-fig",
+      "ramo": "etapa9-fig",
+      "porta": 8841,
+      "checagens": [
+        "node testes/figurantes.mjs passa e mede o que a frente pediu. Faça também a SUA verificação independente no Node: para centenas de faltas sorteadas (18 a 33 m, −32° a 32°, as duas pernas) simule com js/physics.js chutes bons nos dois cantos (com curva e com força) e confirme que nenhum bate em figurante; confira as zonas proibidas (corredor do chute, 9,15 m, câmera atrás da bola, caminho do cobrador, goleiro) e que a mesma semente dá a mesma montagem.",
+        "No jogo (celular 390×844 e câmera livre de cima): falta frontal, falta lateral dos dois lados, falta longa, pênalti e replay. As posições parecem um lance de jogo de verdade? Alguém tapa a câmera, fica no caminho da corrida do cobrador, em cima de outro jogador ou dentro do gol?",
+        "Uniformes: companheiros com o do time do cobrador, adversários com o do rival (teste com 2 ou 3 cobradores de clubes diferentes, inclusive o goleiro Seni, número 1).",
+        "Vida: antes do chute cada um tem um jeito e não estão sincronizados como robôs? No chute acompanham a bola? No gol os companheiros comemoram e os adversários lamentam (e o contrário no erro)? Pés deslizando, teleporte, poses quebradas?",
+        "Colisão: chute de propósito num figurante (mire nele): a bola desvia, aparece 'NA ZAGA!' ou 'NO COMPANHEIRO!' e o lance termina; um gol depois de desvio vale.",
+        "Custo: quantas chamadas de desenho os figurantes somam (jogoTeste.desenho() com figurantes.quantidade 0 e 10) e se a montagem a cada falta trava.",
+        "Determinismo: o replay repete os mesmos jogadores nos mesmos lugares e o mesmo desvio; nada de Math.random na lógica; quantidade 0 deixa o campo vazio como antes."
+      ],
+      "notas": "fig"
+    }
+  ]
+}

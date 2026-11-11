@@ -1,0 +1,16 @@
+{ "descricao": "Página de inspeção: jeitos de esperar",
+  "perfil": "computador", "escala": 1, "url": "testes/figurantes.html?modo=jeitos&teste&captura", "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/capturas/i01",
+  "passos": [
+  { "esperarJogo": true },
+  { "js": "window.jogoTeste.avancar(1.0)" }, { "esperarQuadros": 2 },
+  { "foto": "jeitos-frente" },
+  { "js": "window.jogoTeste.camera({ pos: [10, 1.5, 12], olhar: [0, 0.95, 6], fov: 30 })" }, { "esperarQuadros": 2 },
+  { "foto": "jeitos-lado" },
+  { "js": "window.jogoTeste.camera({ pos: [-3.5, 1.4, 11.5], olhar: [-4.6, 0.95, 6], fov: 24 })" }, { "esperarQuadros": 2 },
+  { "foto": "jeitos-perto-1" },
+  { "js": "window.jogoTeste.camera({ pos: [1.5, 1.4, 11.5], olhar: [0.6, 0.95, 6], fov: 24 })" }, { "esperarQuadros": 2 },
+  { "foto": "jeitos-perto-2" },
+  { "js": "window.jogoTeste.camera({ pos: [6.5, 1.4, 11.0], olhar: [5.4, 0.95, 6], fov: 24 })" }, { "esperarQuadros": 2 },
+  { "foto": "jeitos-perto-3" },
+  { "avaliar": "JSON.stringify(window.jogoTeste.diagnostico())", "guardar": "diag" }
+] }

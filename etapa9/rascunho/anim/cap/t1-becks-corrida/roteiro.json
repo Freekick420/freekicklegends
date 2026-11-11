@@ -1,0 +1,145 @@
+{
+ "perfil": "computador",
+ "escala": 1,
+ "url": "index.html?teste",
+ "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/anim/cap/t1-becks-corrida",
+ "passos": [
+  {
+   "esperarJogo": true
+  },
+  {
+   "tamanho": {
+    "largura": 640,
+    "altura": 480
+   }
+  },
+  {
+   "js": "const t = window.jogoTeste; t.hud(false); t.falta(22, 0); t.cobrador(23); t.mirar(1.5); t.contato(0.4, 0.1); t.pausar(true);"
+  },
+  {
+   "js": "window.jogoTeste.camera({\"pos\":[4.5893449863350835,1,0.3129098854319375],\"olhar\":[0,0.85,0],\"seguir\":true,\"fov\":30})"
+  },
+  {
+   "js": "window.jogoTeste.chutar(0.8); window.__tc = window.jogoTeste.tempos().tempoContato; window.__dur = window.jogoTeste.tempos().duracao;"
+  },
+  {
+   "avaliar": "JSON.stringify(window.jogoTeste.tempos())",
+   "guardar": "tempos"
+  },
+  {
+   "js": "window.__t = 0"
+  },
+  {
+   "js": "{ const alvo = 0 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q00"
+  },
+  {
+   "js": "{ const alvo = 0.09090909090909091 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q01"
+  },
+  {
+   "js": "{ const alvo = 0.18181818181818182 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q02"
+  },
+  {
+   "js": "{ const alvo = 0.2727272727272727 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q03"
+  },
+  {
+   "js": "{ const alvo = 0.36363636363636365 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q04"
+  },
+  {
+   "js": "{ const alvo = 0.45454545454545453 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q05"
+  },
+  {
+   "js": "{ const alvo = 0.5454545454545454 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q06"
+  },
+  {
+   "js": "{ const alvo = 0.6363636363636364 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q07"
+  },
+  {
+   "js": "{ const alvo = 0.7272727272727273 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q08"
+  },
+  {
+   "js": "{ const alvo = 0.8181818181818182 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q09"
+  },
+  {
+   "js": "{ const alvo = 0.9090909090909091 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q10"
+  },
+  {
+   "js": "{ const alvo = 1 * window.__tc; window.jogoTeste.avancar(alvo - window.__t); window.__t = Math.round(alvo * 60) / 60; }"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q11"
+  },
+  {
+   "avaliar": "JSON.stringify({ e: window.jogoTeste.estado(), t: window.jogoTeste.tempos() })",
+   "guardar": "fim"
+  }
+ ]
+}

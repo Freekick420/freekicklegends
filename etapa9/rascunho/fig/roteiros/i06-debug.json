@@ -1,0 +1,7 @@
+{ "descricao": "Depuração dos passos: quando o pé escorrega",
+  "perfil": "computador", "escala": 1, "url": "testes/figurantes.html?modo=passos&teste&captura", "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/capturas/i06",
+  "passos": [
+  { "esperarJogo": true },
+  { "js": "window.jogoTeste.avancar(0.1)" },
+  { "avaliar": "(() => { const SOLA = [[0, -0.07, -0.055], [0, -0.07, 0.1], [0, -0.062, 0.19]]; const out = []; let ant = null; let antZ = 0; for (let i = 0; i < 330; i++) { window.jogoTeste.avancar(1/60); const per = window.jogoTeste.personagens()[1]; per.grupo.updateMatrixWorld(true); const pes = ['D', 'E'].map((lado) => { const m = per.juntas['tornozelo' + lado].matrixWorld.elements; return SOLA.map(([x, y, z]) => [m[0] * x + m[4] * y + m[8] * z + m[12], m[1] * x + m[5] * y + m[9] * z + m[13], m[2] * x + m[6] * y + m[10] * z + m[14]]); }); let s = ''; if (ant) { for (let p = 0; p < 2; p++) { let menor = Infinity; let subiu = 0; for (let q = 0; q < 3; q++) { const a = ant[p][q]; const b = pes[p][q]; subiu = Math.max(subiu, b[1] - a[1]); if (a[1] < 0.003 && b[1] < 0.003) menor = Math.min(menor, Math.hypot(b[0] - a[0], b[2] - a[2])); } s += (menor < Infinity && subiu < 0.03 ? (menor * 1000).toFixed(0) : '-') + ' '; } } out.push(i + ' v' + ((antZ - per.grupo.position.z) * 60).toFixed(2) + ' yaw' + per.grupo.rotation.y.toFixed(2) + ' ' + s); antZ = per.grupo.position.z; ant = pes; } return out.join(' | '); })()", "guardar": "log" }
+] }

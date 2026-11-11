@@ -1,0 +1,23 @@
+{ "descricao": "Vazamento: várias cobranças e trocas de cobrador seguidas; geometrias e texturas não podem crescer sem parar",
+  "perfil": "computador", "escala": 1, "url": "index.html?teste", "saida": "x", "passos": [
+  { "esperarJogo": true },
+  { "esperarSegundos": 0.2 },
+  { "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })", "guardar": "inicio" },
+  { "repetir": 6, "inicio": 1, "passos": [
+    { "js": "const t = window.jogoTeste; t.falta(18 + {{i}} * 2, -20 + {{i}} * 7); t.cobrador([7, 8, 30, 1, 23, 9][{{i}} - 1]);" },
+    { "esperarSegundos": 0.15 },
+    { "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })", "guardar": "volta{{i}}" }
+  ] },
+  { "js": "window.jogoTeste.modo('penalti')" }, { "esperarSegundos": 0.2 },
+  { "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })", "guardar": "penalti" },
+  { "js": "window.jogoTeste.modo('treino')" }, { "esperarSegundos": 0.2 },
+  { "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })", "guardar": "treino" },
+  { "js": "window.sombrasTeste.qualidade(0)" }, { "esperarSegundos": 0.1 },
+  { "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })", "guardar": "qualidade0" },
+  { "foto": "qualidade0" },
+  { "js": "window.sombrasTeste.qualidade(0.5)" }, { "esperarSegundos": 0.1 },
+  { "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })", "guardar": "qualidade05" },
+  { "foto": "qualidade05" },
+  { "js": "window.sombrasTeste.qualidade(1)" }, { "esperarSegundos": 0.1 },
+  { "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })", "guardar": "qualidade1" }
+] }

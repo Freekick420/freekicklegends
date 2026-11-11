@@ -1,0 +1,28 @@
+{
+  "descricao": "EXTRA: o pênalti de perto (escala 2). O mesmo pênalti do penalti-celular, mas com a mira já fora do meio (mirar 2,9 logo ao entrar no modo; no roteiro normal a mira começa bem em cima do goleiro e tapa o gesto dele) e com um recorte do gol, da bola e do cobrador nos três instantes do gesto. Depois o voo e o fim em tela cheia.",
+  "perfil": "celular",
+  "escala": 2,
+  "url": "index.html?teste",
+  "saida": "capturas/penalti-celular-closeup",
+  "passos": [
+    { "esperarJogo": true },
+    { "js": "window.jogoTeste.modo('penalti'); window.jogoTeste.mirar(2.9);" },
+    { "esperarSegundos": 0.3 },
+    { "foto": "01-goleiro-0s30", "recorte": { "x": 60, "y": 305, "largura": 280, "altura": 245 } },
+    { "esperarSegundos": 0.9 },
+    { "foto": "02-goleiro-1s20", "recorte": { "x": 60, "y": 305, "largura": 280, "altura": 245 } },
+    { "foto": "02-tela-1s20" },
+    { "esperarSegundos": 0.5 },
+    { "foto": "03-goleiro-1s70", "recorte": { "x": 60, "y": 305, "largura": 280, "altura": 245 } },
+    { "avaliar": "window.jogoTeste.goleiro()", "guardar": "goleiroAntes" },
+    { "js": "window.jogoTeste.mirar(2.9); window.jogoTeste.contato(0.1, 0.2); window.jogoTeste.chutar(0.7);" },
+    { "esperarAte": "window.jogoTeste.estado().fase === 'voo'", "limiteSegundos": 6 },
+    { "esperarSegundos": 0.25 },
+    { "foto": "04-voo" },
+    { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 8 },
+    { "esperarSegundos": 0.3 },
+    { "foto": "05-fim" },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" },
+    { "avaliar": "window.jogoTeste.goleiro()", "guardar": "goleiro" }
+  ]
+}

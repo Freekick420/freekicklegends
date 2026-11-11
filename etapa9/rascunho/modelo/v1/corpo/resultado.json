@@ -1,0 +1,140 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/modelo/rot/corpo.json",
+  "url": "http://127.0.0.1:8821/testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta,Bruxo&corpo&largura=1400",
+  "raiz": "/home/user/fkl-modelo",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 2
+  },
+  "porta": 8821,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/modelo/v1/corpo",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1440,
+    "altura": 900
+  },
+  "congelar": true,
+  "versaoDoJogo": null,
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:19:09.761Z",
+  "segundosReais": 5.9,
+  "quadros": 0,
+  "quadrosPorSegundo": null,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "tamanho",
+      "passo": {
+        "tamanho": {
+          "largura": 1440,
+          "altura": 900
+        }
+      },
+      "ok": true,
+      "ms": 549
+    },
+    {
+      "n": 2,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 3,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 3,
+      "tipo": "foto",
+      "passo": {
+        "foto": "corpo",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 346,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "corpo",
+        "arquivo": "corpo.png",
+        "bytes": 296796,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 134.8,
+        "desvioLuminancia": 56.2,
+        "cores": 35848,
+        "corDominante": 0.331,
+        "corDominanteHex": "#9cd4f4",
+        "fracaoEscura": 0.04,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 4,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "document.getElementById('info').textContent",
+        "guardar": "info"
+      },
+      "ok": true,
+      "ms": 72,
+      "guardado": "info",
+      "valor": "Por boneco: até 2 chamadas de desenho e 6158 triângulos (detalhe baixo: 2472); silhueta da sombra: 990 triângulos por cópia\n{\"jogador\":\"Becks\",\"pe\":\"D\",\"tempoContato\":0.813,\"peNaBola_cm\":2,\"alturaPeitoDoPe_cm\":11.9,\"apoioAoLado_cm\":23.8,\"apoioAtras_cm\":3.3,\"escorregaoApoio_cm\":0,\"peMaisBaixo_cm\":-0.14,\"maiorPassoQuadro_cm\":6.1,\"inicio\":{\"x\":2.34,\"z\":24.28}}\n{\"jogador\":\"Canhão\",\"pe\":\"E\",\"tempoContato\":0.813,\"peNaBola_cm\":2,\"alturaPeitoDoPe_cm\":11.1,\"apoioAoLado_cm\":-23.1,\"apoioAtras_cm\":3.7,\"escorregaoApoio_cm\":0,\"peMaisBaixo_cm\":-0.13,\"maiorPassoQuadro_cm\":6.1,\"inicio\":{\"x\":-5.49,\"z\":27.31}}\n{\"jogador\":\"Zizou\",\"pe\":\"D\",\"tempoContato\":0.813,\"peNaBola_cm\":2.1,\"alturaPeitoDoPe_cm\":12.2,\"apoioAoLado_cm\":24.1,\"apoioAtras_cm\":3.2,\"escorregaoApoio_cm\":0,\"peMaisBaixo_cm\":-0.14,\"maiorPassoQuadro_cm\":6.1,\"inicio\":{\"x\":-1.49,\"z\":21.85}}\n{\"jogador\":\"Robozão\",\"pe\":\"D\",\"tempoContato\":0.813,\"peNaBola_cm\":2.1,\"alturaPeitoDoPe_cm\":12.4,\"apoioAoLado_cm\":24.2,\"apoioAtras_cm\":3.2,\"escorregaoApoio_cm\":0,\"peMaisBaixo_cm\":-0.15,\"maiorPassoQuadro_cm\":6.1,\"inicio\":{\"x\":7.64,\"z\":30.35}}\n{\"barreira_difAlturaCabeca_cm\":2.4,\"barreira_peAbaixoDoChao_cm\":0}\n{\"dispose_emUsoAntes\":2,\"dispose_emUsoDepois\":2,\"dispose_guardadas\":6,\"dispose_ok\":true,\"timeDivideTextura_ok\":true,\"disposeDuplo_ok\":true,\"geometrias\":24,\"materiais\":9,\"texturas\":18}"
+    },
+    {
+      "n": 5,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.errosDasSecoes || [])",
+        "guardar": "erros"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "erros",
+      "valor": "[]"
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "corpo",
+      "arquivo": "corpo.png",
+      "bytes": 296796,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 134.8,
+      "desvioLuminancia": 56.2,
+      "cores": 35848,
+      "corDominante": 0.331,
+      "corDominanteHex": "#9cd4f4",
+      "fracaoEscura": 0.04,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "info": "Por boneco: até 2 chamadas de desenho e 6158 triângulos (detalhe baixo: 2472); silhueta da sombra: 990 triângulos por cópia\n{\"jogador\":\"Becks\",\"pe\":\"D\",\"tempoContato\":0.813,\"peNaBola_cm\":2,\"alturaPeitoDoPe_cm\":11.9,\"apoioAoLado_cm\":23.8,\"apoioAtras_cm\":3.3,\"escorregaoApoio_cm\":0,\"peMaisBaixo_cm\":-0.14,\"maiorPassoQuadro_cm\":6.1,\"inicio\":{\"x\":2.34,\"z\":24.28}}\n{\"jogador\":\"Canhão\",\"pe\":\"E\",\"tempoContato\":0.813,\"peNaBola_cm\":2,\"alturaPeitoDoPe_cm\":11.1,\"apoioAoLado_cm\":-23.1,\"apoioAtras_cm\":3.7,\"escorregaoApoio_cm\":0,\"peMaisBaixo_cm\":-0.13,\"maiorPassoQuadro_cm\":6.1,\"inicio\":{\"x\":-5.49,\"z\":27.31}}\n{\"jogador\":\"Zizou\",\"pe\":\"D\",\"tempoContato\":0.813,\"peNaBola_cm\":2.1,\"alturaPeitoDoPe_cm\":12.2,\"apoioAoLado_cm\":24.1,\"apoioAtras_cm\":3.2,\"escorregaoApoio_cm\":0,\"peMaisBaixo_cm\":-0.14,\"maiorPassoQuadro_cm\":6.1,\"inicio\":{\"x\":-1.49,\"z\":21.85}}\n{\"jogador\":\"Robozão\",\"pe\":\"D\",\"tempoContato\":0.813,\"peNaBola_cm\":2.1,\"alturaPeitoDoPe_cm\":12.4,\"apoioAoLado_cm\":24.2,\"apoioAtras_cm\":3.2,\"escorregaoApoio_cm\":0,\"peMaisBaixo_cm\":-0.15,\"maiorPassoQuadro_cm\":6.1,\"inicio\":{\"x\":7.64,\"z\":30.35}}\n{\"barreira_difAlturaCabeca_cm\":2.4,\"barreira_peAbaixoDoChao_cm\":0}\n{\"dispose_emUsoAntes\":2,\"dispose_emUsoDepois\":2,\"dispose_guardadas\":6,\"dispose_ok\":true,\"timeDivideTextura_ok\":true,\"disposeDuplo_ok\":true,\"geometrias\":24,\"materiais\":9,\"texturas\":18}",
+    "erros": "[]"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

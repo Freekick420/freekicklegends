@@ -1,0 +1,18 @@
+{ "perfil": "computador", "escala": 1, "url": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&corpo&largura=1400", "passos": [
+  { "tamanho": { "largura": 1440, "altura": 900 } },
+  { "esperarAte": "window.pronto === true", "limiteReal": 170 },
+  { "foto": "corpo-juninho", "seletor": "#retrato img" },
+  { "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&tronco&largura=1400" },
+  { "esperarAte": "window.pronto === true", "limiteReal": 170 },
+  { "foto": "tronco-juninho", "seletor": "#retrato img" },
+  { "abrir": "testes/jogadores.html?so=retrato&quem=Robozão&pernas&largura=1400" },
+  { "esperarAte": "window.pronto === true", "limiteReal": 170 },
+  { "foto": "pernas-robozao", "seletor": "#retrato img" },
+  { "abrir": "testes/jogadores.html?so=retrato&quem=Robozão&corpo&malha&largura=1400" },
+  { "esperarAte": "window.pronto === true", "limiteReal": 170 },
+  { "foto": "malha-robozao", "seletor": "#retrato img" },
+  { "abrir": "testes/jogadores.html?so=dobras&quem=Robozão&largura=1400" },
+  { "esperarAte": "window.pronto === true", "limiteReal": 170 },
+  { "foto": "dobras-robozao", "seletor": "#dobras img" },
+  { "avaliar": "JSON.stringify(window.errosDasSecoes || [])", "guardar": "erros" }
+] }

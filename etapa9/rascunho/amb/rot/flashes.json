@@ -1,0 +1,11 @@
+{ "descricao": "Flashes na torcida: calmo (3 instantes) e na festa do gol (3 instantes)",
+  "perfil": "computador", "escala": 1, "url": "testes/cenario.html?cam=a&ui=0&teste&pausa", "saida": "x", "passos": [
+  { "esperarAte": "window.cenarioPronto === true", "limiteReal": 300 },
+  { "js": "window.avancar(0.5)" }, { "esperarQuadros": 2 }, { "foto": "f-calmo-1" },
+  { "js": "window.avancar(0.35)" }, { "esperarQuadros": 2 }, { "foto": "f-calmo-2" },
+  { "js": "window.definirCamera('e'); window.avancar(0.3)" }, { "esperarQuadros": 2 }, { "foto": "f-calmo-geral" },
+  { "js": "window.cenario.torcida.festa(1); window.avancar(0.5)" }, { "esperarQuadros": 2 }, { "foto": "f-festa-geral" },
+  { "js": "window.definirCamera('a'); window.avancar(0.1)" }, { "esperarQuadros": 2 }, { "foto": "f-festa-1" },
+  { "js": "window.avancar(0.07)" }, { "esperarQuadros": 2 }, { "foto": "f-festa-2" },
+  { "js": "window.definirCamera('f'); window.avancar(0.07)" }, { "esperarQuadros": 2 }, { "foto": "f-festa-3" }
+] }

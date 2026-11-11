@@ -1,0 +1,14 @@
+{ "descricao": "Página de inspeção: reações ao gol e ao erro",
+  "perfil": "computador", "escala": 1, "url": "testes/figurantes.html?modo=reacoes&resultado=gol&teste&captura", "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/capturas/i03",
+  "passos": [
+  { "esperarJogo": true },
+  { "js": "window.jogoTeste.camera({ pos: [0, 1.6, 17.5], olhar: [0, 1.05, 6], fov: 30 })" },
+  { "js": "window.jogoTeste.avancar(0.7)" }, { "esperarQuadros": 1 }, { "foto": "gol-070" },
+  { "js": "window.jogoTeste.avancar(0.25)" }, { "esperarQuadros": 1 }, { "foto": "gol-095" },
+  { "js": "window.jogoTeste.avancar(0.6)" }, { "esperarQuadros": 1 }, { "foto": "gol-155" },
+  { "js": "window.jogoTeste.camera({ pos: [9, 1.6, 12], olhar: [0, 1.05, 6], fov: 30 })" }, { "esperarQuadros": 1 }, { "foto": "gol-155-lado" },
+  { "js": "window.jogoTeste.modo('reacoes', { resultado: 'fora' }); window.jogoTeste.camera({ pos: [0, 1.6, 15], olhar: [0, 1.05, 6], fov: 30 })" },
+  { "js": "window.jogoTeste.avancar(0.9)" }, { "esperarQuadros": 1 }, { "foto": "fora-090" },
+  { "js": "window.jogoTeste.avancar(0.7)" }, { "esperarQuadros": 1 }, { "foto": "fora-160" },
+  { "js": "window.jogoTeste.camera({ pos: [8, 1.6, 12], olhar: [0, 1.05, 6], fov: 30 })" }, { "esperarQuadros": 1 }, { "foto": "fora-160-lado" }
+] }

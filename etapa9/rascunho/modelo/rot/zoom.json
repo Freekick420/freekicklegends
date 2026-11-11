@@ -1,0 +1,11 @@
+{ "perfil": "computador", "escala": 1, "url": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&tronco&largura=1400&giros=0.7,2.4", "passos": [
+  { "tamanho": { "largura": 1440, "altura": 900 } },
+  { "esperarAte": "window.pronto === true", "limiteReal": 170 },
+  { "foto": "tronco-zoom", "seletor": "#retrato img" },
+  { "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&maos&largura=1400&giros=0,1.5708,3.1416" },
+  { "esperarAte": "window.pronto === true", "limiteReal": 170 },
+  { "foto": "maos-zoom", "seletor": "#retrato img" },
+  { "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&zoom&largura=1400&giros=0,0.7,1.5708,3.1416" },
+  { "esperarAte": "window.pronto === true", "limiteReal": 170 },
+  { "foto": "rosto-zoom", "seletor": "#retrato img" }
+] }

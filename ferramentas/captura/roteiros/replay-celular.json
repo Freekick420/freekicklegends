@@ -1,0 +1,37 @@
+{
+  "descricao": "Replay no celular (escala 1): o mesmo chute do treino-celular, espera o fim, liga o replay (sem gravar vídeo) e tira 8 fotos ao longo dele: pausa, corrida (3), contato, voo (2) e fim.",
+  "perfil": "celular",
+  "escala": 1,
+  "url": "index.html?teste",
+  "saida": "capturas/replay-celular",
+  "passos": [
+    { "esperarJogo": true },
+    { "js": "window.jogoTeste.falta(22, 12); window.jogoTeste.cobrador(8);" },
+    { "esperarSegundos": 0.5 },
+    { "js": "window.jogoTeste.mirar(2.4); window.jogoTeste.contato(0.45, 0.1); window.jogoTeste.chutar(0.8);" },
+    { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 10 },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estadoAntesDoReplay" },
+
+    { "js": "window.jogoTeste.replay(false);" },
+    { "avaliar": "window.jogoTeste.emReplay()", "guardar": "emReplay" },
+    { "nota": "O replay começa com 0,8 s parado (pausa) antes da corrida", "esperarSegundos": 0.4 },
+    { "foto": "replay-01-pausa" },
+    { "nota": "0,2 s de corrida", "esperarSegundos": 0.6 },
+    { "foto": "replay-02-corrida" },
+    { "nota": "0,5 s de corrida", "esperarSegundos": 0.3 },
+    { "foto": "replay-03-corrida" },
+    { "nota": "0,8 s de corrida (a perna do chute indo para trás)", "esperarSegundos": 0.3 },
+    { "foto": "replay-04-corrida" },
+    { "nota": "o quadro exato do contato", "esperarAte": "window.jogoTeste.estado().fase === 'voo'", "limiteSegundos": 5 },
+    { "foto": "replay-05-contato" },
+    { "esperarSegundos": 0.2 },
+    { "foto": "replay-06-voo" },
+    { "esperarSegundos": 0.4 },
+    { "foto": "replay-07-voo" },
+    { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 8 },
+    { "esperarSegundos": 0.4 },
+    { "foto": "replay-08-fim" },
+    { "avaliar": "window.jogoTeste.emReplay()", "guardar": "emReplayNoFim" },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" }
+  ]
+}

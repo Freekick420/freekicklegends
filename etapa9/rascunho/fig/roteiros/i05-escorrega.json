@@ -1,0 +1,11 @@
+{ "descricao": "Página de inspeção: mede quanto os pés escorregam andando e correndo; e parado",
+  "perfil": "computador", "escala": 1, "url": "testes/figurantes.html?modo=passos&teste&captura", "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/capturas/i05",
+  "passos": [
+  { "esperarJogo": true },
+  { "avaliar": "JSON.stringify(window.jogoTeste.escorrega(7))", "guardar": "passos" },
+  { "js": "window.jogoTeste.modo('jeitos')" },
+  { "avaliar": "JSON.stringify(window.jogoTeste.escorrega(4))", "guardar": "parados" },
+  { "js": "window.jogoTeste.modo('gestos')" },
+  { "avaliar": "JSON.stringify(window.jogoTeste.escorrega(4))", "guardar": "gestos" },
+  { "avaliar": "window.jogoTeste.custo(500)", "guardar": "custoMs" }
+] }

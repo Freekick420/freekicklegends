@@ -1,0 +1,245 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/modelo/rot/zoom.json",
+  "url": "http://127.0.0.1:8821/testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&tronco&largura=1400&giros=0.7,2.4",
+  "raiz": "/home/user/fkl-modelo",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 2
+  },
+  "porta": 8821,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/modelo/v2/zoom",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1440,
+    "altura": 900
+  },
+  "congelar": true,
+  "versaoDoJogo": null,
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:27:21.006Z",
+  "segundosReais": 10.5,
+  "quadros": 0,
+  "quadrosPorSegundo": null,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "tamanho",
+      "passo": {
+        "tamanho": {
+          "largura": 1440,
+          "altura": 900
+        }
+      },
+      "ok": true,
+      "ms": 583
+    },
+    {
+      "n": 2,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 3,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 3,
+      "tipo": "foto",
+      "passo": {
+        "foto": "tronco-zoom",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 377,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "tronco-zoom",
+        "arquivo": "tronco-zoom.png",
+        "bytes": 352569,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 115.5,
+        "desvioLuminancia": 71.9,
+        "cores": 13589,
+        "corDominante": 0.259,
+        "corDominanteHex": "#9cd4f4",
+        "fracaoEscura": 0.218,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 4,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&maos&largura=1400&giros=0,1.5708,3.1416"
+      },
+      "ok": true,
+      "ms": 1953
+    },
+    {
+      "n": 5,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 260,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 6,
+      "tipo": "foto",
+      "passo": {
+        "foto": "maos-zoom",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 390,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "maos-zoom",
+        "arquivo": "maos-zoom.png",
+        "bytes": 392591,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 43,
+        "desvioLuminancia": 57.1,
+        "cores": 9486,
+        "corDominante": 0.352,
+        "corDominanteHex": "#0c0c0c",
+        "fracaoEscura": 0.628,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 7,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&zoom&largura=1400&giros=0,0.7,1.5708,3.1416"
+      },
+      "ok": true,
+      "ms": 1876
+    },
+    {
+      "n": 8,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 1394,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 9,
+      "tipo": "foto",
+      "passo": {
+        "foto": "rosto-zoom",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 411,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "rosto-zoom",
+        "arquivo": "rosto-zoom.png",
+        "bytes": 543043,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 72.2,
+        "desvioLuminancia": 52.3,
+        "cores": 12784,
+        "corDominante": 0.061,
+        "corDominanteHex": "#040404",
+        "fracaoEscura": 0.207,
+        "suspeita": false,
+        "motivo": null
+      }
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "tronco-zoom",
+      "arquivo": "tronco-zoom.png",
+      "bytes": 352569,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 115.5,
+      "desvioLuminancia": 71.9,
+      "cores": 13589,
+      "corDominante": 0.259,
+      "corDominanteHex": "#9cd4f4",
+      "fracaoEscura": 0.218,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "maos-zoom",
+      "arquivo": "maos-zoom.png",
+      "bytes": 392591,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 43,
+      "desvioLuminancia": 57.1,
+      "cores": 9486,
+      "corDominante": 0.352,
+      "corDominanteHex": "#0c0c0c",
+      "fracaoEscura": 0.628,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "rosto-zoom",
+      "arquivo": "rosto-zoom.png",
+      "bytes": 543043,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 72.2,
+      "desvioLuminancia": 52.3,
+      "cores": 12784,
+      "corDominante": 0.061,
+      "corDominanteHex": "#040404",
+      "fracaoEscura": 0.207,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {},
+  "consoleErros": [],
+  "falhasRede": []
+}

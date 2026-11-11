@@ -1,0 +1,391 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/modelo/rot/perto.json",
+  "url": "http://127.0.0.1:8821/testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&corpo&largura=1400",
+  "raiz": "/home/user/fkl-modelo",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 2
+  },
+  "porta": 8821,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/modelo/v2/perto",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1440,
+    "altura": 900
+  },
+  "congelar": true,
+  "versaoDoJogo": null,
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:26:06.270Z",
+  "segundosReais": 19.3,
+  "quadros": 0,
+  "quadrosPorSegundo": null,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "tamanho",
+      "passo": {
+        "tamanho": {
+          "largura": 1440,
+          "altura": 900
+        }
+      },
+      "ok": true,
+      "ms": 543
+    },
+    {
+      "n": 2,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 2,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 3,
+      "tipo": "foto",
+      "passo": {
+        "foto": "corpo-juninho",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 389,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "corpo-juninho",
+        "arquivo": "corpo-juninho.png",
+        "bytes": 404994,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 120,
+        "desvioLuminancia": 66.2,
+        "cores": 19785,
+        "corDominante": 0.267,
+        "corDominanteHex": "#9cd4f4",
+        "fracaoEscura": 0.159,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 4,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=retrato&quem=Rei%20da%20Falta&tronco&largura=1400"
+      },
+      "ok": true,
+      "ms": 2175
+    },
+    {
+      "n": 5,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 2084,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 6,
+      "tipo": "foto",
+      "passo": {
+        "foto": "tronco-juninho",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 611,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "tronco-juninho",
+        "arquivo": "tronco-juninho.png",
+        "bytes": 661673,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 79.7,
+        "desvioLuminancia": 81.1,
+        "cores": 17020,
+        "corDominante": 0.271,
+        "corDominanteHex": "#0c0c0c",
+        "fracaoEscura": 0.452,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 7,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=retrato&quem=Robozão&pernas&largura=1400"
+      },
+      "ok": true,
+      "ms": 2182
+    },
+    {
+      "n": 8,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 436,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 9,
+      "tipo": "foto",
+      "passo": {
+        "foto": "pernas-robozao",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 495,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "pernas-robozao",
+        "arquivo": "pernas-robozao.png",
+        "bytes": 555910,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 136.4,
+        "desvioLuminancia": 33.1,
+        "cores": 45247,
+        "corDominante": 0.206,
+        "corDominanteHex": "#449444",
+        "fracaoEscura": 0.001,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 10,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=retrato&quem=Robozão&corpo&malha&largura=1400"
+      },
+      "ok": true,
+      "ms": 2131
+    },
+    {
+      "n": 11,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 843,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 12,
+      "tipo": "foto",
+      "passo": {
+        "foto": "malha-robozao",
+        "seletor": "#retrato img"
+      },
+      "ok": true,
+      "ms": 424,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "malha-robozao",
+        "arquivo": "malha-robozao.png",
+        "bytes": 729646,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 144.3,
+        "desvioLuminancia": 44.5,
+        "cores": 49269,
+        "corDominante": 0.248,
+        "corDominanteHex": "#9cd4f4",
+        "fracaoEscura": 0.008,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 13,
+      "tipo": "abrir",
+      "passo": {
+        "abrir": "testes/jogadores.html?so=dobras&quem=Robozão&largura=1400"
+      },
+      "ok": true,
+      "ms": 2061
+    },
+    {
+      "n": 14,
+      "tipo": "esperarAte",
+      "passo": {
+        "esperarAte": "window.pronto === true",
+        "limiteReal": 170
+      },
+      "ok": true,
+      "ms": 1077,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "segundosDeJogo": null
+    },
+    {
+      "n": 15,
+      "tipo": "foto",
+      "passo": {
+        "foto": "dobras-robozao",
+        "seletor": "#dobras img"
+      },
+      "ok": true,
+      "ms": 270,
+      "quadros": 0,
+      "tempoDeJogo": null,
+      "foto": {
+        "nome": "dobras-robozao",
+        "arquivo": "dobras-robozao.png",
+        "bytes": 299141,
+        "tempoDeJogo": null,
+        "largura": 1400,
+        "altura": 760,
+        "luminanciaMedia": 180.5,
+        "desvioLuminancia": 38.7,
+        "cores": 29134,
+        "corDominante": 0.643,
+        "corDominanteHex": "#9cd4f4",
+        "fracaoEscura": 0.006,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 16,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.errosDasSecoes || [])",
+        "guardar": "erros"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "erros",
+      "valor": "[]"
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "corpo-juninho",
+      "arquivo": "corpo-juninho.png",
+      "bytes": 404994,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 120,
+      "desvioLuminancia": 66.2,
+      "cores": 19785,
+      "corDominante": 0.267,
+      "corDominanteHex": "#9cd4f4",
+      "fracaoEscura": 0.159,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "tronco-juninho",
+      "arquivo": "tronco-juninho.png",
+      "bytes": 661673,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 79.7,
+      "desvioLuminancia": 81.1,
+      "cores": 17020,
+      "corDominante": 0.271,
+      "corDominanteHex": "#0c0c0c",
+      "fracaoEscura": 0.452,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "pernas-robozao",
+      "arquivo": "pernas-robozao.png",
+      "bytes": 555910,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 136.4,
+      "desvioLuminancia": 33.1,
+      "cores": 45247,
+      "corDominante": 0.206,
+      "corDominanteHex": "#449444",
+      "fracaoEscura": 0.001,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "malha-robozao",
+      "arquivo": "malha-robozao.png",
+      "bytes": 729646,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 144.3,
+      "desvioLuminancia": 44.5,
+      "cores": 49269,
+      "corDominante": 0.248,
+      "corDominanteHex": "#9cd4f4",
+      "fracaoEscura": 0.008,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "dobras-robozao",
+      "arquivo": "dobras-robozao.png",
+      "bytes": 299141,
+      "tempoDeJogo": null,
+      "largura": 1400,
+      "altura": 760,
+      "luminanciaMedia": 180.5,
+      "desvioLuminancia": 38.7,
+      "cores": 29134,
+      "corDominante": 0.643,
+      "corDominanteHex": "#9cd4f4",
+      "fracaoEscura": 0.006,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "erros": "[]"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

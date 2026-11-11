@@ -1,0 +1,391 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/roteiros/i01-jeitos.json",
+  "url": "http://127.0.0.1:8841/testes/figurantes.html?modo=jeitos&teste&captura",
+  "raiz": "/home/user/fkl-fig",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 4
+  },
+  "porta": 8841,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/capturas/i01",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1280,
+    "altura": 720
+  },
+  "congelar": true,
+  "versaoDoJogo": null,
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:17:30.994Z",
+  "segundosReais": 3.3,
+  "quadros": 11,
+  "quadrosPorSegundo": 17.1,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "esperarJogo",
+      "passo": {
+        "esperarJogo": true
+      },
+      "ok": true,
+      "ms": 575,
+      "quadros": 1,
+      "tempoDeJogo": 0.016666666666666666
+    },
+    {
+      "n": 2,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.avancar(1.0)"
+      },
+      "ok": true,
+      "ms": 150
+    },
+    {
+      "n": 3,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 37,
+      "quadros": 2,
+      "tempoDeJogo": 1.0500000000000012,
+      "segundosDeJogo": 0.033333333333333215
+    },
+    {
+      "n": 4,
+      "tipo": "foto",
+      "passo": {
+        "foto": "jeitos-frente"
+      },
+      "ok": true,
+      "ms": 918,
+      "quadros": 0,
+      "tempoDeJogo": 1.0500000000000012,
+      "foto": {
+        "nome": "jeitos-frente",
+        "arquivo": "jeitos-frente.png",
+        "bytes": 99489,
+        "tempoDeJogo": 1.0500000000000012,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 67.8,
+        "desvioLuminancia": 39.3,
+        "cores": 16141,
+        "corDominante": 0.502,
+        "corDominanteHex": "#14243c",
+        "fracaoEscura": 0.015,
+        "suspeita": true,
+        "motivo": "50% da imagem numa cor escura só (tela preta?)"
+      }
+    },
+    {
+      "n": 5,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera({ pos: [10, 1.5, 12], olhar: [0, 0.95, 6], fov: 30 })"
+      },
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 6,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 7,
+      "quadros": 2,
+      "tempoDeJogo": 1.0833333333333344,
+      "segundosDeJogo": 0.033333333333333215
+    },
+    {
+      "n": 7,
+      "tipo": "foto",
+      "passo": {
+        "foto": "jeitos-lado"
+      },
+      "ok": true,
+      "ms": 213,
+      "quadros": 0,
+      "tempoDeJogo": 1.0833333333333344,
+      "foto": {
+        "nome": "jeitos-lado",
+        "arquivo": "jeitos-lado.png",
+        "bytes": 192420,
+        "tempoDeJogo": 1.0833333333333344,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 68.9,
+        "desvioLuminancia": 40.4,
+        "cores": 25674,
+        "corDominante": 0.443,
+        "corDominanteHex": "#14243c",
+        "fracaoEscura": 0.041,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 8,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera({ pos: [-3.5, 1.4, 11.5], olhar: [-4.6, 0.95, 6], fov: 24 })"
+      },
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 9,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 19,
+      "quadros": 2,
+      "tempoDeJogo": 1.1166666666666676,
+      "segundosDeJogo": 0.033333333333333215
+    },
+    {
+      "n": 10,
+      "tipo": "foto",
+      "passo": {
+        "foto": "jeitos-perto-1"
+      },
+      "ok": true,
+      "ms": 182,
+      "quadros": 0,
+      "tempoDeJogo": 1.1166666666666676,
+      "foto": {
+        "nome": "jeitos-perto-1",
+        "arquivo": "jeitos-perto-1.png",
+        "bytes": 251299,
+        "tempoDeJogo": 1.1166666666666676,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 71.4,
+        "desvioLuminancia": 48,
+        "cores": 27745,
+        "corDominante": 0.346,
+        "corDominanteHex": "#14243c",
+        "fracaoEscura": 0.107,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 11,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera({ pos: [1.5, 1.4, 11.5], olhar: [0.6, 0.95, 6], fov: 24 })"
+      },
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 12,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 19,
+      "quadros": 2,
+      "tempoDeJogo": 1.1500000000000008,
+      "segundosDeJogo": 0.033333333333333215
+    },
+    {
+      "n": 13,
+      "tipo": "foto",
+      "passo": {
+        "foto": "jeitos-perto-2"
+      },
+      "ok": true,
+      "ms": 173,
+      "quadros": 0,
+      "tempoDeJogo": 1.1500000000000008,
+      "foto": {
+        "nome": "jeitos-perto-2",
+        "arquivo": "jeitos-perto-2.png",
+        "bytes": 201771,
+        "tempoDeJogo": 1.1500000000000008,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 73.9,
+        "desvioLuminancia": 49.2,
+        "cores": 23794,
+        "corDominante": 0.367,
+        "corDominanteHex": "#14243c",
+        "fracaoEscura": 0.072,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 14,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.camera({ pos: [6.5, 1.4, 11.0], olhar: [5.4, 0.95, 6], fov: 24 })"
+      },
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "n": 15,
+      "tipo": "esperarQuadros",
+      "passo": {
+        "esperarQuadros": 2
+      },
+      "ok": true,
+      "ms": 24,
+      "quadros": 2,
+      "tempoDeJogo": 1.183333333333334,
+      "segundosDeJogo": 0.033333333333333215
+    },
+    {
+      "n": 16,
+      "tipo": "foto",
+      "passo": {
+        "foto": "jeitos-perto-3"
+      },
+      "ok": true,
+      "ms": 176,
+      "quadros": 0,
+      "tempoDeJogo": 1.183333333333334,
+      "foto": {
+        "nome": "jeitos-perto-3",
+        "arquivo": "jeitos-perto-3.png",
+        "bytes": 236461,
+        "tempoDeJogo": 1.183333333333334,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 73.4,
+        "desvioLuminancia": 47.8,
+        "cores": 30032,
+        "corDominante": 0.34,
+        "corDominanteHex": "#14243c",
+        "fracaoEscura": 0.081,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 17,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.jogoTeste.diagnostico())",
+        "guardar": "diag"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "diag",
+      "valor": "{\"atores\":12,\"comBoneco\":12,\"naFila\":0,\"guardados\":12,\"criados\":12,\"reciclados\":0,\"montagens\":1,\"quadro\":71,\"jeitos\":[\"pronto\",\"pronto\",\"cintura\",\"cintura\",\"solto\",\"solto\",\"joelhos\",\"joelhos\",\"cruzados\",\"cruzados\",\"pronto\",\"marcando\"],\"gestos\":[null,null,null,null,null,null,null,null,null,null,null,null],\"reacoes\":[null,null,null,null,null,null,null,null,null,null,null,null]}"
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "jeitos-frente",
+      "arquivo": "jeitos-frente.png",
+      "bytes": 99489,
+      "tempoDeJogo": 1.0500000000000012,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 67.8,
+      "desvioLuminancia": 39.3,
+      "cores": 16141,
+      "corDominante": 0.502,
+      "corDominanteHex": "#14243c",
+      "fracaoEscura": 0.015,
+      "suspeita": true,
+      "motivo": "50% da imagem numa cor escura só (tela preta?)"
+    },
+    {
+      "nome": "jeitos-lado",
+      "arquivo": "jeitos-lado.png",
+      "bytes": 192420,
+      "tempoDeJogo": 1.0833333333333344,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 68.9,
+      "desvioLuminancia": 40.4,
+      "cores": 25674,
+      "corDominante": 0.443,
+      "corDominanteHex": "#14243c",
+      "fracaoEscura": 0.041,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "jeitos-perto-1",
+      "arquivo": "jeitos-perto-1.png",
+      "bytes": 251299,
+      "tempoDeJogo": 1.1166666666666676,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 71.4,
+      "desvioLuminancia": 48,
+      "cores": 27745,
+      "corDominante": 0.346,
+      "corDominanteHex": "#14243c",
+      "fracaoEscura": 0.107,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "jeitos-perto-2",
+      "arquivo": "jeitos-perto-2.png",
+      "bytes": 201771,
+      "tempoDeJogo": 1.1500000000000008,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 73.9,
+      "desvioLuminancia": 49.2,
+      "cores": 23794,
+      "corDominante": 0.367,
+      "corDominanteHex": "#14243c",
+      "fracaoEscura": 0.072,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "jeitos-perto-3",
+      "arquivo": "jeitos-perto-3.png",
+      "bytes": 236461,
+      "tempoDeJogo": 1.183333333333334,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 73.4,
+      "desvioLuminancia": 47.8,
+      "cores": 30032,
+      "corDominante": 0.34,
+      "corDominanteHex": "#14243c",
+      "fracaoEscura": 0.081,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [
+    "jeitos-frente"
+  ],
+  "guardados": {
+    "diag": "{\"atores\":12,\"comBoneco\":12,\"naFila\":0,\"guardados\":12,\"criados\":12,\"reciclados\":0,\"montagens\":1,\"quadro\":71,\"jeitos\":[\"pronto\",\"pronto\",\"cintura\",\"cintura\",\"solto\",\"solto\",\"joelhos\",\"joelhos\",\"cruzados\",\"cruzados\",\"pronto\",\"marcando\"],\"gestos\":[null,null,null,null,null,null,null,null,null,null,null,null],\"reacoes\":[null,null,null,null,null,null,null,null,null,null,null,null]}"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

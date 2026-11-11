@@ -1,0 +1,541 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/amb/rot/vazamento-planob.json",
+  "url": "http://127.0.0.1:8831/index.html?teste",
+  "raiz": "/home/user/fkl-amb",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 6
+  },
+  "porta": 8831,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/amb/v4/vazamento-planob",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1280,
+    "altura": 720
+  },
+  "congelar": true,
+  "versaoDoJogo": "v0.1 · etapa 8.1",
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:19:09.328Z",
+  "segundosReais": 52.9,
+  "quadros": 109,
+  "quadrosPorSegundo": 3.8,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "esperarJogo",
+      "passo": {
+        "esperarJogo": true
+      },
+      "ok": true,
+      "ms": 4009,
+      "quadros": 1,
+      "tempoDeJogo": 0.016666666666666666
+    },
+    {
+      "n": 2,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.2
+      },
+      "ok": true,
+      "ms": 248,
+      "quadros": 12,
+      "tempoDeJogo": 0.21666666666666665,
+      "segundosDeJogo": 0.19999999999999998
+    },
+    {
+      "n": 3,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "inicio"
+      },
+      "ok": true,
+      "ms": 11,
+      "guardado": "inicio",
+      "valor": "{\"d\":{\"frame\":13,\"calls\":174,\"triangles\":59540,\"points\":896,\"lines\":1,\"geometrias\":46,\"texturas\":33},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":7,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12000,\"borroes\":83,\"estencil\":true}}"
+    },
+    {
+      "n": 4,
+      "tipo": "js",
+      "passo": {
+        "js": "const t = window.jogoTeste; t.falta(18 + 01 * 2, -20 + 01 * 7); t.cobrador([7, 8, 30, 1, 23, 9][01 - 1]);"
+      },
+      "ok": true,
+      "ms": 533
+    },
+    {
+      "n": 5,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.15
+      },
+      "ok": true,
+      "ms": 232,
+      "quadros": 9,
+      "tempoDeJogo": 0.36666666666666664,
+      "segundosDeJogo": 0.15
+    },
+    {
+      "n": 6,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "volta01"
+      },
+      "ok": true,
+      "ms": 3,
+      "guardado": "volta01",
+      "valor": "{\"d\":{\"frame\":22,\"calls\":175,\"triangles\":59510,\"points\":896,\"lines\":1,\"geometrias\":46,\"texturas\":46},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":7,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12192,\"borroes\":83,\"estencil\":true}}"
+    },
+    {
+      "n": 7,
+      "tipo": "js",
+      "passo": {
+        "js": "const t = window.jogoTeste; t.falta(18 + 02 * 2, -20 + 02 * 7); t.cobrador([7, 8, 30, 1, 23, 9][02 - 1]);"
+      },
+      "ok": true,
+      "ms": 224
+    },
+    {
+      "n": 8,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.15
+      },
+      "ok": true,
+      "ms": 2721,
+      "quadros": 9,
+      "tempoDeJogo": 0.5166666666666666,
+      "segundosDeJogo": 0.14999999999999997
+    },
+    {
+      "n": 9,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "volta02"
+      },
+      "ok": true,
+      "ms": 9,
+      "guardado": "volta02",
+      "valor": "{\"d\":{\"frame\":31,\"calls\":153,\"triangles\":56450,\"points\":896,\"lines\":1,\"geometrias\":47,\"texturas\":56},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12192,\"borroes\":77,\"estencil\":true}}"
+    },
+    {
+      "n": 10,
+      "tipo": "js",
+      "passo": {
+        "js": "const t = window.jogoTeste; t.falta(18 + 03 * 2, -20 + 03 * 7); t.cobrador([7, 8, 30, 1, 23, 9][03 - 1]);"
+      },
+      "ok": true,
+      "ms": 164
+    },
+    {
+      "n": 11,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.15
+      },
+      "ok": true,
+      "ms": 2237,
+      "quadros": 9,
+      "tempoDeJogo": 0.6666666666666671,
+      "segundosDeJogo": 0.15000000000000047
+    },
+    {
+      "n": 12,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "volta03"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "volta03",
+      "valor": "{\"d\":{\"frame\":40,\"calls\":132,\"triangles\":53586,\"points\":896,\"lines\":1,\"geometrias\":50,\"texturas\":63},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":5,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12192,\"borroes\":71,\"estencil\":true}}"
+    },
+    {
+      "n": 13,
+      "tipo": "js",
+      "passo": {
+        "js": "const t = window.jogoTeste; t.falta(18 + 04 * 2, -20 + 04 * 7); t.cobrador([7, 8, 30, 1, 23, 9][04 - 1]);"
+      },
+      "ok": true,
+      "ms": 31
+    },
+    {
+      "n": 14,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.15
+      },
+      "ok": true,
+      "ms": 2943,
+      "quadros": 9,
+      "tempoDeJogo": 0.8166666666666675,
+      "segundosDeJogo": 0.15000000000000047
+    },
+    {
+      "n": 15,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "volta04"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "volta04",
+      "valor": "{\"d\":{\"frame\":49,\"calls\":130,\"triangles\":53420,\"points\":896,\"lines\":1,\"geometrias\":50,\"texturas\":63},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":5,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12000,\"borroes\":71,\"estencil\":true}}"
+    },
+    {
+      "n": 16,
+      "tipo": "js",
+      "passo": {
+        "js": "const t = window.jogoTeste; t.falta(18 + 05 * 2, -20 + 05 * 7); t.cobrador([7, 8, 30, 1, 23, 9][05 - 1]);"
+      },
+      "ok": true,
+      "ms": 166
+    },
+    {
+      "n": 17,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.15
+      },
+      "ok": true,
+      "ms": 2591,
+      "quadros": 9,
+      "tempoDeJogo": 0.966666666666668,
+      "segundosDeJogo": 0.15000000000000047
+    },
+    {
+      "n": 18,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "volta05"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "volta05",
+      "valor": "{\"d\":{\"frame\":58,\"calls\":130,\"triangles\":52570,\"points\":896,\"lines\":1,\"geometrias\":51,\"texturas\":67},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":5,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":11752,\"borroes\":71,\"estencil\":true}}"
+    },
+    {
+      "n": 19,
+      "tipo": "js",
+      "passo": {
+        "js": "const t = window.jogoTeste; t.falta(18 + 06 * 2, -20 + 06 * 7); t.cobrador([7, 8, 30, 1, 23, 9][06 - 1]);"
+      },
+      "ok": true,
+      "ms": 19
+    },
+    {
+      "n": 20,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.15
+      },
+      "ok": true,
+      "ms": 2651,
+      "quadros": 9,
+      "tempoDeJogo": 1.1166666666666676,
+      "segundosDeJogo": 0.14999999999999958
+    },
+    {
+      "n": 21,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "volta06"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "volta06",
+      "valor": "{\"d\":{\"frame\":67,\"calls\":110,\"triangles\":50600,\"points\":896,\"lines\":1,\"geometrias\":51,\"texturas\":71},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":4,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12192,\"borroes\":65,\"estencil\":true}}"
+    },
+    {
+      "n": 22,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.modo('penalti')"
+      },
+      "ok": true,
+      "ms": 4
+    },
+    {
+      "n": 23,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.2
+      },
+      "ok": true,
+      "ms": 5166,
+      "quadros": 12,
+      "tempoDeJogo": 1.3166666666666669,
+      "segundosDeJogo": 0.1999999999999993
+    },
+    {
+      "n": 24,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "penalti"
+      },
+      "ok": true,
+      "ms": 4,
+      "guardado": "penalti",
+      "valor": "{\"d\":{\"frame\":79,\"calls\":67,\"triangles\":44200,\"points\":896,\"lines\":1,\"geometrias\":51,\"texturas\":69},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":2,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":11752,\"borroes\":53,\"estencil\":true}}"
+    },
+    {
+      "n": 25,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.modo('treino')"
+      },
+      "ok": true,
+      "ms": 30
+    },
+    {
+      "n": 26,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.2
+      },
+      "ok": true,
+      "ms": 6297,
+      "quadros": 12,
+      "tempoDeJogo": 1.5166666666666662,
+      "segundosDeJogo": 0.1999999999999993
+    },
+    {
+      "n": 27,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "treino"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "treino",
+      "valor": "{\"d\":{\"frame\":91,\"calls\":155,\"triangles\":57666,\"points\":896,\"lines\":1,\"geometrias\":52,\"texturas\":79},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12792,\"borroes\":77,\"estencil\":true}}"
+    },
+    {
+      "n": 28,
+      "tipo": "js",
+      "passo": {
+        "js": "window.sombrasTeste.qualidade(0)"
+      },
+      "ok": true,
+      "ms": 13
+    },
+    {
+      "n": 29,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.1
+      },
+      "ok": true,
+      "ms": 3048,
+      "quadros": 6,
+      "tempoDeJogo": 1.6166666666666658,
+      "segundosDeJogo": 0.09999999999999964
+    },
+    {
+      "n": 30,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "qualidade0"
+      },
+      "ok": true,
+      "ms": 1,
+      "guardado": "qualidade0",
+      "valor": "{\"d\":{\"frame\":97,\"calls\":154,\"triangles\":44734,\"points\":896,\"lines\":1,\"geometrias\":52,\"texturas\":79},\"s\":{\"modo\":\"simples\",\"nivel\":0,\"bonecos\":6,\"silhuetas\":0,\"provisorias\":1,\"triangulos\":0,\"borroes\":7,\"estencil\":true}}"
+    },
+    {
+      "n": 31,
+      "tipo": "foto",
+      "passo": {
+        "foto": "qualidade0"
+      },
+      "ok": true,
+      "ms": 10156,
+      "quadros": 0,
+      "tempoDeJogo": 1.6166666666666658,
+      "foto": {
+        "nome": "qualidade0",
+        "arquivo": "qualidade0.png",
+        "bytes": 1203900,
+        "tempoDeJogo": 1.6166666666666658,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 97,
+        "desvioLuminancia": 43.4,
+        "cores": 85404,
+        "corDominante": 0.145,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.027,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 32,
+      "tipo": "js",
+      "passo": {
+        "js": "window.sombrasTeste.qualidade(0.5)"
+      },
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "n": 33,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.1
+      },
+      "ok": true,
+      "ms": 84,
+      "quadros": 6,
+      "tempoDeJogo": 1.7166666666666655,
+      "segundosDeJogo": 0.09999999999999964
+    },
+    {
+      "n": 34,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "qualidade05"
+      },
+      "ok": true,
+      "ms": 8,
+      "guardado": "qualidade05",
+      "valor": "{\"d\":{\"frame\":103,\"calls\":154,\"triangles\":44882,\"points\":896,\"lines\":1,\"geometrias\":52,\"texturas\":79},\"s\":{\"modo\":\"cruz\",\"nivel\":0.5,\"bonecos\":6,\"silhuetas\":0,\"provisorias\":1,\"triangulos\":0,\"borroes\":81,\"estencil\":true}}"
+    },
+    {
+      "n": 35,
+      "tipo": "foto",
+      "passo": {
+        "foto": "qualidade05"
+      },
+      "ok": true,
+      "ms": 2170,
+      "quadros": 0,
+      "tempoDeJogo": 1.7166666666666655,
+      "foto": {
+        "nome": "qualidade05",
+        "arquivo": "qualidade05.png",
+        "bytes": 1204972,
+        "tempoDeJogo": 1.7166666666666655,
+        "largura": 1280,
+        "altura": 720,
+        "luminanciaMedia": 95.7,
+        "desvioLuminancia": 43.4,
+        "cores": 86069,
+        "corDominante": 0.142,
+        "corDominanteHex": "#3c7c34",
+        "fracaoEscura": 0.027,
+        "suspeita": false,
+        "motivo": null
+      }
+    },
+    {
+      "n": 36,
+      "tipo": "js",
+      "passo": {
+        "js": "window.sombrasTeste.qualidade(1)"
+      },
+      "ok": true,
+      "ms": 3
+    },
+    {
+      "n": 37,
+      "tipo": "esperarSegundos",
+      "passo": {
+        "esperarSegundos": 0.1
+      },
+      "ok": true,
+      "ms": 82,
+      "quadros": 6,
+      "tempoDeJogo": 1.816666666666665,
+      "segundosDeJogo": 0.09999999999999964
+    },
+    {
+      "n": 38,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify({ d: window.jogoTeste.desenho(), s: window.sombrasTeste.estado() })",
+        "guardar": "qualidade1"
+      },
+      "ok": true,
+      "ms": 2,
+      "guardado": "qualidade1",
+      "valor": "{\"d\":{\"frame\":109,\"calls\":155,\"triangles\":57666,\"points\":896,\"lines\":1,\"geometrias\":52,\"texturas\":79},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12792,\"borroes\":77,\"estencil\":true}}"
+    }
+  ],
+  "fotos": [
+    {
+      "nome": "qualidade0",
+      "arquivo": "qualidade0.png",
+      "bytes": 1203900,
+      "tempoDeJogo": 1.6166666666666658,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 97,
+      "desvioLuminancia": 43.4,
+      "cores": 85404,
+      "corDominante": 0.145,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.027,
+      "suspeita": false,
+      "motivo": null
+    },
+    {
+      "nome": "qualidade05",
+      "arquivo": "qualidade05.png",
+      "bytes": 1204972,
+      "tempoDeJogo": 1.7166666666666655,
+      "largura": 1280,
+      "altura": 720,
+      "luminanciaMedia": 95.7,
+      "desvioLuminancia": 43.4,
+      "cores": 86069,
+      "corDominante": 0.142,
+      "corDominanteHex": "#3c7c34",
+      "fracaoEscura": 0.027,
+      "suspeita": false,
+      "motivo": null
+    }
+  ],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "inicio": "{\"d\":{\"frame\":13,\"calls\":174,\"triangles\":59540,\"points\":896,\"lines\":1,\"geometrias\":46,\"texturas\":33},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":7,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12000,\"borroes\":83,\"estencil\":true}}",
+    "volta01": "{\"d\":{\"frame\":22,\"calls\":175,\"triangles\":59510,\"points\":896,\"lines\":1,\"geometrias\":46,\"texturas\":46},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":7,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12192,\"borroes\":83,\"estencil\":true}}",
+    "volta02": "{\"d\":{\"frame\":31,\"calls\":153,\"triangles\":56450,\"points\":896,\"lines\":1,\"geometrias\":47,\"texturas\":56},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12192,\"borroes\":77,\"estencil\":true}}",
+    "volta03": "{\"d\":{\"frame\":40,\"calls\":132,\"triangles\":53586,\"points\":896,\"lines\":1,\"geometrias\":50,\"texturas\":63},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":5,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12192,\"borroes\":71,\"estencil\":true}}",
+    "volta04": "{\"d\":{\"frame\":49,\"calls\":130,\"triangles\":53420,\"points\":896,\"lines\":1,\"geometrias\":50,\"texturas\":63},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":5,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12000,\"borroes\":71,\"estencil\":true}}",
+    "volta05": "{\"d\":{\"frame\":58,\"calls\":130,\"triangles\":52570,\"points\":896,\"lines\":1,\"geometrias\":51,\"texturas\":67},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":5,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":11752,\"borroes\":71,\"estencil\":true}}",
+    "volta06": "{\"d\":{\"frame\":67,\"calls\":110,\"triangles\":50600,\"points\":896,\"lines\":1,\"geometrias\":51,\"texturas\":71},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":4,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12192,\"borroes\":65,\"estencil\":true}}",
+    "penalti": "{\"d\":{\"frame\":79,\"calls\":67,\"triangles\":44200,\"points\":896,\"lines\":1,\"geometrias\":51,\"texturas\":69},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":2,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":11752,\"borroes\":53,\"estencil\":true}}",
+    "treino": "{\"d\":{\"frame\":91,\"calls\":155,\"triangles\":57666,\"points\":896,\"lines\":1,\"geometrias\":52,\"texturas\":79},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12792,\"borroes\":77,\"estencil\":true}}",
+    "qualidade0": "{\"d\":{\"frame\":97,\"calls\":154,\"triangles\":44734,\"points\":896,\"lines\":1,\"geometrias\":52,\"texturas\":79},\"s\":{\"modo\":\"simples\",\"nivel\":0,\"bonecos\":6,\"silhuetas\":0,\"provisorias\":1,\"triangulos\":0,\"borroes\":7,\"estencil\":true}}",
+    "qualidade05": "{\"d\":{\"frame\":103,\"calls\":154,\"triangles\":44882,\"points\":896,\"lines\":1,\"geometrias\":52,\"texturas\":79},\"s\":{\"modo\":\"cruz\",\"nivel\":0.5,\"bonecos\":6,\"silhuetas\":0,\"provisorias\":1,\"triangulos\":0,\"borroes\":81,\"estencil\":true}}",
+    "qualidade1": "{\"d\":{\"frame\":109,\"calls\":155,\"triangles\":57666,\"points\":896,\"lines\":1,\"geometrias\":52,\"texturas\":79},\"s\":{\"modo\":\"completo\",\"nivel\":1,\"bonecos\":6,\"silhuetas\":1,\"provisorias\":1,\"triangulos\":12792,\"borroes\":77,\"estencil\":true}}"
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

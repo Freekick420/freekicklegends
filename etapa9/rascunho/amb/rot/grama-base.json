@@ -1,0 +1,13 @@
+{ "descricao": "Gramado: câmera do jogo no celular (pronto e aérea) e de perto",
+  "perfil": "celular", "escala": 2, "url": "index.html?teste", "saida": "x", "passos": [
+  { "esperarJogo": true },
+  { "js": "const t = window.jogoTeste; t.hud(false); t.falta(22, 12); t.cobrador(8);" },
+  { "esperarSegundos": 0.5 },
+  { "foto": "g1-pronto" },
+  { "js": "const t = window.jogoTeste; t.mirar(2.4); t.contato(0.45, 0.1); t.pausar(true); t.chutar(0.8); t.avancarAte(() => t.estado().fase === 'voo', 5); t.avancar(0.5);" },
+  { "esperarQuadros": 2 }, { "foto": "g2-aerea" },
+  { "js": "window.jogoTeste.camera({ pos: [8, 1.7, 30], olhar: [3, 0.3, 20], fov: 45 })" },
+  { "esperarQuadros": 2 }, { "foto": "g3-baixa" },
+  { "js": "window.jogoTeste.camera({ pos: [30, 12, 10], olhar: [4, 0.5, 12], fov: 24 })" },
+  { "esperarQuadros": 2 }, { "foto": "g4-lateral" }
+] }

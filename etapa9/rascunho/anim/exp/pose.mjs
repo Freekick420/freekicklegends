@@ -1,0 +1,45 @@
+// Despeja a pose num instante (relativo ao contato): eixos do tronco e do quadril no referencial do chute
+import { register } from 'node:module';
+import { pathToFileURL } from 'node:url';
+register(pathToFileURL('/home/user/fkl-anim/testes/carregador-three.mjs'));
+const THREE = await import('three');
+const J = await import('/home/user/fkl-anim/js/jogadores.js');
+const { criarCobranca, PADRAO_COBRANCA } = await import('/home/user/fkl-anim/js/cobranca.js');
+const { ELENCO } = await import('/home/user/fkl-anim/js/elenco.js');
+const { CONFIG } = await import('/home/user/fkl-anim/js/config.js');
+const { preverTecnica } = await import('/home/user/fkl-anim/js/physics.js');
+const arg = (n, d) => { const a = process.argv.find((x) => x.startsWith(`--${n}=`)); return a ? a.slice(n.length + 3) : d; };
+const jog = ELENCO.find((j) => j.numero === Number(arg('lenda', 8)));
+const c = jog.cobranca;
+const cadencia = 1.6 * (c.ritmo || 1);
+const cfg = { ...CONFIG, cobrador: { ...PADRAO_COBRANCA, distancia: c.distancia, angulo: c.angulo, cadencia, postura: c.postura, braco: c.braco } };
+const p = J.criarPersonagem({ visual: jog.visual, numero: jog.numero, nome: jog.apelido });
+const dist = Number(arg('dist', 22)), ang = Number(arg('ang', 0));
+const bola = { x: dist * Math.sin(ang * Math.PI / 180), z: dist * Math.cos(ang * Math.PI / 180) };
+const an = criarCobranca(p, { bola, alvo: { x: 0, z: 0 }, pe: jog.pe, cfg, estilo: c });
+const contato = { x: Number(arg('cx', 0.4)), y: Number(arg('cy', 0.1)) };
+const forca = Number(arg('forca', 0.8));
+const mira = Number(arg('mira', 1.5));
+const tecnica = arg('tecnica', preverTecnica({ forca, contato, cobrador: jog }, CONFIG));
+an.preparar({ forca, contato, alvo: { x: mira, z: 0 }, tecnica });
+const dm = Math.hypot(mira - bola.x, -bola.z);
+const f = new THREE.Vector3((mira - bola.x) / dm, 0, -bola.z / dm);
+const r = new THREE.Vector3(-f.z, 0, f.x);
+const up = new THREE.Vector3(0, 1, 0);
+const rel = (v) => `(frente ${v.dot(f).toFixed(2)}, dir ${v.dot(r).toFixed(2)}, cima ${v.dot(up).toFixed(2)})`;
+const B = new THREE.Vector3(bola.x, 0, bola.z);
+console.log(jog.nome, 'batida', an.batida, 'tc', an.tempoContato.toFixed(3), JSON.stringify(an.medir().tempos));
+for (const dtS of arg('dt', '-0.115,-0.045,0,0.055,0.18').split(',')) {
+  const t = an.tempoContato + Number(dtS);
+  for (let k = 0; k < 2; k++) an.atualizar(t, {});
+  p.grupo.updateMatrixWorld(true);
+  const eixo = (j, x, y, z) => new THREE.Vector3(x, y, z).transformDirection(p.juntas[j].matrixWorld);
+  const pos = (j) => p.juntas[j].getWorldPosition(new THREE.Vector3()).sub(B);
+  console.log(`\n== contato ${dtS} s`);
+  console.log(' grupo yaw', (p.grupo.rotation.y * 180 / Math.PI).toFixed(1), 'pos', rel(p.grupo.position.clone().sub(B)), 'H', p.juntas.quadril.position.y.toFixed(3));
+  console.log(' quadril cima', rel(eixo('quadril', 0, 1, 0)), 'frente', rel(eixo('quadril', 0, 0, 1)));
+  console.log(' tronco  cima', rel(eixo('tronco', 0, 1, 0)), 'frente', rel(eixo('tronco', 0, 0, 1)));
+  console.log(' cabeca  frente', rel(eixo('cabeca', 0, 0, 1)));
+  for (const j of ['quadril', 'cabeca', 'joelhoE', 'tornozeloE', 'joelhoD', 'tornozeloD', 'punhoE', 'punhoD']) console.log(' ', j.padEnd(11), rel(pos(j)));
+  console.log('  joelhos', 'E', (p.juntas.joelhoE.rotation.x * 180 / Math.PI).toFixed(0), 'D', (p.juntas.joelhoD.rotation.x * 180 / Math.PI).toFixed(0), 'pose rot', JSON.stringify({ q: p.juntas.quadril.rotation.toArray().slice(0, 3).map((v) => +v.toFixed(2)), t: p.juntas.tronco.rotation.toArray().slice(0, 3).map((v) => +v.toFixed(2)) }));
+}

@@ -1,0 +1,20 @@
+{ "perfil": "computador", "escala": 1, "url": "index.html?teste", "saida": "capturas/base-chute-de-lado", "passos": [
+  { "esperarJogo": true },
+  { "esperarSegundos": 0.3 },
+  { "foto": "00-jogo" },
+  { "avaliar": "JSON.stringify(window.jogoTeste.desenho())", "guardar": "desenho" },
+  { "js": "const t = window.jogoTeste; t.hud(false); t.falta(22, 0); t.cobrador(8); t.mirar(1.5); t.contato(0.4, 0.1); t.pausar(true); t.chutar(0.8);" },
+  { "js": "window.jogoTeste.camera({ pos: [4.5, 1.1, 0.3], olhar: [0, 0.9, 0], seguir: true, fov: 30 })" },
+  { "esperarQuadros": 2 }, { "foto": "10-lado-000" },
+  { "avaliar": "JSON.stringify(window.jogoTeste.tempos())", "guardar": "tempos0" },
+  { "js": "window.jogoTeste.avancar(0.5)" }, { "esperarQuadros": 2 }, { "foto": "11-lado-050" },
+  { "js": "window.jogoTeste.avancarAte(() => window.jogoTeste.estado().fase === 'voo', 5)" }, { "esperarQuadros": 2 }, { "foto": "12-lado-contato" },
+  { "avaliar": "JSON.stringify({ t: window.jogoTeste.tempos(), bola: window.jogoTeste.bolaPos(), cob: window.jogoTeste.cobradorPos() })", "guardar": "contato" },
+  { "js": "window.jogoTeste.avancar(0.1)" }, { "esperarQuadros": 2 }, { "foto": "13-lado-depois" },
+  { "js": "window.jogoTeste.camera(null); window.jogoTeste.hud(true); window.jogoTeste.pausar(false)" },
+  { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 8 },
+  { "foto": "14-fim" },
+  { "avaliar": "JSON.stringify({ e: window.jogoTeste.estado(), d: window.jogoTeste.desenho(), f: window.jogoTeste.figurantes() })", "guardar": "fim" },
+  { "js": "window.jogoTeste.modo('penalti')" }, { "esperarSegundos": 0.5 }, { "foto": "20-penalti" },
+  { "js": "window.jogoTeste.modo('desafio')" }, { "esperarSegundos": 0.5 }, { "foto": "21-desafio" }
+] }

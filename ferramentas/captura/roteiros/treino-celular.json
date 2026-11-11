@@ -1,0 +1,38 @@
+{
+  "descricao": "Treino no celular (390x844, escala 1). Falta de 22 m pela direita, Juninho (8). Uma cobrança só: pronto, corrida quadro a quadro (uma foto a cada 7 quadros = 0,117 s de jogo), contato, voo e fim.",
+  "perfil": "celular",
+  "escala": 1,
+  "url": "index.html?teste",
+  "saida": "capturas/treino-celular",
+  "passos": [
+    { "esperarJogo": true },
+    { "js": "window.jogoTeste.falta(22, 12); window.jogoTeste.cobrador(8);" },
+    { "esperarSegundos": 0.5 },
+    { "foto": "01-pronto" },
+
+    { "nota": "02-corrida-00 = parado, já com a mira no lugar (o instante em que a corrida começa)", "js": "window.jogoTeste.mirar(2.4); window.jogoTeste.contato(0.45, 0.1);" },
+    { "foto": "02-corrida-00" },
+    { "js": "window.jogoTeste.chutar(0.8);" },
+    { "nota": "01 a 08: 7, 14 ... 56 quadros depois do começo da corrida", "repetir": 8, "inicio": 1, "passos": [
+      { "esperarQuadros": 7 },
+      { "foto": "02-corrida-{{i}}" }
+    ] },
+    { "nota": "09 = o quadro exato em que o pé toca a bola (a fase vira 'voo'); com o Juninho cai 63 quadros depois do começo", "esperarAte": "window.jogoTeste.estado().fase === 'voo'", "limiteSegundos": 5 },
+    { "foto": "02-corrida-09-contato" },
+    { "esperarQuadros": 7 },
+    { "foto": "02-corrida-10" },
+    { "esperarQuadros": 7 },
+    { "foto": "02-corrida-11" },
+    { "esperarQuadros": 7 },
+    { "foto": "02-corrida-12" },
+    { "nota": "03-voo = 0,35 s (21 quadros) depois do contato: o mesmo instante da 02-corrida-12", "foto": "03-voo" },
+    { "esperarQuadros": 7 },
+    { "foto": "02-corrida-13" },
+
+    { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 8 },
+    { "esperarSegundos": 0.3 },
+    { "foto": "04-fim" },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" },
+    { "avaliar": "window.jogoTeste.registro()", "guardar": "registro" }
+  ]
+}

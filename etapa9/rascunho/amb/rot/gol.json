@@ -1,0 +1,18 @@
+{ "descricao": "Gol de perto: sombras das traves, goleiro, pênalti; e a festa do gol (flashes)",
+  "perfil": "computador", "escala": 1, "url": "index.html?teste&silhuetas=todos", "saida": "x", "passos": [
+  { "esperarJogo": true },
+  { "js": "const t = window.jogoTeste; t.hud(false); t.falta(20, -8); t.cobrador(7);" },
+  { "esperarSegundos": 0.3 },
+  { "js": "window.jogoTeste.pausar(true); window.jogoTeste.camera({ pos: [6, 3.2, 9], olhar: [0, 0.8, 0], fov: 38 })" },
+  { "esperarQuadros": 2 }, { "foto": "gol-1-frente" },
+  { "js": "window.jogoTeste.camera({ pos: [-7, 5, -7], olhar: [0, 0.8, 1], fov: 40 })" },
+  { "esperarQuadros": 2 }, { "foto": "gol-2-tras" },
+  { "js": "window.jogoTeste.camera({ pos: [0, 16, 6], olhar: [0, 0, 0.5], fov: 40 })" },
+  { "esperarQuadros": 2 }, { "foto": "gol-3-cima" },
+  { "js": "window.jogoTeste.camera(null); window.jogoTeste.pausar(false); window.jogoTeste.mirar(-2.6); window.jogoTeste.contato(-0.35, 0.1); window.jogoTeste.chutar(0.82);" },
+  { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 10 },
+  { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" },
+  { "esperarSegundos": 0.25 }, { "foto": "gol-4-festa-a" },
+  { "esperarSegundos": 0.1 }, { "foto": "gol-5-festa-b" },
+  { "esperarSegundos": 0.4 }, { "foto": "gol-6-festa-c" }
+] }

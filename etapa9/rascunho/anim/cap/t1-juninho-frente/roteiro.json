@@ -1,0 +1,97 @@
+{
+ "perfil": "computador",
+ "escala": 1,
+ "url": "index.html?teste",
+ "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/anim/cap/t1-juninho-frente",
+ "passos": [
+  {
+   "esperarJogo": true
+  },
+  {
+   "tamanho": {
+    "largura": 640,
+    "altura": 480
+   }
+  },
+  {
+   "js": "const t = window.jogoTeste; t.hud(false); t.falta(22, 0); t.cobrador(8); t.mirar(1.5); t.contato(0.4, 0.1); t.pausar(true);"
+  },
+  {
+   "js": "window.jogoTeste.camera({\"pos\":[0.6394245484913506,1.1,17.031988703033512],\"olhar\":[-0.02720955525495109,0.85,22.399073477072616],\"fov\":30})"
+  },
+  {
+   "js": "window.jogoTeste.chutar(0.8); window.__tc = window.jogoTeste.tempos().tempoContato; window.__dur = window.jogoTeste.tempos().duracao;"
+  },
+  {
+   "avaliar": "JSON.stringify(window.jogoTeste.tempos())",
+   "guardar": "tempos"
+  },
+  {
+   "js": "window.jogoTeste.avancar(Math.max(0, window.__tc + (-0.3)))"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q00"
+  },
+  {
+   "js": "window.jogoTeste.avancar(0.1)"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q01"
+  },
+  {
+   "js": "window.jogoTeste.avancar(0.1)"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q02"
+  },
+  {
+   "js": "window.jogoTeste.avancar(0.1)"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q03"
+  },
+  {
+   "js": "window.jogoTeste.avancar(0.1)"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q04"
+  },
+  {
+   "js": "window.jogoTeste.avancar(0.1)"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q05"
+  },
+  {
+   "js": "window.jogoTeste.avancar(0.1)"
+  },
+  {
+   "esperarQuadros": 2
+  },
+  {
+   "foto": "q06"
+  },
+  {
+   "avaliar": "JSON.stringify({ e: window.jogoTeste.estado(), t: window.jogoTeste.tempos() })",
+   "guardar": "fim"
+  }
+ ]
+}

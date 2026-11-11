@@ -1,0 +1,13 @@
+ok - sem url e chave, disponivel é false e as chamadas lançam
+ok - enviar monta a URL, os cabeçalhos e o corpo certos e devolve true
+ok - tabela diferente entra no endereço
+ok - o nome é limpo: sem espaços sobrando, sem quebras de linha, no máximo 24 letras
+ok - enviar recusa nome vazio, gols inválidos e dia fora do formato (sem chamar a internet)
+ok - erro HTTP ao enviar vira Error curto em português
+ok - falha de rede ao enviar vira Error em português
+ok - passou do tempo: a chamada é cancelada e vira Error em português
+ok - listar monta a URL e os cabeçalhos certos
+ok - listar deixa uma linha por nome (a maior sequência), ordena e numera com empates
+ok - listar limita a 50 linhas
+ok - erro HTTP ou resposta estranha ao listar vira Error em português
+Todos os testes do ranking passaram.

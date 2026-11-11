@@ -1,0 +1,18 @@
+{
+  "descricao": "Exemplo mínimo (o do enunciado): mira, chuta, fotografa antes, no voo e no fim.",
+  "perfil": "celular",
+  "escala": 1,
+  "url": "index.html?teste",
+  "saida": "capturas/exemplo",
+  "passos": [
+    { "esperarJogo": true },
+    { "js": "window.jogoTeste.mirar(2.5); window.jogoTeste.contato(0.4, 0.1);" },
+    { "foto": "antes" },
+    { "js": "window.jogoTeste.chutar(0.8)" },
+    { "esperarSegundos": 1.2 },
+    { "foto": "voo" },
+    { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 8 },
+    { "foto": "fim" },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" }
+  ]
+}

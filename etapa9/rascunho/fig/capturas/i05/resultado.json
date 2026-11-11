@@ -1,0 +1,125 @@
+{
+  "ok": true,
+  "erro": null,
+  "roteiro": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/roteiros/i05-escorrega.json",
+  "url": "http://127.0.0.1:8841/testes/figurantes.html?modo=passos&teste&captura",
+  "raiz": "/home/user/fkl-fig",
+  "raizGit": {
+    "commit": "9e8392d",
+    "assunto": "Base da etapa 9: CLAUDE.md com os módulos novos (cobrança, figurantes, bola, sombras) e os ganchos de teste",
+    "arquivosAlterados": 4
+  },
+  "porta": 8841,
+  "saida": "/tmp/claude-0/-home-user/92f63482-318d-57a2-ba81-43ab7e6086d3/scratchpad/fig/capturas/i05",
+  "perfil": "computador",
+  "escala": 1,
+  "tela": {
+    "largura": 1280,
+    "altura": 720
+  },
+  "congelar": true,
+  "versaoDoJogo": null,
+  "navegador": "chromium 153.0.8010.12",
+  "navegadorArgumentos": [
+    "--no-proxy-server",
+    "--enable-unsafe-swiftshader",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--ignore-gpu-blocklist",
+    "--disable-gpu-rasterization"
+  ],
+  "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "inicio": "2026-11-11T22:26:14.993Z",
+  "segundosReais": 3.9,
+  "quadros": 1,
+  "quadrosPorSegundo": 1.2,
+  "passos": [
+    {
+      "n": 1,
+      "tipo": "esperarJogo",
+      "passo": {
+        "esperarJogo": true
+      },
+      "ok": true,
+      "ms": 877,
+      "quadros": 1,
+      "tempoDeJogo": 0.016666666666666666
+    },
+    {
+      "n": 2,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.jogoTeste.escorrega(7))",
+        "guardar": "passos"
+      },
+      "ok": true,
+      "ms": 1007,
+      "guardado": "passos",
+      "valor": "[{\"andou\":7,\"escorregou\":1.21,\"menorY\":0},{\"andou\":7,\"escorregou\":1.13,\"menorY\":0},{\"andou\":7,\"escorregou\":1.41,\"menorY\":0},{\"andou\":7,\"escorregou\":1.41,\"menorY\":0},{\"andou\":7,\"escorregou\":1.23,\"menorY\":0},{\"andou\":7,\"escorregou\":1.19,\"menorY\":0}]"
+    },
+    {
+      "n": 3,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.modo('jeitos')"
+      },
+      "ok": true,
+      "ms": 5
+    },
+    {
+      "n": 4,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.jogoTeste.escorrega(4))",
+        "guardar": "parados"
+      },
+      "ok": true,
+      "ms": 224,
+      "guardado": "parados",
+      "valor": "[{\"andou\":0,\"escorregou\":0.07,\"menorY\":0},{\"andou\":0,\"escorregou\":0.08,\"menorY\":0},{\"andou\":0,\"escorregou\":0,\"menorY\":0},{\"andou\":0,\"escorregou\":0,\"menorY\":0},{\"andou\":0,\"escorregou\":0.03,\"menorY\":0},{\"andou\":0,\"escorregou\":0.05,\"menorY\":0},{\"andou\":0,\"escorregou\":0.05,\"menorY\":0},{\"andou\":0,\"escorregou\":0.04,\"menorY\":0},{\"andou\":0,\"escorregou\":0.06,\"menorY\":0},{\"andou\":0,\"escorregou\":0.03,\"menorY\":0},{\"andou\":0,\"escorregou\":0.07,\"menorY\":0},{\"andou\":0,\"escorregou\":0.07,\"menorY\":0}]"
+    },
+    {
+      "n": 5,
+      "tipo": "js",
+      "passo": {
+        "js": "window.jogoTeste.modo('gestos')"
+      },
+      "ok": true,
+      "ms": 12
+    },
+    {
+      "n": 6,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "JSON.stringify(window.jogoTeste.escorrega(4))",
+        "guardar": "gestos"
+      },
+      "ok": true,
+      "ms": 55,
+      "guardado": "gestos",
+      "valor": "[{\"andou\":0,\"escorregou\":0.02,\"menorY\":0},{\"andou\":0,\"escorregou\":0.07,\"menorY\":0},{\"andou\":0,\"escorregou\":0.05,\"menorY\":0},{\"andou\":0,\"escorregou\":0.03,\"menorY\":0},{\"andou\":0,\"escorregou\":0.33,\"menorY\":0},{\"andou\":0,\"escorregou\":0.04,\"menorY\":0},{\"andou\":0,\"escorregou\":0,\"menorY\":0},{\"andou\":0,\"escorregou\":0.22,\"menorY\":0},{\"andou\":0,\"escorregou\":0.03,\"menorY\":0},{\"andou\":0,\"escorregou\":0.12,\"menorY\":0},{\"andou\":0,\"escorregou\":0.1,\"menorY\":0},{\"andou\":0,\"escorregou\":0.24,\"menorY\":0}]"
+    },
+    {
+      "n": 7,
+      "tipo": "avaliar",
+      "passo": {
+        "avaliar": "window.jogoTeste.custo(500)",
+        "guardar": "custoMs"
+      },
+      "ok": true,
+      "ms": 51,
+      "guardado": "custoMs",
+      "valor": 0.07359999999962748
+    }
+  ],
+  "fotos": [],
+  "fotosSuspeitas": [],
+  "guardados": {
+    "passos": "[{\"andou\":7,\"escorregou\":1.21,\"menorY\":0},{\"andou\":7,\"escorregou\":1.13,\"menorY\":0},{\"andou\":7,\"escorregou\":1.41,\"menorY\":0},{\"andou\":7,\"escorregou\":1.41,\"menorY\":0},{\"andou\":7,\"escorregou\":1.23,\"menorY\":0},{\"andou\":7,\"escorregou\":1.19,\"menorY\":0}]",
+    "parados": "[{\"andou\":0,\"escorregou\":0.07,\"menorY\":0},{\"andou\":0,\"escorregou\":0.08,\"menorY\":0},{\"andou\":0,\"escorregou\":0,\"menorY\":0},{\"andou\":0,\"escorregou\":0,\"menorY\":0},{\"andou\":0,\"escorregou\":0.03,\"menorY\":0},{\"andou\":0,\"escorregou\":0.05,\"menorY\":0},{\"andou\":0,\"escorregou\":0.05,\"menorY\":0},{\"andou\":0,\"escorregou\":0.04,\"menorY\":0},{\"andou\":0,\"escorregou\":0.06,\"menorY\":0},{\"andou\":0,\"escorregou\":0.03,\"menorY\":0},{\"andou\":0,\"escorregou\":0.07,\"menorY\":0},{\"andou\":0,\"escorregou\":0.07,\"menorY\":0}]",
+    "gestos": "[{\"andou\":0,\"escorregou\":0.02,\"menorY\":0},{\"andou\":0,\"escorregou\":0.07,\"menorY\":0},{\"andou\":0,\"escorregou\":0.05,\"menorY\":0},{\"andou\":0,\"escorregou\":0.03,\"menorY\":0},{\"andou\":0,\"escorregou\":0.33,\"menorY\":0},{\"andou\":0,\"escorregou\":0.04,\"menorY\":0},{\"andou\":0,\"escorregou\":0,\"menorY\":0},{\"andou\":0,\"escorregou\":0.22,\"menorY\":0},{\"andou\":0,\"escorregou\":0.03,\"menorY\":0},{\"andou\":0,\"escorregou\":0.12,\"menorY\":0},{\"andou\":0,\"escorregou\":0.1,\"menorY\":0},{\"andou\":0,\"escorregou\":0.24,\"menorY\":0}]",
+    "custoMs": 0.07359999999962748
+  },
+  "consoleErros": [],
+  "falhasRede": []
+}

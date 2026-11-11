@@ -1,0 +1,29 @@
+{
+  "descricao": "Pênalti no celular (escala 1): entra no modo, três fotos do goleiro esperando (0,3 s, 1,2 s e 1,7 s: o gesto dele), bate (mira 2,9, contato 0,1/0,2, força 0,7), foto no voo (0,25 s depois do contato) e no fim.",
+  "perfil": "celular",
+  "escala": 1,
+  "url": "index.html?teste",
+  "saida": "capturas/penalti-celular",
+  "passos": [
+    { "esperarJogo": true },
+    { "js": "window.jogoTeste.modo('penalti');" },
+    { "esperarSegundos": 0.3 },
+    { "foto": "01-goleiro-0s30" },
+    { "esperarSegundos": 0.9 },
+    { "foto": "02-goleiro-1s20" },
+    { "esperarSegundos": 0.5 },
+    { "foto": "03-goleiro-1s70" },
+    { "avaliar": "window.jogoTeste.goleiro()", "guardar": "goleiroAntes" },
+    { "js": "window.jogoTeste.mirar(2.9); window.jogoTeste.contato(0.1, 0.2); window.jogoTeste.chutar(0.7);" },
+    { "esperarAte": "window.jogoTeste.estado().fase === 'voo'", "limiteSegundos": 6 },
+    { "esperarSegundos": 0.25 },
+    { "foto": "04-voo" },
+    { "esperarAte": "window.jogoTeste.estado().fase === 'fim'", "limiteSegundos": 8 },
+    { "esperarSegundos": 0.3 },
+    { "foto": "05-fim" },
+    { "avaliar": "JSON.stringify(window.jogoTeste.estado())", "guardar": "estado" },
+    { "avaliar": "window.jogoTeste.registro()", "guardar": "registro" },
+    { "avaliar": "window.jogoTeste.goleiro()", "guardar": "goleiro" },
+    { "avaliar": "window.jogoTeste.placar()", "guardar": "placar" }
+  ]
+}
