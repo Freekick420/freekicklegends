@@ -11,6 +11,7 @@
 //   'folhaSeca'  bola que sobe e cai de repente, por giro para a frente (diferente da sem rotação)
 //
 // uniforme: camisa inspirada no time em que o jogador foi mais marcante (só cores e padrões, sem escudo nem nome no jogo)
+//   linha (opcional, só para o goleiro-artilheiro): o que muda no uniforme dos companheiros de linha dele
 //   padrao: 'liso' | 'listras' (verticais) | 'aros' (horizontais) | 'faixa' (faixa no peito, até 3 cores) |
 //           'diagonal' (faixa em diagonal) | 'v' (V no peito) | 'faixaVertical' (faixa de cima a baixo no meio do
 //           peito: cores[0] a faixa, cores[1] os filetes das bordas); cores: cores do padrão sobre a cor da camisa
@@ -47,7 +48,11 @@ export const ELENCO = [
     numero: 1, apelido: 'Mito', nome: 'Rogério Seni', nomeCamisa: 'SENI', referencia: 'Rogério Ceni', posicao: 'GOL', pe: 'D', titular: true,
     atributos: { FOR: 84, CUR: 90, QUE: 76, PRE: 96, FRI: 94 },
     especiais: [], estilo: 'O goleiro artilheiro',
-    uniforme: { clube: 'São Paulo (goleiro)', padrao: 'faixa', camisa: '#2a2e35', cores: ['#d0021b', '#ffffff', '#111111'], calcao: '#2a2e35', meiao: '#2a2e35', numero: '#ffffff', gola: '#d0021b' },
+    uniforme: {
+      clube: 'São Paulo (goleiro)', padrao: 'faixa', camisa: '#2a2e35', cores: ['#d0021b', '#ffffff', '#111111'], calcao: '#2a2e35', meiao: '#2a2e35', numero: '#ffffff', gola: '#d0021b',
+      // linha: o que muda no uniforme dos companheiros (jogadores de linha) em relação à camisa do goleiro
+      linha: { camisa: '#f4f4f4', cores: ['#d0021b', '#f4f4f4', '#151515'], calcao: '#f4f4f4', meiao: '#f4f4f4', numero: '#151515', gola: '#d0021b' },
+    },
     cobranca: { postura: 'concentrado', distancia: 4.2, angulo: 28, passos: 6, ritmo: 1.0, batida: 'chapa', braco: 'normal', assinatura: 'Sai do gol, corrida longa e batida colocada' },
     visual: { pele: PELE.clara, cabelo: { estilo: 'curto', cor: '#3b2a1e' }, barba: 'nenhuma', faixa: null, altura: 1.88, porte: 'normal', coxas: 'normais', chuteira: '#111111', goleiro: true },
   },
@@ -233,7 +238,7 @@ export const RIVAIS = {
   'Manchester United': { nome: 'Manchester City', padrao: 'liso', camisa: '#6cabdd', cores: [], calcao: '#f4f4f4', meiao: '#1c2c5b', numero: '#1c2c5b', gola: '#1c2c5b' },
   'Flamengo': { nome: 'Vasco', padrao: 'diagonal', camisa: '#f4f4f4', cores: ['#151515'], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
   'Vasco': { nome: 'Flamengo', padrao: 'aros', camisa: '#c4142b', cores: ['#151515'], calcao: '#f4f4f4', meiao: '#c4142b', numero: '#ffffff', gola: '#151515' },
-  'São Paulo (goleiro)': { nome: 'Corinthians', padrao: 'liso', camisa: '#f4f4f4', cores: [], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
+  'São Paulo (goleiro)': { nome: 'Corinthians', padrao: 'liso', camisa: '#151515', cores: [], calcao: '#f4f4f4', meiao: '#151515', numero: '#f4f4f4', gola: '#f4f4f4' },
   'Palmeiras': { nome: 'Corinthians', padrao: 'liso', camisa: '#f4f4f4', cores: [], calcao: '#151515', meiao: '#f4f4f4', numero: '#151515', gola: '#151515' },
   'Santos': { nome: 'Palmeiras', padrao: 'liso', camisa: '#0a7a3f', cores: [], calcao: '#f4f4f4', meiao: '#0a7a3f', numero: '#ffffff', gola: '#ffffff' },
   'Lazio': { nome: 'Roma', padrao: 'liso', camisa: '#8e1b1b', cores: [], calcao: '#f4f4f4', meiao: '#8e1b1b', numero: '#f7c948', gola: '#f7c948' },

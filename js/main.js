@@ -5,11 +5,13 @@ import { ELENCO, RIVAIS, sugerirCobradores } from './elenco.js?v=9';
 import { criarCenario, PADRAO_CENARIO } from './estadio.js?v=9';
 import { montarBarreira, semBarreira, atualizarBarreira, colidirBolaBarreira, PADRAO_BARREIRA } from './barreira.js?v=9';
 import { criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, PADRAO_GOLEIRO, PADRAO_PENALTI } from './goleiro.js?v=9';
-import {
-  criarPersonagem, criarSombraBlob, visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, UNIFORMES, misturarPoses,
-} from './jogadores.js?v=9';
+import { criarPersonagem, visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, UNIFORMES, misturarPoses } from './jogadores.js?v=9';
 import { criarCobranca, PADRAO_COBRANCA, poseChute, poseComemoracao, poseLamento } from './cobranca.js?v=9';
 import { criarAnimadorGoleiro, criarAnimadorBarreira } from './animacaoDefesa.js?v=9';
+import { montarFigurantes, atualizarFigurantes, colidirBolaFigurantes, PADRAO_FIGURANTES } from './figurantes.js?v=9';
+import { criarAnimadorFigurantes } from './animacaoFigurantes.js?v=9';
+import { criarBolaVisual } from './bola.js?v=9';
+import { criarSombras } from './sombras.js?v=9';
 import { criarAudio, PADRAO_AUDIO } from './audio.js?v=9';
 import { criarGravador, salvarVideo } from './replay.js?v=9';
 import { criarInterface } from './interface.js?v=9';
@@ -21,14 +23,13 @@ import { criarRanking } from './ranking.js?v=9';
 CONFIG.goleiro = { ...PADRAO_GOLEIRO, ...(CONFIG.goleiro || {}) };
 CONFIG.penalti = { ...PADRAO_PENALTI, ...(CONFIG.penalti || {}) };
 CONFIG.barreira = { ...PADRAO_BARREIRA, ...(CONFIG.barreira || {}) };
+CONFIG.figurantes = { ...PADRAO_FIGURANTES, ...(CONFIG.figurantes || {}) };
 CONFIG.cobrador = { ...PADRAO_COBRANCA, ...(CONFIG.cobrador || {}) };
 CONFIG.audio = { ...PADRAO_AUDIO, ...(CONFIG.audio || {}) };
 CONFIG.cenario = { ...PADRAO_CENARIO, ...(CONFIG.cenario || {}) };
 
 const GRAUS = Math.PI / 180;
 const PASSO_FISICA = 1 / 240; // a física roda em passos pequenos e fixos, independente do celular
-const GIRO_VISUAL = 0.35;     // a bola gira mais devagar na tela do que na física, para o olho acompanhar
-const GIRO_VISUAL_MAX = 40;   // rad/s: acima disso a bola parece girar para trás na tela
 const CONTATO_MAXIMO = 0.95;  // até onde o ponto de contato pode ir na borda da bola
 
 // Com ?teste no endereço, cada quadro vale exatamente 1/60 s e o sorteio é sempre o mesmo:
@@ -103,47 +104,14 @@ function texturaDeCanvas(canvas) {
   return textura;
 }
 
-// ---------- Bola, sombra e rastro ----------
+// ---------- Bola, sombras e rastro ----------
 
-// Desenha uma bola clássica: branca com 12 manchas pretas (nos vértices de um icosaedro)
-function texturaBola() {
-  const W = 256;
-  const H = 128;
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  const imagem = ctx.createImageData(W, H);
-  const vertices = new THREE.IcosahedronGeometry(1, 0).attributes.position;
-  const manchas = [];
-  for (let i = 0; i < vertices.count; i++) {
-    const v = new THREE.Vector3().fromBufferAttribute(vertices, i).normalize();
-    if (!manchas.some((m) => m.distanceTo(v) < 0.01)) manchas.push(v);
-  }
-  const dir = new THREE.Vector3();
-  for (let y = 0; y < H; y++) {
-    const theta = (y / H) * Math.PI;
-    for (let x = 0; x < W; x++) {
-      const phi = (x / W) * Math.PI * 2;
-      dir.set(-Math.cos(phi) * Math.sin(theta), Math.cos(theta), Math.sin(phi) * Math.sin(theta));
-      const preto = manchas.some((m) => m.dot(dir) > 0.93);
-      const i = (y * W + x) * 4;
-      const cor = preto ? 30 : 245;
-      imagem.data[i] = imagem.data[i + 1] = imagem.data[i + 2] = cor;
-      imagem.data[i + 3] = 255;
-    }
-  }
-  ctx.putImageData(imagem, 0, 0);
-  return texturaDeCanvas(canvas);
-}
-
-const bolaMesh = new THREE.Mesh(
-  new THREE.SphereGeometry(CONFIG.raioBola, 32, 16),
-  new THREE.MeshLambertMaterial({ map: texturaBola() })
-);
-scene.add(bolaMesh);
-const sombraBola = criarSombraBlob(0.3);
-scene.add(sombraBola);
+// A bola desenhada (js/bola.js) e as sombras no gramado (js/sombras.js). O cenário pode dizer de onde vem
+// a luz dos refletores (cenario.refletores), para as sombras caírem para o lado certo.
+const bolaVisual = criarBolaVisual(scene, CONFIG);
+const bolaMesh = bolaVisual.malha;
+const sombras = criarSombras(scene, { refletores: cenario.refletores });
+const sombraDaBola = sombras.bola(0.3);
 
 // Rastro: pontinhos que ficam para trás da bola durante o voo, para enxergar a curva
 const RASTRO_MAX = 70;
@@ -290,17 +258,20 @@ function uniformeAdversario(jogador) {
 
 let cobradorBoneco = null;
 let animacao = null;   // corrida e chute do cobrador (js/cobranca.js)
-const sombraCobrador = criarSombraBlob(0.4);
-scene.add(sombraCobrador);
+let sombraCobrador = null; // sombra do cobrador no gramado (js/sombras.js)
 let bonecosBarreira = [];
 let goleiroBoneco = null;
 let animGoleiro = null;   // animação do goleiro por cima da lógica (js/animacaoDefesa.js)
 let animBarreira = null;  // idem para a barreira
-const sombraGoleiro = criarSombraBlob(0.45);
-scene.add(sombraGoleiro);
+let sombraGoleiro = null;
+// Os outros jogadores em campo: lógica em js/figurantes.js, bonecos em js/animacaoFigurantes.js
+let figurantes = null;
+let modoDaCobranca = 'treino'; // o modo da cobrança que está montada (no replay, o da cobrança gravada)
+const animFigurantes = criarAnimadorFigurantes(scene, { criarSombra: (personagem, opcoes) => sombras.boneco(personagem, opcoes) });
 
 function vestirCobrador(jogador) {
   if (cobradorBoneco) {
+    sombraCobrador.remover();
     scene.remove(cobradorBoneco.grupo);
     cobradorBoneco.dispose();
   }
@@ -311,6 +282,7 @@ function vestirCobrador(jogador) {
     nome: jogador.nomeCamisa || jogador.apelido,
   });
   scene.add(cobradorBoneco.grupo);
+  sombraCobrador = sombras.boneco(cobradorBoneco, { raio: 0.4, destaque: true });
   // estilo: o jeito de bater da lenda (js/elenco.js, campo cobranca), para a animação
   animacao = criarCobranca(cobradorBoneco, {
     bola: { x: bola.pos.x, z: bola.pos.z }, alvo: { x: 0, z: 0 }, pe: jogador.pe, cfg: configDaCobranca(jogador),
@@ -351,10 +323,37 @@ function configDaCobranca(jogador) {
   };
 }
 
+// Companheiros do cobrador: o uniforme de linha do time dele (o goleiro-artilheiro veste outra camisa:
+// uniforme.linha, em js/elenco.js, diz o que muda)
+function uniformeDosCompanheiros(jogador) {
+  const u = jogador.uniforme;
+  if (!u) return { ...UNIFORMES.lendas };
+  const linha = u.linha ? { ...u, ...u.linha } : u;
+  return { ...linha, listras: linha.padrao === 'listras' ? linha.cores[0] : null };
+}
+
+// Os outros jogadores em campo: companheiros com o uniforme do time do cobrador, adversários com o do rival.
+// Refeitos a cada cobrança e quando o cobrador muda (a corrida dele começa em outro lugar). O sorteio tem a
+// semente da jogada: o replay repete os mesmos jogadores nos mesmos lugares.
+function montarFigurantesDaCobranca() {
+  figurantes = montarFigurantes(bola.pos, barreira, CONFIG, sorteioDaJogada(3), {
+    penalti: modoDaCobranca === 'penalti',
+    cobrador: { x: animacao.inicio.x, z: animacao.inicio.z },
+    pe: cobrador.pe,
+    goleiro: { x: goleiro.base.x, z: goleiro.z },
+  });
+  animFigurantes.montar(figurantes, {
+    uniformeAtaque: uniformeDosCompanheiros(cobrador),
+    uniformeDefesa: uniformeAdversario(cobrador),
+    semente: sorteioDaJogada(4)(),
+  });
+}
+
 // Barreira e goleiro do time adversário (genéricos), refeitos a cada falta com a camisa que contrasta
 function montarAdversarios() {
   for (const b of bonecosBarreira) {
-    scene.remove(b.personagem.grupo, b.sombra);
+    b.sombra.remover();
+    scene.remove(b.personagem.grupo);
     b.personagem.dispose();
   }
   const uniforme = uniformeAdversario(cobrador);
@@ -364,14 +363,15 @@ function montarAdversarios() {
       visual: visualAdversario(i + Math.floor(sorteio() * 8), j.altura),
       uniforme, numero: [4, 5, 6, 8, 3][i % 5], nome: '',
     });
-    const sombra = criarSombraBlob(0.4);
-    scene.add(personagem.grupo, sombra);
+    scene.add(personagem.grupo);
+    const sombra = sombras.boneco(personagem, { raio: 0.4 });
     return { personagem, sombra };
   });
   animBarreira = criarAnimadorBarreira(bonecosBarreira.map((b) => b.personagem), { semente: sorteio(), diagnostico: false });
   if (!goleiroBoneco) {
     goleiroBoneco = criarPersonagem({ visual: VISUAL_GOLEIRO_ADVERSARIO, uniforme: UNIFORMES.goleiroAdversario, numero: 1, nome: '' });
     scene.add(goleiroBoneco.grupo);
+    sombraGoleiro = sombras.boneco(goleiroBoneco, { raio: 0.45 });
   }
   // O goleiro é o mesmo boneco, mas a animação começa do zero a cada cobrança (com a semente da jogada)
   animGoleiro = criarAnimadorGoleiro(goleiroBoneco, { semente: sorteio(), diagnostico: false });
@@ -674,7 +674,7 @@ let tiro = null; // o que chutar() devolveu
 const jogada = {};
 function zerarJogada() {
   Object.assign(jogada, {
-    batida: null, redeFora: false, barreira: false, defesa: null, barreiraPulou: false, porBaixo: false,
+    batida: null, redeFora: false, barreira: false, jogador: null, defesa: null, barreiraPulou: false, porBaixo: false,
     resultado: null, somRede: false, quiques: 0, lentaUsada: false, lentaAte: 0,
   });
 }
@@ -883,6 +883,7 @@ function escolherCobrador(jogador) {
   mostrarInfoFalta();
   vestirCobrador(cobrador);
   montarAdversarios();
+  montarFigurantesDaCobranca();
   posicionarCamera();
   mostrarContato();
 }
@@ -962,6 +963,7 @@ function novaCobranca() {
   if (gravador.gravando) gravador.descartar(); // só o replay grava; se sobrou algo ligado, joga fora
   const emReplay = Boolean(replay);
   const modo = emReplay ? registro.modo : estado.modo;
+  modoDaCobranca = modo;
   if (emReplay) {
     falta = { ...registro.falta };
     cobrador = registro.cobrador;
@@ -975,7 +977,7 @@ function novaCobranca() {
   }
   sementeJogada = emReplay ? registro.sementeJogada : modo === 'desafio' ? desafio.sementeJogada : aleatorio();
   bola = criarBola(posicaoDaFalta(falta));
-  bolaMesh.quaternion.identity();
+  bolaVisual.reiniciar();
   cfgDefesa = configDaDefesa(modo);
   if (modo === 'penalti') {
     // Sem barreira; o goleiro decide o canto já aqui (sorteio com semente, para o replay repetir), olhando
@@ -1016,6 +1018,7 @@ function novaCobranca() {
   mostrarInfoFalta();
   vestirCobrador(cobrador);
   montarAdversarios();
+  montarFigurantesDaCobranca();
   posicionarCamera();
 
   if (emReplay) {
@@ -1220,7 +1223,7 @@ const painel = criarPainel({
       ui.definirFixar(true);
       falta = { distancia: CONFIG.falta.distancia, angulo: CONFIG.falta.angulo };
       if (estado.fase === 'pronto') novaCobranca();
-    } else if ((chave.startsWith('barreira.') || chave.startsWith('cobrador.') || chave.startsWith('camera.') || chave.startsWith('penalti.')) && estado.fase === 'pronto') {
+    } else if ((chave.startsWith('barreira.') || chave.startsWith('cobrador.') || chave.startsWith('camera.') || chave.startsWith('penalti.') || chave.startsWith('figurantes.')) && estado.fase === 'pronto') {
       const fixa = estado.fixa;
       estado.fixa = true;
       novaCobranca();
@@ -1253,6 +1256,10 @@ function processarEventos() {
     } else if (ev.tipo === 'barreira') {
       if (!jogada.barreira) audio.barreira(Math.min(1, (ev.impacto || 15) / 25));
       jogada.barreira = true;
+    } else if (ev.tipo === 'jogador') {
+      // Bateu num dos outros jogadores em campo (ev.time: 'ataque' = companheiro, 'defesa' = adversário)
+      if (!jogada.jogador) audio.barreira(Math.min(1, (ev.impacto || 15) / 25));
+      jogada.jogador = ev.time || 'defesa';
     } else if (ev.tipo === 'defesa') {
       if (!jogada.defesa || ev.modo === 'segurou') audio.defesa(Math.min(1, (ev.impacto || 15) / 30));
       if (jogada.defesa !== 'segurou') jogada.defesa = ev.modo || 'espalmou';
@@ -1287,10 +1294,12 @@ function decidirResultado(acabou) {
   if (voltando && jogada.defesa) return 'defesa';
   if (voltando && jogada.batida) return 'trave';
   if (voltando && jogada.barreira) return 'barreira';
+  if (voltando && jogada.jogador) return 'jogador';
   if (acabou) {
     if (jogada.defesa) return 'defesa';
     if (jogada.batida) return 'trave';
     if (jogada.barreira) return 'barreira';
+    if (jogada.jogador) return 'jogador';
     return 'curta';
   }
   return null;
@@ -1324,6 +1333,7 @@ function mostrarResultado(resultado) {
     if (noAngulo) sub.push('No ângulo');
     else if (jogada.batida) sub.push('Na trave e pra dentro');
     else if (jogada.defesa) sub.push('O goleiro ainda tocou');
+    else if (jogada.jogador) sub.push('Desviou no caminho');
     if (estado.sequencia >= 2) sub.push(`${estado.sequencia} seguidos`);
     audio.torcidaGol();
     cenario.torcida.festa(1);
@@ -1341,6 +1351,9 @@ function mostrarResultado(resultado) {
     } else if (resultado === 'barreira') {
       tipo = 'defesa';
       titulo = 'NA BARREIRA!';
+    } else if (resultado === 'jogador') {
+      tipo = 'defesa';
+      titulo = jogada.jogador === 'ataque' ? 'NO COMPANHEIRO!' : 'NA ZAGA!';
     } else if (resultado === 'trave') {
       titulo = jogada.batida === 'travessao' ? 'NO TRAVESSÃO!' : 'NA TRAVE!';
     } else if (resultado === 'cima') {
@@ -1348,6 +1361,7 @@ function mostrarResultado(resultado) {
     } else if (resultado === 'fora') {
       titulo = 'PRA FORA';
       if (jogada.redeFora) sub.push('Na rede, pelo lado de fora');
+      else if (jogada.jogador) sub.push('Desviou num jogador');
     } else {
       titulo = 'NÃO CHEGOU';
     }
@@ -1420,63 +1434,33 @@ function animarCobrador(t) {
     }
   }
   const g = cobradorBoneco.grupo.position;
-  sombraCobrador.position.set(g.x, 0.012, g.z);
+  sombraCobrador.atualizar({ x: g.x, z: g.z });
 }
 
-const infoDefesa = { fase: 'pronto', tempoDesdeChute: null, bola: null };
+const infoDefesa = { fase: 'pronto', tempoDesdeChute: null, bola: null, resultado: null };
 function animarAdversarios(t, dt) {
   infoDefesa.fase = estado.fase;
   infoDefesa.tempoDesdeChute = estado.fase === 'corrida' ? estado.tCobranca - animacao.tempoContato
     : (estado.fase === 'voo' || estado.fase === 'fim') ? estado.tempo : null;
   infoDefesa.bola = bola;
+  infoDefesa.resultado = estado.fase === 'fim' ? jogada.resultado : null;
   animBarreira.atualizar(barreira, t, dt, infoDefesa);
   animGoleiro.atualizar(goleiro, t, dt, infoDefesa);
+  animFigurantes.atualizar(figurantes, t, dt, infoDefesa);
   bonecosBarreira.forEach((b, i) => {
     const j = barreira.jogadores[i];
-    b.sombra.position.set(j.x, 0.012, j.z);
-    const escala = Math.max(0.45, 1 - (j.yPes || 0) * 1.2);
-    b.sombra.scale.set(escala, escala, escala);
+    b.sombra.atualizar({ x: j.x, z: j.z, altura: j.yPes || 0 });
   });
   const p = goleiro.pose;
   const centro = p.centro || p;
-  sombraGoleiro.position.set(centro.x, 0.012, p.z);
+  sombraGoleiro.atualizar({ x: centro.x, z: p.z });
 }
 
 // ---------- Loop principal ----------
 
-const eixoGiro = new THREE.Vector3();
-const giroVisual = new THREE.Quaternion();
-
 function atualizarBolaNaTela(dt) {
-  const { pos, giro } = bola;
-  bolaMesh.position.set(pos.x, pos.y, pos.z);
-  // Longe da câmera (na aérea) a bola fica um pouco maior na tela, para o olho não perder.
-  // Perto do gol ela volta ao tamanho de verdade, para não "furar" traves e rede.
-  const longe = camera.position.distanceTo(bolaMesh.position) / CONFIG.camera.bolaVisivelAte;
-  let escala = Math.min(CONFIG.camera.bolaAumentoMax, Math.max(1, longe));
-  const meiaGol = CONFIG.golLargura / 2;
-  const foraDoGol = Math.hypot(
-    Math.max(0, Math.abs(pos.x) - meiaGol),
-    Math.max(0, pos.y - CONFIG.golAltura),
-    Math.max(0, pos.z, -CONFIG.golProfundidade - pos.z)
-  );
-  escala = 1 + (escala - 1) * Math.min(1, Math.max(0, (foraDoGol - 1) / 3));
-  bolaMesh.scale.setScalar(escala);
-
-  // Gira a bola na tela com o giro da física (mais devagar, para o olho acompanhar)
-  eixoGiro.set(giro.x, giro.y, giro.z).multiplyScalar(GIRO_VISUAL);
-  if (eixoGiro.length() > GIRO_VISUAL_MAX) eixoGiro.setLength(GIRO_VISUAL_MAX);
-  const angulo = eixoGiro.length() * dt;
-  if (angulo > 1e-5) {
-    giroVisual.setFromAxisAngle(eixoGiro.normalize(), angulo);
-    bolaMesh.quaternion.premultiply(giroVisual);
-  }
-
-  const altura = pos.y - CONFIG.raioBola;
-  const tamanho = 1 + altura * 0.15;
-  sombraBola.position.set(pos.x, 0.012, pos.z);
-  sombraBola.scale.set(tamanho, tamanho, tamanho);
-  sombraBola.material.opacity = Math.max(0.15, 0.9 - altura * 0.12);
+  bolaVisual.atualizar(bola, camera, dt);
+  sombraDaBola.atualizar(bola.pos, CONFIG.raioBola);
 }
 
 const relogio = new THREE.Clock();
@@ -1506,6 +1490,10 @@ function ajustarQualidade(dtReal) {
     qualidade.pixel = Math.max(1, qualidade.pixel - 0.25);
     renderer.setPixelRatio(qualidade.pixel);
     ajustarTela();
+  } else if (media > 1 / 40 && qualidade.pixel <= 1 && !qualidade.sombrasSimples) {
+    // Já está no mínimo de pixels e ainda não dá conta: as sombras passam para a versão mais barata
+    qualidade.sombrasSimples = true;
+    sombras.qualidade(0);
   }
 }
 
@@ -1522,9 +1510,11 @@ function simular(dt) {
     estado.tempo += h;
     const anteriorZ = bola.pos.z;
     atualizarBarreira(barreira, estado.tempo);
+    atualizarFigurantes(figurantes, estado.tempo);
     atualizarGoleiro(goleiro, bola, h, cfgDefesa, { chutou: true, tempoDesdeChute: estado.tempo, cfgFisica: CONFIG, aleatorio: sorteioChute });
     passo(bola, h, CONFIG);
     colidirBolaBarreira(bola, barreira, CONFIG);
+    if (CONFIG.figurantes.colisao) colidirBolaFigurantes(bola, figurantes, CONFIG);
     colidirBolaGoleiro(bola, goleiro, cfgDefesa);
     verificarPorBaixo(anteriorZ);
   }
@@ -1560,6 +1550,7 @@ function passoDoJogo(dtReal, desenhar = true) {
     rastro.adicionar(bola.pos, dt);
   } else {
     atualizarBarreira(barreira, -1);
+    atualizarFigurantes(figurantes, -1);
     // No pênalti o goleiro vê a corrida do cobrador: se firma e, se for o caso, parte antes do contato
     const tempoAteChute = goleiro.penalti && estado.fase === 'corrida' ? Math.max(0, animacao.tempoContato - estado.tCobranca) : undefined;
     atualizarGoleiro(goleiro, bola, dt, cfgDefesa, { chutou: false, tempoDesdeChute: -1, tempoAteChute, cfgFisica: CONFIG, aleatorio });
@@ -1583,6 +1574,7 @@ function passoDoJogo(dtReal, desenhar = true) {
   animarAdversarios(tempoTotal, dt);
   atualizarBolaNaTela(dt);
   atualizarCamera(dt);
+  sombras.atualizar(dt);
   cenario.rede.bola(bola.pos, CONFIG.raioBola * bolaMesh.scale.x); // a rede de pano envolve a bola desenhada
   cenario.atualizar(dt);
   audio.atualizar(dt);
@@ -1661,6 +1653,7 @@ if (MODO_TESTE) {
     desenho: () => ({ ...renderer.info.render, geometrias: renderer.info.memory.geometries, texturas: renderer.info.memory.textures }),
     cobradorPos: () => cobradorBoneco && { x: cobradorBoneco.grupo.position.x, z: cobradorBoneco.grupo.position.z, giro: cobradorBoneco.grupo.rotation.y },
     bolaPos: () => ({ ...bola.pos }),
+    figurantes: () => figurantes.jogadores.map((j) => ({ x: j.x, z: j.z, time: j.time })),
     desafio: () => ({ ...desafio, cobrador: desafio.cobrador && desafio.cobrador.numero }),
     goleiro: () => (goleiro.penalti ? { ...goleiro.penalti } : null),
     placar: () => placar(),

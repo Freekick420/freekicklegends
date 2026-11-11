@@ -54,6 +54,10 @@ const CAMPOS = [
   { chave: 'barreira.atrasoPulo', rotulo: 'Atraso do pulo depois do chute (s)', min: 0.05, max: 0.4, passo: 0.01 },
   { chave: 'barreira.sobraTrave', rotulo: 'Quanto passa da trave (m)', min: -0.5, max: 1, passo: 0.05 },
 
+  { secao: 'Outros jogadores em campo' },
+  { chave: 'figurantes.quantidade', rotulo: 'Quantos jogadores além do cobrador, da barreira e do goleiro', min: 0, max: 14, passo: 1 },
+  { chave: 'figurantes.colisao', rotulo: 'A bola bate neles', tipo: 'liga' },
+
   { secao: 'Gramado e gol' },
   { chave: 'quiqueChao', rotulo: 'Quique no gramado (batida lenta)', min: 0.2, max: 0.9, passo: 0.05 },
   { chave: 'atritoDeslize', rotulo: 'Atrito da grama com a bola escorregando', min: 0.05, max: 1, passo: 0.05 },
