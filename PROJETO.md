@@ -142,34 +142,40 @@ Regras:
 - **Os atributos ajustam, não decidem.** Entre a nota mais baixa e a mais alta do elenco, a diferença fica em torno de 15% no parâmetro da física. A habilidade de quem joga continua mandando. O peso dos atributos vai para o painel de ajuste.
 - **Pé bom:** curvar para o lado natural do pé (parte de dentro) usa a curva cheia. Curvar para o outro lado (de trivela) curva menos e erra mais.
 
-Elenco (notas propostas, ajustáveis; os nomes no jogo serão apelidos):
+Elenco (revisto em 11/11/2026, etapa 9; tabela gerada de `js/elenco.js`, que é quem manda; no jogo os nomes
+aparecem no estilo do PES antigo, com uma letra trocada):
 
-| # | Pos. | Referência | Pé | FOR | CUR | QUE | PRE | FRI | OVR |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | GOL | Rogério Ceni | D | 85 | 84 | 82 | 92 | 95 | 88 |
-| 2 | LD | Daniel Alves | D | 78 | 82 | 74 | 80 | 85 | 80 |
-| 3 | ZAG | Beckenbauer | D | 76 | 80 | 70 | 84 | 97 | 81 |
-| 4 | ZAG | Koeman | D | 96 | 74 | 78 | 88 | 92 | 86 |
-| 5 | LE | Roberto Carlos | E | 99 | 93 | 72 | 75 | 85 | 85 |
-| 6 | MC | Pirlo | D | 74 | 88 | 98 | 95 | 99 | 91 |
-| 7 | MD | Beckham | D | 82 | 99 | 85 | 94 | 90 | 90 |
-| 8 | MEI | Zico | D | 80 | 93 | 90 | 97 | 92 | 90 |
-| 9 | ME | Ronaldinho | D | 82 | 92 | 93 | 90 | 91 | 90 |
-| 10 | ATA | Messi | E | 80 | 94 | 88 | 97 | 88 | 89 |
-| 11 | ATA | Cristiano Ronaldo | D | 97 | 78 | 84 | 85 | 93 | 87 |
-| 12 | GOL | Chilavert | E | 92 | 82 | 76 | 86 | 96 | 86 |
-| 13 | LD | Nelinho | D | 95 | 92 | 75 | 80 | 86 | 86 |
-| 14 | ZAG | Mihajlovic | E | 96 | 85 | 82 | 92 | 90 | 89 |
-| 15 | LE | Branco | E | 97 | 80 | 76 | 82 | 90 | 85 |
-| 16 | MC | Didi | D | 78 | 86 | 99 | 92 | 93 | 90 |
-| 17 | MC | Juninho Pernambucano | D | 95 | 88 | 92 | 96 | 94 | 93 |
-| 18 | MC | Marcos Assunção | D | 84 | 92 | 88 | 95 | 90 | 90 |
-| 19 | MC | Gerrard | D | 94 | 82 | 80 | 85 | 95 | 87 |
-| 20 | MEI | Maradona | E | 84 | 95 | 90 | 96 | 94 | 92 |
-| 21 | ATA | Neymar | D | 80 | 90 | 85 | 90 | 82 | 85 |
-| 22 | ATA | Del Piero | D | 82 | 92 | 88 | 95 | 92 | 90 |
+| # | Pos. | Referência | Pé | Clube da camisa | FOR | CUR | QUE | PRE | FRI | OVR |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | GOL | Rogério Ceni | D | São Paulo | 84 | 90 | 76 | 96 | 94 | 88 |
+| 2 | LD | Daniel Alves | D | Barcelona | 76 | 77 | 62 | 72 | 83 | 74 |
+| 3 | LE | Roberto Carlos | E | Real Madrid | 99 | 97 | 76 | 76 | 90 | 88 |
+| 21 | MC | Andrea Pirlo | D | Milan | 77 | 93 | 97 | 97 | 96 | 92 |
+| 23 | MD | David Beckham | D | Manchester United | 84 | 99 | 89 | 98 | 96 | 93 |
+| 80 | ME | Ronaldinho | D | Barcelona | 82 | 95 | 90 | 94 | 91 | 90 |
+| 30 | ATA | Lionel Messi | E | Barcelona | 80 | 98 | 90 | 99 | 96 | 93 |
+| 7 | ATA | Cristiano Ronaldo | D | Real Madrid | 99 | 73 | 95 | 79 | 91 | 87 |
+| 8 | MC | Juninho Pernambucano | D | Vasco | 95 | 96 | 99 | 99 | 97 | 97 |
+| 5 | MEI | Zinedine Zidane | D | Real Madrid | 86 | 90 | 86 | 93 | 97 | 90 |
+| 9 | ATA | Harry Kane | D | Bayern | 91 | 84 | 82 | 93 | 98 | 90 |
+| 14 | ZAG | Siniša Mihajlović | E | Lazio | 96 | 92 | 86 | 98 | 94 | 93 |
+| 28 | MC | Marcos Assunção | D | Palmeiras | 88 | 95 | 90 | 97 | 92 | 92 |
+| 4 | MC | Steven Gerrard | D | Liverpool | 96 | 83 | 76 | 85 | 97 | 87 |
+| 11 | ATA | Neymar | D | Santos | 79 | 94 | 86 | 94 | 88 | 88 |
+| 22 | ATA | Alessandro Del Piero | D | Juventus | 81 | 96 | 92 | 97 | 94 | 92 |
+| 20 | MEI | Álvaro Recoba | E | Inter | 95 | 96 | 86 | 92 | 85 | 91 |
+| 76 | ATA | Andriy Shevchenko | D | Milan | 94 | 83 | 80 | 90 | 93 | 88 |
+| 10 | ATA | Adriano Imperador | E | Flamengo | 99 | 80 | 78 | 83 | 86 | 85 |
+| 18 | ATA | Zlatan Ibrahimović | D | PSG | 97 | 85 | 86 | 87 | 96 | 90 |
+| 19 | ATA | Hulk | E | Atlético-MG | 99 | 86 | 82 | 85 | 91 | 89 |
+| 17 | MC | Kevin De Bruyne | D | Manchester City | 91 | 95 | 87 | 96 | 90 | 92 |
 
-Os titulares (1 a 11) são escolha de quem conduz o projeto. Beckenbauer e Daniel Alves ficam no time mesmo não sendo especialistas em falta; por isso, as notas deles são mais baixas.
+**Troca de elenco da etapa 9 (pedido do dono em 11/11/2026):** saíram os mais antigos (Beckenbauer, Koeman,
+Zico, Chilavert, Nelinho, Branco, Didi e Maradona) e entraram nomes que a geração dele conhece do videogame e
+da TV: Harry Kane, Zinedine Zidane, Álvaro Recoba, Andriy Shevchenko, Adriano Imperador, Zlatan Ibrahimović,
+Hulk e Kevin De Bruyne. Gerrard passou para a camisa 4 e Marcos Assunção para a 28 (a 17 ficou com De Bruyne e a
+20 com Recoba). Cada clube de camisa tem um rival em `RIVAIS` (a barreira, o goleiro e os adversários em campo
+vestem as cores dele).
 
 ## Escopo da v0.1 (revisado)
 
