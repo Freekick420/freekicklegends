@@ -16,12 +16,15 @@ A especificação completa (escopo, mecânica, ordem de construção) está em `
   - `js/config.js`: todos os números ajustáveis (`CONFIG`) e o rótulo `VERSAO` mostrado na tela.
   - `js/physics.js`: física da bola, sem dependência do Three.js (dá para rodar no Node).
   - `js/main.js`: cena, câmera, controles, loop, replay, os três modos (`estado.modo`: treino, desafio, penalti), o Desafio do Dia (sementes pela data, recordes e compartilhar) e a cola entre os módulos abaixo.
-  - `js/elenco.js`: as 22 lendas (atributos, pé, uniforme, jeito de cobrar, visual), `overall`, nota por falta (`notaParaFalta`), nota por pênalti (`notaParaPenalti`) e sugestão de cobrador.
+  - `js/elenco.js`: as 22 lendas (atributos, pé, uniforme, jeito de cobrar, visual), os uniformes dos rivais (`RIVAIS`), `overall`, nota por falta (`notaParaFalta`), nota por pênalti (`notaParaPenalti`) e sugestão de cobrador.
   - `js/interface.js`: HUD (cartão do cobrador, lista "Quem bate?", resultado, placar, botões de modo). Só mexe no HTML.
   - `js/estadio.js`: gramado, gol, rede de pano (massa-mola), arquibancadas e torcida. `PADRAO_CENARIO`.
   - `js/barreira.js` e `js/goleiro.js`: lógica (posição, pulo, reação, mergulho, colisão), sem desenho. `PADRAO_BARREIRA`, `PADRAO_GOLEIRO`, `PADRAO_PENALTI` (goleiro de pênalti: adivinha o canto, dica, memória) e `semBarreira` (pênalti).
-  - `js/jogadores.js`: bonecos (corpo, rosto, camisas por padrão), poses e a corrida/chute do cobrador (`criarCobranca`, posturas por lenda). `PADRAO_COBRANCA`.
+  - `js/jogadores.js`: bonecos (corpo, rosto, uniformes), o formato da pose (`aplicarPose`, descrito no cabeçalho) e as poses da defesa.
+  - `js/cobranca.js`: o cobrador em movimento (espera com a postura de cada lenda, corrida, chute, terminação, comemoração e lamento): `criarCobranca`, `PADRAO_COBRANCA`. O `main.js` avisa o chute escolhido com `animacao.preparar(...)` e passa a bola e o resultado em `animacao.atualizar(t, contexto)`.
   - `js/animacaoDefesa.js`: desenho do goleiro e da barreira por cima da lógica (passos, mergulho, queda, gestos).
+  - `js/figurantes.js` (lógica, sem Three.js) e `js/animacaoFigurantes.js` (bonecos): os outros jogadores em campo, além do cobrador, da barreira e do goleiro. `PADRAO_FIGURANTES`. Posições com a semente da jogada (`sorteioDaJogada(3)`); a bola bate neles (evento `jogador`).
+  - `js/bola.js`: a bola desenhada (textura, giro na tela, aumento à distância). `js/sombras.js`: sombras no gramado (bonecos e bola).
   - `js/audio.js`: som sintetizado (sem arquivos). `PADRAO_AUDIO`.
   - `js/replay.js`: grava a cobrança em vídeo (MediaRecorder) e baixa/compartilha o gol.
   - `js/painel.js`: painel de ajuste (sliders que mudam o `CONFIG` na hora). Todo número novo que afete a sensação do jogo ganha um slider aqui. `bloquear(sim)`: no Desafio do Dia o painel some e os números do jogo voltam ao padrão (som, câmera e cenário ficam).
@@ -33,5 +36,5 @@ A especificação completa (escopo, mecânica, ordem de construção) está em `
 - **Cache:** a hospedagem guarda arquivos em cache por alguns minutos. A cada etapa publicada, aumente o número `?v=N` em todos os imports e links (`index.html` e `js/*.js`) e atualize `VERSAO`:
   `sed -i 's/?v=[0-9]*/?v=NOVO/g' index.html js/*.js`
 - Testar no celular real é obrigatório; o rótulo de versão no canto da tela confirma qual versão está carregada.
-- **Modo teste:** abrir com `?teste` no endereço faz cada quadro valer exatamente 1/60 s, fixa o sorteio (e a data do Desafio do Dia em 2026-10-10) e expõe `window.tempoDeJogo` e `window.jogoTeste` (falta, cobrador, contato, mira, chutar, estado, video, modo, desafio, goleiro, placar, recordes). Serve para capturas automáticas previsíveis (Playwright), mesmo com o navegador lento.
+- **Modo teste:** abrir com `?teste` no endereço faz cada quadro valer exatamente 1/60 s, fixa o sorteio (e a data do Desafio do Dia em 2026-10-10) e expõe `window.tempoDeJogo` e `window.jogoTeste` (falta, cobrador, contato, mira, chutar, estado, video, modo, desafio, goleiro, placar, recordes; e para capturas: pausar, avancar, avancarAte, camera, hud, tempos, desenho, cobradorPos, bolaPos, figurantes). Serve para capturas automáticas previsíveis (Playwright), mesmo com o navegador lento.
 - O CDN do Three.js não abre dentro do ambiente de desenvolvimento na nuvem: os testes com Playwright interceptam o import e servem uma cópia local (`npm pack three@0.160.0`).
