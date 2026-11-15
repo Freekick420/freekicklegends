@@ -212,16 +212,16 @@ Várias ligas, duelo entre jogadores, multiplayer, moedas, loja, anúncios, comp
 12. ~~Etapa 8: ranking do dia na internet (Supabase), painel trancado no desafio, goleiro do desafio mais fraco,
     câmera do replay mais longe e de cima.~~ Feito (10/10/2026); o ranking só liga quando o endereço e a chave
     do Supabase entrarem em `config.js`.
-13. Etapa 9 (**em pausa desde 11/11/2026**, ainda não publicada): chute e corrida do cobrador mais realistas,
-    bonecos mais bonitos e mais leves, quatro sombras dos refletores, bola melhor, outros jogadores em campo e
-    elenco novo. O elenco e a preparação estão prontos; as quatro partes grandes estão pela metade, só no ramo de
-    trabalho `claude/peaceful-planck-mfrfig`. Para continuar: `etapa9/RETOMAR.md`.
+13. ~~Etapa 9: chute e corrida do cobrador refeitos (passos com o pé preso no chão, armada, chicote, terminação
+    e força que muda o gesto), bonecos novos com esqueleto e uniforme no corte do PES do PS2, quatro sombras dos
+    refletores, bola nova, outros jogadores em campo (a bola bate neles), elenco novo, replay idêntico ao lance,
+    câmera que segura o cobrador depois do chute, replay que começa de perto e câmeras novas do pênalti.~~
+    Feito (15/11/2026).
 14. Depois: transformar em PWA para instalar na tela inicial do celular.
 
-Estado em 11/11/2026: no ar continua a `v0.1 · etapa 8.1` (ranking ligado ao projeto Supabase do dono). Amigos e
-família já jogam pelo link (o critério de sucesso da v0.1 está sendo cumprido na prática). A etapa 9 foi pausada
-no meio para poupar o limite de uso; nada foi perdido e o site não mudou. Este ramo de trabalho **não está pronto
-para publicar** (ver item 13).
+Estado em 15/11/2026: publicado `v0.1 · etapa 9`. Amigos e família já jogam pelo link (o critério de sucesso da
+v0.1 está sendo cumprido na prática). Agora: teste no celular real (a etapa 9 só foi vista no navegador de testes,
+sem placa de vídeo) e ajuste fino pelo painel.
 
 Ideias anotadas (não construir sem combinar): tipos de rede para escolher (véu de noiva, caixote, triangular).
 A rede é uma simulação presa ao formato do gol e à física da bola na rede; trocar o formato é refazer essa parte.

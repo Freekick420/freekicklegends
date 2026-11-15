@@ -8,7 +8,7 @@
 // Eixos: x = direita de quem cobra, y = para cima, z = do gol para quem cobra. Os bonecos olham para +z
 // local e a esquerda do boneco fica em +x local. Metros, segundos, radianos.
 
-import { criarPersonagem, visualAdversario } from './jogadores.js?v=9';
+import { criarPersonagem, visualAdversario } from './jogadores.js?v=10';
 
 // ---------- Utilidades ----------
 
