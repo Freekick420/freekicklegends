@@ -176,6 +176,10 @@ teste('quantidade: 0 = campo vazio; o padrão é 10; o máximo é 14; times equi
   // Sem configuração nenhuma (só os padrões do módulo) também monta
   const solto = montarFigurantes({ x: 0, z: 22 }, montarBarreira({ x: 0, z: 22 }, {}, criarSorteio(0.5)), {}, criarSorteio(0.5), {});
   assert.equal(solto.jogadores.length, 10);
+  // Obstáculos para o desenho (a corrida da comemoração desvia deles): a barreira e, por último, o goleiro
+  const { f: comMuro, barreira: muro } = montar({ quantidade: 10 });
+  assert.equal(comMuro.obstaculos.length, muro.jogadores.length + 1);
+  assert.deepEqual(montar({ quantidade: 0 }).f.obstaculos, []);
 });
 
 teste(`falta: ${COMPLETO ? 1500 : 400} faltas sorteadas (18 a 33 m, −32° a 32°, destros e canhotos, 1 a 14 jogadores): ninguém no corredor, nas zonas proibidas ou em cima de outro`, () => {

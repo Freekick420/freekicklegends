@@ -299,6 +299,7 @@ export function montarFigurantes(posBola, barreira, cfg = {}, aleatorio = Math.r
     ultimaBatida: null,   // { jogador, time, parte, impacto }
     fimDoMovimento: 0,    // s depois do chute em que o último para de andar
     caixa: null,          // { x0, x1, z0, z1 }: onde eles ficam e andam (descarte rápido na colisão)
+    obstaculos: [],       // [{ x, z }] barreira e goleiro: o desenho desvia deles na corrida da comemoração
     _t: null,
     _anterior: null,      // posição da bola na última checagem (para a bola rápida não atravessar)
     _bola: null,
@@ -335,6 +336,8 @@ export function montarFigurantes(posBola, barreira, cfg = {}, aleatorio = Math.r
   const ladoCamera = Math.abs(latCobrador) > 0.15 ? Math.sign(latCobrador) : ladoPe;
 
   const ctx = { c, B, ax, az, lx, lz, meia, muro, cobrador, goleiro, corredor, penalti };
+  for (const j of muro) f.obstaculos.push({ x: j.x, z: j.z });
+  f.obstaculos.push({ x: goleiro.x, z: goleiro.z });
 
   // Quem já está na tela da câmera de trás: o cobrador, a barreira e o goleiro
   const ocupados = [];

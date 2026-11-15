@@ -375,6 +375,7 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
       const per = criarPersonagem({
         visual: visualAdversario(j.aparencia + ator.variacao, j.altura),
         uniforme: uniformes[j.time], numero: j.numero, nome: '',
+        detalhe: 'baixo', // vistos de longe: menos triângulos e textura menor
       });
       item = { per, sombra: null, altura: j.altura, numero: j.numero, aparencia: j.aparencia };
       g.lista[ator.k] = item;
@@ -657,7 +658,11 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
   // a vez dele (a fase da passada), sai do chão, dobra o joelho e vai pousar à frente, na direção do movimento.
   // fase: 0 a 1 = dois passos (o pé direito pousa em 0, o esquerdo em 0,5).
   function andarPes(ator, frente, lado, passo, corrida) {
-    const apoio = misturar(0.6, 0.5, corrida); // parte do ciclo com o pé no chão (andando, os dois se revezam com folga)
+    // Parte do ciclo com o pé no chão: andando, os dois se revezam com folga; correndo, menos da metade (entre
+    // um pé e o outro o corpo voa um instante, e a passada não vira um espacate)
+    const apoio = misturar(0.6, 0.4, corrida);
+    const meio = ator.passada % 0.5;
+    ator.voo = apoio < 0.5 && meio > apoio ? Math.sin((Math.PI * (meio - apoio)) / (0.5 - apoio)) : 0;
     const d = Math.hypot(frente, lado);
     // Onde o pé pousa: metade do que o corpo anda num apoio, na direção em que ele vai
     const alcance = (apoio * passo) / ator.escalaZ;
@@ -679,8 +684,12 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
           pe.x0 = pe.x;
           pe.y0 = pe.y;
         }
+        // O ponto de onde saiu continua ficando para trás com o chão: assim o pé decola parado (em relação
+        // ao gramado) e ganha velocidade aos poucos, em vez de sair arrastando o bico na grama
+        pe.x0 -= frente / ator.escalaZ;
+        pe.y0 -= lado / ator.escalaZ;
         pe.k = (u - apoio) / (1 - apoio);
-        const k = suave(pe.k);
+        const k = suave(Math.min(1, pe.k * 1.08));
         pe.x = misturar(pe.x0, ax, k);
         pe.y = misturar(pe.y0, ay, k);
       }
@@ -722,8 +731,9 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
     // Braços ao contrário das pernas (o esquerdo vai à frente com a perna direita), mais dobrados na corrida
     const balanco = misturar(0.28, 0.6, corrida) * Math.cos(a) * paraFrente;
     const dobra = misturar(0.45, 1.4, corrida);
-    p.bracoE.frente = misturar(p.bracoE.frente, 0.05 + balanco, w);
-    p.bracoD.frente = misturar(p.bracoD.frente, 0.05 - balanco, w);
+    const ombro = misturar(0.05, -0.18, corrida); // correndo, os cotovelos ficam para trás do corpo
+    p.bracoE.frente = misturar(p.bracoE.frente, ombro + balanco, w);
+    p.bracoD.frente = misturar(p.bracoD.frente, ombro - balanco, w);
     p.bracoE.lado = misturar(p.bracoE.lado, 0.17, w);
     p.bracoD.lado = misturar(p.bracoD.lado, 0.17, w);
     p.bracoE.cotovelo = misturar(p.bracoE.cotovelo, dobra + 0.25 * Math.cos(a) * corrida, w);
@@ -740,7 +750,7 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
     p.quadril.lado = misturar(p.quadril.lado, 0, w);
     p.quadril.frente = misturar(p.quadril.frente, 0, w);
     p.agachar = misturar(p.agachar, 0, w);
-    p.pulo = misturar(p.pulo, 0, w);
+    p.pulo = misturar(p.pulo, 0.07 * corrida * (ator.voo || 0), w); // correndo: os dois pés no ar entre as passadas
     p.apoio = misturar(p.apoio, 1, w);
   }
 
@@ -766,6 +776,64 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
       re.corre = !!forcar.corre;
       re.vira = forcar.vira || 0;
     }
+  }
+
+  // Rumo de quem corre de (x, z) na direção (dx, dz), desviando dos obstáculos por perto: quem está à frente
+  // empurra para o lado (para o lado em que já está mais livre) e, bem de perto, para longe. Resultado em `rumo`.
+  const rumo = { x: 0, z: 0 };
+  function afastar(x, z, dx, dz, ox, oz, raio) {
+    const rx = ox - x;
+    const rz = oz - z;
+    const d = Math.hypot(rx, rz);
+    if (d > raio || d < 1e-4) return;
+    const aFrente = (rx * dx + rz * dz) / d;
+    if (aFrente < -0.2) return;
+    const k = 1 - d / raio;
+    const lado = rx * dz - rz * dx >= 0 ? -1 : 1; // o obstáculo está de um lado: passa pelo outro
+    rumo.x += (dz * lado * 3 * (0.3 + aFrente) - (rx / d) * 1.2 * k) * k;
+    rumo.z += (-dx * lado * 3 * (0.3 + aFrente) - (rz / d) * 1.2 * k) * k;
+  }
+  function desviar(ator, x, z, dx, dz) {
+    rumo.x = dx;
+    rumo.z = dz;
+    const obst = ator.figurantes.obstaculos;
+    // A barreira (todos os obstáculos menos o último, que é o goleiro) no meio do caminho: dá a volta pela
+    // ponta que deixa o caminho mais curto
+    const nMuro = obst ? obst.length - 1 : 0;
+    if (nMuro >= 2) {
+      const a = obst[0];
+      const b = obst[nMuro - 1];
+      const tx = ator.figurantes.bola.x;
+      const tz = ator.figurantes.bola.z;
+      const mx = b.x - a.x;
+      const mz = b.z - a.z;
+      const ml = Math.hypot(mx, mz) || 1;
+      const folga = 1.5 / ml;
+      // cruzamento do caminho (daqui até o cobrador) com a linha da barreira esticada 1,5 m para cada lado
+      const den = (tx - x) * mz - (tz - z) * mx;
+      if (Math.abs(den) > 1e-6) {
+        const u = ((a.x - x) * mz - (a.z - z) * mx) / den;          // onde no caminho (0 = aqui, 1 = lá)
+        const w = ((a.x - x) * (tz - z) - (a.z - z) * (tx - x)) / den; // onde na barreira (0 = uma ponta, 1 = a outra)
+        if (u > 0 && u < 1 && w > -folga && w < 1 + folga) {
+          const k = w < 0.5 ? -folga : 1 + folga;
+          const px = a.x + mx * k - x;
+          const pz = a.z + mz * k - z;
+          const pn = Math.hypot(px, pz) || 1;
+          rumo.x = px / pn;
+          rumo.z = pz / pn;
+          dx = rumo.x;
+          dz = rumo.z;
+        }
+      }
+    }
+    if (obst) for (let i = 0; i < obst.length; i++) afastar(x, z, dx, dz, obst[i].x, obst[i].z, 3.2);
+    for (let i = 0; i < atores.length; i++) {
+      const o = atores[i];
+      if (o !== ator) afastar(x, z, dx, dz, o.px ?? o.j.x, o.pz ?? o.j.z, 1.8);
+    }
+    const n = Math.hypot(rumo.x, rumo.z) || 1;
+    rumo.x /= n;
+    rumo.z /= n;
   }
 
   // ----- Um quadro de um ator -----
@@ -901,12 +969,33 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
           const alvoV = falta > re.raio ? Math.min(5.2, 1.5 + (falta - re.raio) * 1.6) : 0;
           des.v = aproximar(des.v, alvoV * suave(tr / 0.5), 5, dt);
           if (falta > 0.01) {
-            des.x += (fx / falta) * des.v * dt;
-            des.z += (fz / falta) * des.v * dt;
-            vx = (fx / falta) * des.v;
-            vz = (fz / falta) * des.v;
+            // Vai em direção ao cobrador desviando de quem está no caminho (barreira, goleiro, outros figurantes)
+            desviar(ator, j.x + des.x, j.z + des.z, fx / falta, fz / falta);
+            // (a direção muda aos poucos: ninguém corre em zigue-zague)
+            const kd = des.dx || des.dz ? 1 - Math.exp(-6 * dt) : 1;
+            des.dx = (des.dx || 0) + (rumo.x - (des.dx || 0)) * kd;
+            des.dz = (des.dz || 0) + (rumo.z - (des.dz || 0)) * kd;
+            const dn = Math.hypot(des.dx, des.dz) || 1;
+            des.x += (des.dx / dn) * des.v * dt;
+            des.z += (des.dz / dn) * des.v * dt;
+            vx = (des.dx / dn) * des.v;
+            vz = (des.dz / dn) * des.v;
           }
           des.ativo = true;
+        }
+        // Acabou o duelo: quem marcava e quem era marcado se soltam (um passo para longe um do outro), para
+        // os braços da comemoração ou do lamento não atravessarem o vizinho
+        if (parceiro && !re.corre && dt > 0) {
+          const ux = j.x - parceiro.x;
+          const uz = j.z - parceiro.z;
+          const un = Math.hypot(ux, uz) || 1;
+          const kd = 0.42 * suave(tr / 1.1);
+          const nx = (ux / un) * kd;
+          const nz = (uz / un) * kd;
+          vx += (nx - des.x) / dt;
+          vz += (nz - des.z) / dt;
+          des.x = nx;
+          des.z = nz;
         }
         olhar.peso *= 1 - 0.75 * kReacao * (re.tipo === 'cabisbaixo' || re.tipo === 'dobrado' || re.tipo === 'olhaParaCima' || re.tipo === 'maosNaCabeca' ? 1 : 0.3);
       }
