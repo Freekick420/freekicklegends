@@ -41,12 +41,13 @@ const perto = (a, ref) => ref + Math.atan2(Math.sin(a - ref), Math.cos(a - ref))
 const POSTURAS = {
   normal: {},
   calmo: { tronco: { frente: 0.04 }, bracoE: { lado: 0.12, cotovelo: 0.2 }, bracoD: { lado: 0.12, cotovelo: 0.2 }, agachar: 0.03 },
-  concentrado: { tronco: { frente: 0.16 }, cabeca: { frente: 0.05 }, agachar: 0.08 },
+  concentrado: { tronco: { frente: 0.1 }, cabeca: { frente: 0.05 }, agachar: 0.04 },
   ereto: { tronco: { frente: -0.02 }, cabeca: { frente: -0.16 }, pernaE: { frente: 0.04 }, pernaD: { frente: -0.06 }, agachar: 0.01 },
-  curvado: { tronco: { frente: 0.32 }, cabeca: { frente: 0.1 }, bracoE: { frente: 0.25, cotovelo: 0.6 }, bracoD: { frente: 0.2, cotovelo: 0.55 }, agachar: 0.1 },
+  // (curvado e agachado: de quem vai arrancar, sem corcunda nem cócoras)
+  curvado: { tronco: { frente: 0.18 }, cabeca: { frente: 0.04 }, bracoE: { frente: 0.12, cotovelo: 0.3 }, bracoD: { frente: 0.1, cotovelo: 0.3 }, agachar: 0.07 },
   agachado: {
-    tronco: { frente: 0.28 }, cabeca: { frente: 0 }, pernaE: { frente: 0.3, joelho: 0.6 }, pernaD: { frente: -0.1, joelho: 0.55 },
-    bracoE: { frente: 0.3, lado: 0.3, cotovelo: 0.9 }, bracoD: { frente: 0.3, lado: 0.3, cotovelo: 0.9 }, agachar: 0.22,
+    tronco: { frente: 0.18 }, cabeca: { frente: 0 }, pernaE: { frente: 0.2, joelho: 0.3 }, pernaD: { frente: -0.1, joelho: 0.28 },
+    bracoE: { frente: 0.12, lado: 0.26, cotovelo: 0.4 }, bracoD: { frente: 0.12, lado: 0.26, cotovelo: 0.4 }, agachar: 0.1,
   },
   // Pernas bem abertas, peito estufado (o agachar extra compensa as pernas abertas, para os pés ficarem no chão)
   pernasAbertas: {
@@ -63,10 +64,11 @@ const POSTURAS = {
 export function poseCobradorPronto(t = 0, pe = 'D', postura = 'normal') {
   const respira = Math.sin(t * 1.9);
   const p = {
-    tronco: { frente: 0.1 + 0.012 * respira, lado: 0.02, giro: 0 },
+    tronco: { frente: 0.05 + 0.012 * respira, lado: 0.02, giro: 0 },
     cabeca: { frente: -0.06, giro: 0.05 * Math.sin(t * 0.4) },
-    bracoE: { frente: 0.1, lado: 0.2, cotovelo: 0.35 },
-    bracoD: { frente: 0.0, lado: 0.2, cotovelo: 0.3 },
+    // (braços soltos ao lado do corpo, com a palma virada para a coxa: giro negativo = para dentro)
+    bracoE: { frente: 0.04, lado: 0.18, cotovelo: 0.16, giro: -0.6 },
+    bracoD: { frente: 0.0, lado: 0.18, cotovelo: 0.14, giro: -0.6 },
     pernaE: { frente: 0.12, lado: 0.07, joelho: 0.1 },
     pernaD: { frente: -0.18, lado: 0.06, joelho: 0.12, tornozelo: 0.15 },
     agachar: 0.06 + 0.01 * respira,
@@ -105,7 +107,7 @@ export function poseCorrida(fase = 0) {
 // progresso de 0 a 1: 0,3 = o pé de apoio pisa (TEMPO_APOIO); 0,55 = contato (TEMPO_CONTATO); 1 = fim.
 // A animação do jogo (criarCobranca) devolve o mesmo "progresso" em atualizar().
 export const TEMPO_CONTATO = 0.55;
-export const TEMPO_APOIO = 0.3; // o pé de apoio pisa no chão
+const TEMPO_APOIO = 0.3; // o pé de apoio pisa no chão
 const CHAVES_CHUTE = [
   [0, poseCorrida(0.75)],
   [TEMPO_APOIO, {
@@ -670,7 +672,6 @@ function reacaoErro(tipo, tr, R) {
 export const PADRAO_COBRANCA = {
   distancia: 2.0,  // m da posição inicial até o pé de apoio (cada lenda tem a sua: js/elenco.js)
   angulo: 30,      // graus entre a corrida e a direção do chute (destro vem pela esquerda da bola)
-  corrida: 0.4,    // (sem uso desde a etapa 9: o tempo da corrida sai do número de passos e da cadência)
   chute: 0.75,     // duração do gesto do chute: 0,75 = natural; mais = mais lento (armada, descida e terminação)
   cadencia: 1.6,   // ciclos de corrida por segundo (cada ciclo = dois passos); a lenda multiplica pelo ritmo dela
   postura: 'normal', // jeito de esperar atrás da bola (POSTURAS)
@@ -2010,10 +2011,15 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       olho.giro = gAlvo;
       olho.frente = fAlvo;
     } else {
-      const passo = 5.5 * dt; // rad/s
-      const k = 1 - Math.exp(-14 * dt);
-      olho.giro += limitar((gAlvo - olho.giro) * k, -passo, passo);
-      olho.frente += limitar((fAlvo - olho.frente) * k, -passo, passo);
+      // (em fatias de 1/120 s: o caminho da cabeça fica quase igual com quadros curtos ou compridos, e o replay
+      // num celular lento vira a cabeça como no lance)
+      for (let resto = dt; resto > 1e-9; resto -= 1 / 120) {
+        const h = Math.min(resto, 1 / 120);
+        const passo = 5.5 * h; // rad/s
+        const k = 1 - Math.exp(-14 * h);
+        olho.giro += limitar((gAlvo - olho.giro) * k, -passo, passo);
+        olho.frente += limitar((fAlvo - olho.frente) * k, -passo, passo);
+      }
     }
     olho.t = t;
     Fq.cg = olho.giro;

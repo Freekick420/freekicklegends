@@ -111,9 +111,14 @@ const CAMPOS = [
 
   { secao: 'Câmeras do pênalti' },
   { chave: 'camera.replayPenalti', rotulo: 'Replay do pênalti do alto, atrás do gol (desligado = replay igual ao das faltas)', tipo: 'liga' },
+  { chave: 'camera.replayPenaltiChute', rotulo: 'Replay do pênalti: começa de perto, mostrando o chute', tipo: 'liga' },
+  { chave: 'camera.replayPenaltiAltura', rotulo: 'Replay do alto: altura da câmera (m)', min: 6, max: 20, passo: 0.5 },
+  { chave: 'camera.replayPenaltiLargura', rotulo: 'Replay do alto: largura visível (graus, menos = mais zoom)', min: 20, max: 45, passo: 1 },
   { chave: 'camera.reacaoPenalti', rotulo: 'Corte para o cobrador no fim do pênalti (comemora ou lamenta)', tipo: 'liga' },
   { chave: 'camera.reacaoPenaltiGol', rotulo: 'Corte para o cobrador: quanto tempo depois do gol (s)', min: 0, max: 2, passo: 0.05 },
   { chave: 'camera.reacaoPenaltiErro', rotulo: 'Corte para o cobrador: quanto tempo depois da defesa ou do erro (s)', min: 0, max: 1.2, passo: 0.05 },
+  { chave: 'camera.reacaoFalta', rotulo: 'Gol de falta: corte para o cobrador comemorando', tipo: 'liga' },
+  { chave: 'camera.reacaoFaltaGol', rotulo: 'Gol de falta: corte quanto tempo depois do gol (s)', min: 0, max: 2, passo: 0.05 },
 
   { secao: 'Desafio do Dia' },
   { chave: 'desafio.pressaoPorGol', rotulo: 'Pressão a mais por gol seguido (aumenta o erro; a frieza corta parte)', min: 0, max: 0.3, passo: 0.01 },
@@ -200,6 +205,9 @@ function salvar(chaveArmazenamento, dados) {
   }
 }
 
+// Valor salvo (pode ter sido editado à mão ou vir de outra versão): número fora da faixa do slider volta para ela
+const dentroDaFaixa = (c, v) => (typeof v === 'number' && Number.isFinite(c.min) && Number.isFinite(c.max) ? Math.min(c.max, Math.max(c.min, v)) : v);
+
 export function criarPainel({ config, versao, aoMudar }) {
   const ARMAZENAMENTO = 'fkl-ajustes';
   const padrao = JSON.parse(JSON.stringify(config));
@@ -210,7 +218,7 @@ export function criarPainel({ config, versao, aoMudar }) {
   if (salvo && salvo.versao === versao) {
     for (const c of campos) {
       const v = salvo.valores?.[c.chave];
-      if (typeof v === typeof ler(config, c.chave)) gravar(config, c.chave, v);
+      if (typeof v === typeof ler(config, c.chave)) gravar(config, c.chave, dentroDaFaixa(c, v));
     }
   }
 
@@ -337,7 +345,7 @@ export function criarPainel({ config, versao, aoMudar }) {
       let v = ler(padrao, c.chave);
       if (!sim && salvo && salvo.versao === versao) {
         const s = salvo.valores?.[c.chave];
-        if (typeof s === typeof v) v = s;
+        if (typeof s === typeof v) v = dentroDaFaixa(c, s);
       }
       gravar(config, c.chave, v);
       mostrarNaEntrada(c, entrada, v);

@@ -112,6 +112,10 @@ body {
   align-items: flex-end;
   gap: 3px;
   text-align: right;
+  /* fundo escuro, como o do cartão do cobrador: o texto não depende do que passa atrás (placas do estádio) */
+  padding: 5px 9px 6px;
+  border-radius: 10px;
+  background: rgba(10, 14, 22, 0.72);
 }
 
 #info {
@@ -464,9 +468,15 @@ body {
   -webkit-user-select: text;
 }
 
-/* Durante o voo da bola, os controles ficam apagados para não tapar a jogada */
+/* Durante o voo da bola e no resultado, a barra de força e a dica somem e o botão fica quase apagado, para não
+   taparem a jogada (CHUTAR continua valendo: apertar ali já prepara a próxima cobrança) */
 #hud.em-jogo #controles {
-  opacity: 0.2;
+  opacity: 0.14;
+}
+
+#hud.em-jogo #barra,
+#hud.em-jogo #dica {
+  opacity: 0;
 }
 
 /* Resultado da cobrança: GOL!, NA TRAVE!, POR CIMA... */
@@ -498,8 +508,26 @@ body {
 
 #resultado-sub {
   margin-top: 2px;
+  padding: 0 16px;
   font-size: 18px;
+  line-height: 22px;
   font-weight: 800;
+  text-wrap: balance;
+}
+
+/* Letreiro compacto: quando o normal taparia o gol, a bola, o goleiro ou o cobrador (js/main.js escolhe) */
+#resultado.compacto #resultado-titulo {
+  font-size: 38px;
+}
+
+#resultado.compacto.gol #resultado-titulo {
+  font-size: 52px;
+}
+
+#resultado.compacto #resultado-sub {
+  margin-top: 0;
+  font-size: 14px;
+  line-height: 17px;
 }
 
 @keyframes aparecer {
@@ -525,11 +553,25 @@ body {
     bottom: calc(env(safe-area-inset-bottom) + 16px);
     width: 380px;
   }
+
+  /* A linha "Força · km/h" vai para o canto de baixo: no meio do topo ela caía em cima do gol */
+  #mensagem {
+    position: fixed;
+    left: 16px;
+    bottom: calc(env(safe-area-inset-bottom) + 16px);
+    margin: 0;
+  }
 }
 
-/* Durante o voo, o topo também some um pouco */
+/* Durante o voo e no resultado, o cartão do cobrador e a falta somem (misturavam com as placas do estádio);
+   ficam o título, a linha da força e o letreiro. Invisíveis, também não recebem toque. */
 #hud.em-jogo #linha-info {
-  opacity: 0.35;
+  opacity: 0;
+}
+
+#hud.em-jogo #linha-info *,
+#hud.em-jogo #modos button {
+  pointer-events: none;
 }
 
 /* Folhas que sobem de baixo: lista "Quem bate?" e ranking do dia */
@@ -982,7 +1024,7 @@ body {
   border-color: #f7d84a;
 }
 #hud.em-jogo #modos {
-  opacity: 0.35;
+  opacity: 0;
 }
 #hud.replay #modos {
   display: none;

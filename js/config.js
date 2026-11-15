@@ -88,16 +88,16 @@ export const CONFIG = {
     fovMin: 40,           // campo de visão vertical mínimo
     larguraVisivel: 32,   // campo de visão horizontal mínimo (graus): no celular em pé, mais = mais afastada
     seguir: 0.25,         // quanto a câmera acompanha a bola depois do chute (0 = parada)
-    seguraChute: 0.3,     // s que a câmera fica atrás do cobrador depois do contato, para ver a terminação do chute, antes de ir atrás da bola (0 = vai na hora; nunca passa de 40% do voo; no pênalti não vale)
+    seguraChute: 0.2,     // s que a câmera fica atrás do cobrador depois do contato, para ver a terminação do chute, antes de ir atrás da bola (0 = vai na hora; nunca passa de 30% do voo; no pênalti não vale)
 
     // Câmera do replay. Lateral (padrão): do lado direito de quem cobra, sempre o mesmo lado, com o gol
     // à direita da tela, como no treino do PES de PS2. Acompanha a bola, porque no celular em pé não cabe
     // cobrador e gol de uma vez. Desligando `replayLateral`, volta a câmera atrás do gol (como na TV).
     replayLateral: true,
-    replayLateralDist: 24,    // m para o lado direito de quem cobra (contado a partir da bola): longe, como no treino do PES
-    replayLateralAltura: 12,  // m do chão (de cima)
+    replayLateralDist: 20,    // m para o lado direito de quem cobra (contado a partir da bola): longe, como no treino do PES
+    replayLateralAltura: 9,   // m do chão (de cima)
     replayLateralAlvo: 0.5,   // quanto o olhar vai da bola para o meio do gol quando a bola chega lá (0 = só a bola)
-    replayLateralLargura: 36, // graus de campo de visão horizontal (menos = mais zoom)
+    replayLateralLargura: 32, // graus de campo de visão horizontal (menos = mais zoom)
     replayLateralSegue: 0.4,  // quanto a câmera anda junto com a bola em direção ao gol (0 = parada, 1 = sempre ao lado da bola)
     replayLateralFrente: 4,   // m que a câmera fica adiantada em relação à bola, na direção do gol
     // Tomada do chute: o replay da falta começa de perto, com a câmera baixa, de lado e um pouco à frente do
@@ -108,7 +108,7 @@ export const CONFIG = {
     replayChuteAltura: 1.1,   // m do chão (baixa, na altura da cintura)
     replayChuteAngulo: 35,    // graus: 0 = bem de lado; 90 = de frente para o cobrador (na linha do chute)
     replayChuteLargura: 25,   // graus de campo de visão horizontal (menos = mais zoom)
-    replayChuteDepois: 0.3,   // s depois do contato em que corta para a câmera do voo (nunca passa de 40% do voo)
+    replayChuteDepois: 0.1,   // s depois do contato em que corta para a câmera do voo, antes de a bola sair da tela (nunca passa de 30% do voo)
     replayLado: 7,        // atrás do gol: m para o lado (do lado contrário ao canto em que a bola vai)
     replayAltura: 3.2,    // atrás do gol: m do chão
     replayAtras: 8,       // atrás do gol: m atrás da linha do gol
@@ -118,11 +118,12 @@ export const CONFIG = {
     // o replay, do alto atrás do gol (goleiro embaixo, cobrador no meio, a fila na risca da área ao fundo), e a
     // reação, um corte no fim do lance para o cobrador comemorando ou lamentando com os outros atrás dele.
     replayPenalti: true,        // desligado: o replay do pênalti usa a câmera de replay das faltas
+    replayPenaltiChute: true,   // o replay do pênalti começa de perto, mostrando o chute (como nas faltas), e corta para a do alto
     replayPenaltiAltura: 14.5,  // m do chão
     replayPenaltiAtras: 11,     // m atrás da linha do gol
     replayPenaltiLado: 0.8,     // m para o lado (o contrário do canto em que a bola vai); muito = o gol sai da tela no celular
-    replayPenaltiLargura: 36,   // graus de campo de visão horizontal (mais = cabe mais gente da fila, tudo menor)
-    replayPenaltiTravessao: 0.76, // em que altura da tela fica o travessão (0 = topo, 1 = base): logo abaixo do letreiro do resultado
+    replayPenaltiLargura: 30,   // graus de campo de visão horizontal (mais = cabe mais gente da fila, tudo menor)
+    replayPenaltiTravessao: 0.78, // em que altura da tela fica o travessão (0 = topo, 1 = base): logo abaixo do letreiro do resultado
     reacaoPenalti: true,        // corte para o cobrador no fim do pênalti
     reacaoPenaltiGol: 0.8,      // s depois do gol em que o corte acontece (antes disso, a rede estufando)
     reacaoPenaltiErro: 0.45,    // s depois da defesa, da trave ou da bola fora
@@ -130,6 +131,8 @@ export const CONFIG = {
     reacaoPenaltiLado: 4.5,     // m para o lado (o contrário do lado em que estão os companheiros mais perto)
     reacaoPenaltiAltura: 2,     // m do chão
     reacaoPenaltiLargura: 26,   // graus de campo de visão horizontal
+    reacaoFalta: true,          // o mesmo corte nas faltas, quando é gol (a comemoração do cobrador com os companheiros)
+    reacaoFaltaGol: 0.9,        // s depois do gol de falta em que o corte acontece (antes disso, a rede estufando)
 
     // Câmera aérea depois do chute (como nos jogos de falta do Click Jogos)
     aerea: true,

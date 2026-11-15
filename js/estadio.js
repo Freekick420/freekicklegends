@@ -99,11 +99,13 @@ function retanguloRedondo(ctx, x, y, largura, altura, [r1, r2, r3, r4]) {
   ctx.closePath();
 }
 
-function novoCanvas(largura, altura) {
+// lerPixels: o canvas vai passar por getImageData (aí o desenho fica na CPU: num canvas acelerado pela placa de
+// vídeo, ler os pixels de volta custava segundos na abertura do jogo)
+function novoCanvas(largura, altura, lerPixels = false) {
   const canvas = document.createElement('canvas');
   canvas.width = largura;
   canvas.height = altura;
-  return [canvas, canvas.getContext('2d')];
+  return [canvas, canvas.getContext('2d', lerPixels ? { willReadFrequently: true } : undefined)];
 }
 
 // Junta muitas peças numa geometria só: cada material vira uma chamada de desenho, não importa quantas peças tenha
@@ -313,7 +315,7 @@ function criarLuzes(scene, CONFIG) {
 // se repete sem emenda. Só o brilho importa (cinza médio = não muda a cor do gramado).
 function texturaFiapos(anisotropia) {
   const T = 512;
-  const [canvas, ctx] = novoCanvas(T, T);
+  const [canvas, ctx] = novoCanvas(T, T, true);
   const s = criarSorteio(11);
   ctx.fillStyle = '#808080';
   ctx.fillRect(0, 0, T, T);

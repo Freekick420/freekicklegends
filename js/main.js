@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { CONFIG, VERSAO } from './config.js?v=9';
-import { criarBola, chutar, passo, noChao, coneDeErro, preverTecnica } from './physics.js?v=9';
+import { criarBola, chutar, passo, coneDeErro, preverTecnica } from './physics.js?v=9';
 import { ELENCO, RIVAIS, sugerirCobradores } from './elenco.js?v=9';
 import { criarCenario, PADRAO_CENARIO } from './estadio.js?v=9';
 import { montarBarreira, semBarreira, atualizarBarreira, colidirBolaBarreira, PADRAO_BARREIRA } from './barreira.js?v=9';
@@ -115,6 +115,7 @@ const sombraDaBola = sombras.bola(0.3);
 
 // Rastro: pontinhos que ficam para trás da bola durante o voo, para enxergar a curva
 const RASTRO_MAX = 70;
+const RASTRO_COMECA = 2.5; // m que a bola anda antes de soltar o primeiro ponto
 const rastro = (() => {
   const posicoes = new Float32Array(RASTRO_MAX * 3);
   const cores = new Float32Array(RASTRO_MAX * 3);
@@ -138,12 +139,18 @@ const rastro = (() => {
   scene.add(pontos);
   let total = 0;
   let acumulado = 0;
+  let origem = null; // onde a bola estava no primeiro ponto pedido (de onde ela saiu)
   return {
     limpar() {
       total = 0;
+      origem = null;
       geometria.setDrawRange(0, 0);
     },
     adicionar(pos, dt) {
+      // Os primeiros metros ficam sem rastro: de perto (câmera atrás do cobrador, tomada do chute no replay)
+      // cada ponto vira uma bolha de luz do tamanho da bola, no pé de quem chutou
+      if (!origem) origem = { x: pos.x, y: pos.y, z: pos.z };
+      if (Math.hypot(pos.x - origem.x, pos.y - origem.y, pos.z - origem.z) < RASTRO_COMECA) return;
       acumulado += dt;
       if (acumulado < 1 / 50) return;
       acumulado = 0;
@@ -310,7 +317,6 @@ function configDaCobranca(jogador) {
   const c = jogador.cobranca;
   if (!c) return CONFIG;
   const cadencia = CONFIG.cobrador.cadencia * (c.ritmo || 1);
-  const passos = c.passos || 3;
   return {
     ...CONFIG,
     cobrador: {
@@ -318,7 +324,6 @@ function configDaCobranca(jogador) {
       distancia: c.distancia ?? CONFIG.cobrador.distancia,
       angulo: c.angulo ?? CONFIG.cobrador.angulo,
       cadencia,
-      corrida: Math.max(0.2, passos / (2 * cadencia) - 0.3),
       postura: c.postura || 'normal',
       braco: c.braco || 'normal',
     },
@@ -509,16 +514,28 @@ function poseReplayPenalti() {
 // Reação do pênalti: no fim do lance (um instante depois do resultado, para dar tempo de ver a rede ou a
 // defesa), corte para o cobrador visto do lado do gol, de viés, comemorando ou lamentando, com os outros
 // jogadores (que invadiram a área depois do chute) ao fundo. Só no lance ao vivo: o replay tem a câmera dele.
-let reacao = null; // { pos, lado } enquanto a câmera da reação está no ar
+// Nas faltas o mesmo corte acontece quando é gol (reacaoFalta): senão a comemoração do cobrador, com os
+// companheiros chegando, ficava fora da tela (a câmera aérea continua no gol).
+let reacao = null; // { pos, lado, fx, fz } enquanto a câmera da reação está no ar
 function querReacaoDoPenalti() {
   const c = CONFIG.camera;
-  if (!c.reacaoPenalti || modoDaCobranca !== 'penalti' || replay || estado.fase !== 'fim' || !cobradorBoneco) return false;
+  if (replay || estado.fase !== 'fim' || !cobradorBoneco) return false;
+  if (modoDaCobranca !== 'penalti') return Boolean(c.reacaoFalta) && jogada.resultado === 'gol' && estado.tFim >= c.reacaoFaltaGol;
+  if (!c.reacaoPenalti) return false;
   return estado.tFim >= (jogada.resultado === 'gol' ? c.reacaoPenaltiGol : c.reacaoPenaltiErro);
 }
 function poseReacaoPenalti() {
   const c = CONFIG.camera;
   const k = cobradorBoneco.grupo.position;
   if (!reacao) {
+    // A frente da câmera: no pênalti, a linha do campo; na falta, do cobrador para o meio do gol (ele bate de viés)
+    let fx = 0;
+    let fz = -1;
+    if (modoDaCobranca !== 'penalti') {
+      const d = Math.hypot(k.x, k.z) || 1;
+      fx = -k.x / d;
+      fz = -k.z / d;
+    }
     // De que lado estão os companheiros mais perto do cobrador: a câmera vai para o outro lado e olha de viés,
     // para a fila aparecer ao lado e atrás dele (de frente, no celular em pé, só caberia o cobrador)
     let lado = 1;
@@ -527,14 +544,21 @@ function poseReacaoPenalti() {
       const d = Math.hypot(j.x - k.x, j.z - k.z);
       if (j.time === 'ataque' && d < perto) {
         perto = d;
-        lado = j.x >= k.x ? 1 : -1;
+        lado = (j.x - k.x) * -fz + (j.z - k.z) * fx >= 0 ? 1 : -1;
       }
     }
-    reacao = { lado, pos: new THREE.Vector3(k.x - lado * c.reacaoPenaltiLado, c.reacaoPenaltiAltura, k.z - c.reacaoPenaltiFrente) };
+    reacao = {
+      lado, fx, fz,
+      pos: new THREE.Vector3(
+        k.x + fx * c.reacaoPenaltiFrente + fz * lado * c.reacaoPenaltiLado, c.reacaoPenaltiAltura,
+        k.z + fz * c.reacaoPenaltiFrente - fx * lado * c.reacaoPenaltiLado
+      ),
+    };
   }
   // O cobrador fica num terço da tela e os outros ocupam o resto: o olhar passa um pouco ao lado dele, baixo
   // (cobrador e companheiros ficam na metade de cima da tela, acima do letreiro do resultado)
-  const olhar = new THREE.Vector3(k.x + reacao.lado * 0.7, 0.4, k.z - 0.3);
+  const { lado, fx, fz } = reacao;
+  const olhar = new THREE.Vector3(k.x - fz * lado * 0.7 + fx * 0.3, 0.4, k.z + fx * lado * 0.7 + fz * 0.3);
   return { pos: reacao.pos, olhar, fov: fovParaLargura(c.reacaoPenaltiLargura) };
 }
 // Volta o campo de visão do jogo depois da reação (a próxima cobrança enquadra com ele)
@@ -547,7 +571,7 @@ function largarReacao() {
 
 // Quanto tempo depois do contato a câmera ainda fica no cobrador (para ver a terminação do chute): o tempo
 // pedido, mas nunca mais que uma parte do voo, para o chute forte de perto não chegar ao gol sem ser visto
-const FRACAO_DO_VOO_NO_COBRADOR = 0.4;
+const FRACAO_DO_VOO_NO_COBRADOR = 0.3;
 const tempoNoCobrador = (pedido) => Math.max(0, Math.min(pedido, FRACAO_DO_VOO_NO_COBRADOR * jogada.chegada));
 // A câmera do jogo, depois do contato: s atrás do cobrador antes de ir atrás da bola (no pênalti não segura)
 const tempoSegurandoCobrador = () => (modoDaCobranca === 'penalti' ? 0 : tempoNoCobrador(CONFIG.camera.seguraChute));
@@ -656,10 +680,11 @@ function atualizarCamera(dt) {
   if (replay) {
     // (o pênalti tem a câmera dele: alta atrás do gol, parada, com a fila de jogadores ao fundo)
     const doPenalti = modoDaCobranca === 'penalti' && c.replayPenalti;
-    // (a falta começa com a tomada do chute, de perto; um instante depois do contato corta para a câmera do voo)
-    const doChute = !doPenalti && querTomadaDoChute();
-    const tomada = doPenalti ? 'penalti' : doChute ? 'chute' : 'voo';
-    const rp = doPenalti ? poseReplayPenalti() : doChute ? poseReplayChute(inicio) : c.replayLateral ? poseReplayLateral(inicio) : poseReplay();
+    // (o replay começa com a tomada do chute, de perto; um instante depois do contato corta para a câmera do voo,
+    // ou para a do alto no pênalti)
+    const doChute = (!doPenalti || c.replayPenaltiChute) && querTomadaDoChute();
+    const tomada = doChute ? 'chute' : doPenalti ? 'penalti' : 'voo';
+    const rp = doChute ? poseReplayChute(inicio) : doPenalti ? poseReplayPenalti() : c.replayLateral ? poseReplayLateral(inicio) : poseReplay();
     // Primeiro quadro do replay e troca de tomada: corte seco para a câmera nova; depois ela desliza atrás da bola
     const corte = replay.tomada !== tomada;
     replay.tomada = tomada;
@@ -677,13 +702,17 @@ function atualizarCamera(dt) {
     return;
   }
 
-  // Pênalti, fim do lance: corte seco para a reação do cobrador (com os outros jogadores ao fundo); depois o
-  // olhar acompanha o cobrador de leve
+  // Pênalti (e gol de falta), fim do lance: corte seco para a reação do cobrador (com os outros jogadores ao
+  // fundo); depois o olhar acompanha o cobrador de leve
   if (querReacaoDoPenalti()) {
     const corte = !reacao;
     const rc = poseReacaoPenalti();
-    // (a linha "Força · km/h" sai: nesta câmera ela cairia em cima dos jogadores)
-    if (corte) ui.mostrarMensagem('');
+    // (a linha "Força · km/h" sai: nesta câmera ela cairia em cima dos jogadores; e o letreiro volta para o
+    // lugar de sempre, que nesta câmera fica abaixo dos jogadores)
+    if (corte) {
+      ui.mostrarMensagem('');
+      ui.moverResultado({ topo: null, compacto: false });
+    }
     camera.position.copy(rc.pos);
     if (corte) olharAtual.copy(rc.olhar);
     else olharAtual.lerp(rc.olhar, 1 - Math.exp(-dt * 4));
@@ -698,7 +727,7 @@ function atualizarCamera(dt) {
   // Troca para a aérea com uma transição suave (ou corte seco, se o tempo for 0)
   const querAerea = emJogo && c.aerea && !segurando ? 1 : 0;
   // (depois de segurar o cobrador, a troca aperta o passo se o voo for curto: a aérea chega antes de a bola chegar ao gol)
-  const transicao = segura > 0 ? Math.min(c.aereaTransicao, Math.max(0.15, 0.85 * jogada.chegada - segura)) : c.aereaTransicao;
+  const transicao = segura > 0 ? Math.min(c.aereaTransicao, Math.max(0.15, 0.7 * jogada.chegada - segura)) : c.aereaTransicao;
   if (transicao <= 0) misturaAerea = querAerea;
   else if (misturaAerea < querAerea) misturaAerea = Math.min(querAerea, misturaAerea + dt / transicao);
   else misturaAerea = Math.max(querAerea, misturaAerea - dt / transicao);
@@ -746,7 +775,7 @@ const desafio = { dia: '', indice: 0, melhorHoje: 0, tentativas: 0, enviado: 0, 
 const ranking = criarRanking(CONFIG.ranking);
 // Recorde de sequência de gols em cada modo, salvo no aparelho
 const recordes = { treino: 0, desafio: 0, penalti: 0 };
-for (const [modo, v] of Object.entries(lerSalvo('fkl-recordes', {}))) if (modo in recordes && Number.isFinite(v)) recordes[modo] = v;
+for (const [modo, v] of Object.entries(lerSalvo('fkl-recordes', {}))) if (modo in recordes && Number.isInteger(v) && v >= 0) recordes[modo] = v;
 // Pênaltis: lado em que a bola cruzou a linha nas últimas cobranças (o goleiro tem memória e vai mais
 // para o lado em que você insiste)
 let historicoPenaltis = [];
@@ -826,6 +855,16 @@ const gravador = criarGravador({ canvas: renderer.domElement, audio });
 let registro = null;   // a última cobrança feita
 let replay = null;     // { gravar } enquanto o replay roda
 let videoGol = null;   // { blob, nome } do replay gravado
+// O registro guarda as sementes e o chute, mas não os números do jogo: se eles mudarem depois do lance (painel
+// de ajuste, entrar ou sair do Desafio do Dia), o replay não repetiria a cobrança. Então ele deixa de valer.
+let replayVencido = false;
+function vencerReplay() {
+  if (!registro) return;
+  if (replay) pularReplay();
+  replayVencido = true;
+  videoGol = null;
+  mostrarAcoes();
+}
 const PAUSA_REPLAY = 0.8; // s parado antes da corrida, no replay
 const botoes = {
   replay: document.getElementById('botao-replay'),
@@ -854,7 +893,7 @@ botoes.salvar.addEventListener('click', async (e) => {
 
 // Os botões aparecem depois da cobrança e ficam até o próximo chute
 function mostrarAcoes() {
-  const pode = Boolean(registro) && !replay && (estado.fase === 'fim' || estado.fase === 'pronto');
+  const pode = Boolean(registro) && !replayVencido && !replay && (estado.fase === 'fim' || estado.fase === 'pronto');
   botoes.replay.hidden = !pode;
   botoes.video.hidden = !(pode && CONFIG.video && gravador.disponivel && !videoGol);
   botoes.salvar.hidden = !(pode && videoGol);
@@ -999,7 +1038,9 @@ function trocarModo(modo) {
   ui.definirModo(modo);
   salvar('fkl-modo', modo);
   // No desafio o painel fica trancado e os números do jogo voltam ao padrão (todo mundo joga igual)
+  const numerosAntes = JSON.stringify(CONFIG);
   painel.bloquear(modo === 'desafio');
+  if (JSON.stringify(CONFIG) !== numerosAntes) vencerReplay(); // (os ajustes do painel entraram ou saíram)
   elementos.barraIdeal.style.left = `${CONFIG.forcaIdeal * 100}%`;
   ui.mostrarPlacar(placar());
   novaCobranca();
@@ -1191,7 +1232,7 @@ function novaCobranca() {
 // marcando a mesma hora (mesmo balanço, passo para o lado no mesmo compasso); se no lance ele já estava em
 // campo havia mais tempo do que o replay mostra, esse tempo passa de uma vez aqui. No instante do chute ele
 // retoma o goleiro guardado (executarChute); o que sobra de diferença nessa hora é menos de um décimo de
-// milímetro a 60 quadros por segundo (uns 2 mm num celular a 20), e ninguém vê.
+// milímetro a 60 quadros por segundo (até uns 4 mm com quadros irregulares), e ninguém vê.
 let saltoGoleiroReplay = 0; // m: quanto o goleiro do replay estava longe do guardado na hora do chute
 function acertarGoleiroDoReplay() {
   const guardado = registro.goleiro;
@@ -1206,7 +1247,7 @@ function acertarGoleiroDoReplay() {
 }
 
 function iniciarReplay({ gravar }) {
-  if (!registro || replay) return;
+  if (!registro || replay || replayVencido) return;
   if (estado.fase !== 'fim' && estado.fase !== 'pronto') return;
   // Guarda a falta e o cobrador de agora: o replay pode ser de outro modo, e com a falta fixa a cobrança
   // seguinte precisa voltar para eles
@@ -1225,8 +1266,10 @@ function encerrarReplay() {
   falta = { ...r.antes.falta };
   cobrador = r.antes.cobrador;
   if (r.gravar) {
-    const apelido = (cobrador.apelido || cobrador.nome).toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const nome = `${jogada.resultado === 'gol' ? 'gol' : 'falta'}-${apelido}`;
+    // (o nome do arquivo é o da cobrança gravada, não o da próxima: quem bateu e se foi falta ou pênalti)
+    const quem = registro.cobrador;
+    const apelido = (quem.apelido || quem.nome).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const nome = `${jogada.resultado === 'gol' ? 'gol' : registro.modo === 'penalti' ? 'penalti' : 'falta'}-${apelido}`;
     gravador.parar().then((blob) => {
       if (!blob) return;
       videoGol = { blob, nome };
@@ -1281,6 +1324,7 @@ function soltarChute() {
     relogio: animacao.relogio, // o relógio da espera do cobrador na hora em que a corrida começou (o replay devolve)
   };
   videoGol = null;
+  replayVencido = false;
   mostrarAcoes();
 }
 
@@ -1394,6 +1438,8 @@ const painel = criarPainel({
   config: CONFIG,
   versao: VERSAO,
   aoMudar: (chave) => {
+    // Mexeu num número que muda o lance (não em câmera, som ou cenário): o replay guardado não vale mais
+    if (!['camera.', 'audio.', 'cenario.', 'rastro', 'video', 'mira.', 'falta.', 'sorteio.'].some((p) => chave.startsWith(p))) vencerReplay();
     if (chave.startsWith('falta.')) {
       // A posição da falta só faz sentido no treino (se a troca não puder acontecer agora, ignora)
       if (estado.modo !== 'treino') {
@@ -1553,52 +1599,132 @@ function mostrarResultado(resultado) {
   }
   if (goleiro.penalti) sub.push(descreverGoleiroPenalti(resultado));
   if (!replay) registrarSequencia(resultado);
-  ultimoLetreiro = lugarDoLetreiro(tipo, sub.join(' · '));
-  ui.mostrarResultado({ tipo, titulo, sub: sub.join(' · '), topo: ultimoLetreiro.topo });
+  // O texto de baixo cabe em duas linhas: se passar, saem os itens do meio (a técnica, a sequência)
+  let medida = ui.medirResultado({ tipo, titulo, sub: sub.join(' · ') });
+  while (medida.linhas > 2 && sub.length > 1) {
+    sub.splice(sub.length > 2 ? 1 : sub.length - 1, 1);
+    medida = ui.medirResultado({ tipo, titulo, sub: sub.join(' · ') });
+  }
+  ultimoLetreiro = lugarDoLetreiro(medida, () => ui.medirResultado({ tipo, titulo, sub: sub.join(' · '), compacto: true }));
+  // (no lugar de cima o letreiro ficaria escrito por cima da linha "Força · km/h": ela sai)
+  if (ultimoLetreiro.topo !== null && ultimoLetreiro.topo < 0.45) {
+    jogada.mensagem = '';
+    ui.mostrarMensagem('');
+  }
+  ui.mostrarResultado({ tipo, titulo, sub: sub.join(' · '), topo: ultimoLetreiro.topo, compacto: ultimoLetreiro.compacto });
   ui.mostrarPlacar(placar());
   mostrarAcoes();
 }
 
-// Onde o letreiro do resultado cabe sem tapar o gol nem a bola. O lugar de sempre (58% da altura, no CSS) cai
-// no gramado abaixo do gol; mas na câmera aérea a trave de baixo às vezes chega ali (no celular em pé, por uns
-// pixels: o letreiro desce um pouco, sem chegar nos controles), e em tela larga (computador, celular deitado)
-// o gol aparece bem mais embaixo e o letreiro passava por cima dele: procura a primeira faixa livre.
-// Devolve { topo: fração da altura da tela, ou null = o lugar de sempre; tapa: o lugar de sempre taparia? }.
-const LUGARES_DO_LETREIRO = { emPe: [0.58, 0.61, 0.64], deitado: [0.58, 0.65, 0.72, 0.36, 0.2] };
-function lugarDoLetreiro(tipo, texto = '') {
+// Onde o letreiro do resultado cabe sem tapar o lance. O lugar de sempre (58% da altura, no CSS) cai no gramado
+// abaixo do gol; mas na câmera aérea o gol às vezes chega ali (falta frontal de perto, pênalti), e em tela larga
+// (computador, celular deitado) o gol aparece bem mais embaixo. Então cada lugar possível ganha uma nota: quanto
+// do gol, da bola, do goleiro e do cobrador ele taparia (peso alto) e quanto dos outros jogadores (peso baixo).
+// A ordem da lista também pesa um pouco (o letreiro não muda de lugar por qualquer coisa: só sai do lugar de
+// sempre para deixar de tapar algo que importa, ou vários jogadores de uma vez). Fica o lugar de menor nota; se
+// nenhum deixa o gol, a bola, o goleiro e o cobrador livres, tenta de novo com o letreiro compacto (letra menor).
+// medida: { largura, altura } do letreiro em pixels (ui.medirResultado); medirCompacto(): a medida do compacto.
+// Devolve { topo: fração da altura da tela, ou null = o lugar de sempre; tapa: o lugar de sempre taparia o gol,
+// a bola, o goleiro ou o cobrador?; compacto }.
+const LUGARES_DO_LETREIRO = { emPe: [0.58, 0.61, 0.64, 0.67, 0.7, 0.3, 0.25], deitado: [0.58, 0.65, 0.72, 0.36, 0.2] };
+const cameraDoLetreiro = new THREE.PerspectiveCamera();
+function lugarDoLetreiro(medida, medirCompacto = null) {
   const L = window.innerWidth;
   const A = window.innerHeight;
   const v = new THREE.Vector3();
-  camera.updateMatrixWorld(); // (a câmera é a do quadro anterior; as matrizes dela têm de estar em dia)
+  // A câmera é a do quadro anterior. Se o resultado sai com a câmera ainda a caminho da aérea (bola na
+  // barreira logo depois do chute), a conta é com a aérea já no lugar: é nela que o letreiro vai ser lido.
+  let cam = camera;
+  const indoParaAerea = !replay && !cameraTeste && CONFIG.camera.aerea && misturaAerea < 1;
+  if (indoParaAerea) {
+    const aerea = poseAerea(posicaoDaFalta(falta));
+    cam = cameraDoLetreiro;
+    cam.fov = camera.fov;
+    cam.aspect = camera.aspect;
+    cam.near = camera.near;
+    cam.far = camera.far;
+    cam.updateProjectionMatrix();
+    cam.position.copy(aerea.pos);
+    cam.lookAt(aerea.olhar);
+  }
+  cam.updateMatrixWorld(); // (as matrizes têm de estar em dia)
   const naTela = (x, y, z) => {
-    v.set(x, y, z).project(camera);
+    v.set(x, y, z).project(cam);
     return v.z > 1 ? null : { x: ((v.x + 1) / 2) * L, y: ((1 - v.y) / 2) * A };
   };
-  // Caixas a evitar (pixels): o gol inteiro (traves e fundo da rede) e a bola com folga
+  const caixaDe = (pontos, folga = 0) => (pontos.every(Boolean) ? {
+    x0: Math.min(...pontos.map((p) => p.x)) - folga, x1: Math.max(...pontos.map((p) => p.x)) + folga,
+    y0: Math.min(...pontos.map((p) => p.y)) - folga, y1: Math.max(...pontos.map((p) => p.y)) + folga,
+  } : null);
+  // Uma pessoa de pé em (x, z): dos pés à cabeça, com a largura do corpo
+  const pessoa = (x, z, altura = 1.85) => {
+    const pe = naTela(x, 0, z);
+    const cabeca = naTela(x, altura, z);
+    if (!pe || !cabeca) return null;
+    const meia = Math.max(6, Math.abs(pe.y - cabeca.y) * 0.22);
+    return caixaDe([pe, cabeca, { x: pe.x - meia, y: pe.y }, { x: pe.x + meia, y: pe.y }]);
+  };
+  // Caixas a evitar (pixels). Peso alto: o gol inteiro (traves e fundo da rede), a bola com folga, o goleiro
+  // (de pé ou caído) e o cobrador. Peso baixo: a barreira e os outros jogadores.
   const caixas = [];
+  const por = (caixa, peso) => {
+    if (caixa && caixa.x1 > 0 && caixa.x0 < L && caixa.y1 > 0 && caixa.y0 < A) caixas.push({ ...caixa, peso });
+  };
   const meia = CONFIG.golLargura / 2;
   const gol = [];
   for (const x of [-meia, meia]) for (const y of [0, CONFIG.golAltura]) for (const z of [0, -CONFIG.golProfundidade]) gol.push(naTela(x, y, z));
-  if (gol.every(Boolean)) {
-    caixas.push({ x0: Math.min(...gol.map((p) => p.x)), x1: Math.max(...gol.map((p) => p.x)), y0: Math.min(...gol.map((p) => p.y)), y1: Math.max(...gol.map((p) => p.y)) });
-  }
+  por(caixaDe(gol), 1000);
   const b = naTela(bola.pos.x, bola.pos.y, bola.pos.z);
-  if (b) caixas.push({ x0: b.x - 28, x1: b.x + 28, y0: b.y - 28, y1: b.y + 28 });
-  // O letreiro: centrado, uns 560 px de largura (ou a tela), o título e as linhas do texto de baixo
+  if (b) por({ x0: b.x - 28, x1: b.x + 28, y0: b.y - 28, y1: b.y + 28 }, 1000);
+  const g = goleiro;
+  if (g && Number.isFinite(g.cx)) {
+    por(caixaDe([naTela(g.cx - 1, 0, g.z), naTela(g.cx + 1, 0, g.z), naTela(g.cx - 1, Math.max(1.9, g.cy + 0.9), g.z), naTela(g.cx + 1, Math.max(1.9, g.cy + 0.9), g.z)]), 1000);
+  }
+  if (cobradorBoneco) por(pessoa(cobradorBoneco.grupo.position.x, cobradorBoneco.grupo.position.z), 1000);
+  for (const j of barreira.jogadores) por(pessoa(j.x, j.z), 0.15);
+  for (const j of figurantes.jogadores) por(pessoa(j.x, j.z), 0.15);
   const emPe = L < A;
-  const meiaLargura = Math.min(L * 0.46, 280);
-  const linhas = texto ? Math.ceil((texto.length * 9) / Math.min(L * 0.94, 900)) : 0;
-  const altura = (tipo === 'gol' ? 92 : 58) + 22 * linhas;
-  // (no celular em pé, mais embaixo ficam a barra de força e o botão de chutar)
-  const chao = emPe ? 0.78 * A : A;
-  const livre = (f) => f * A + altura <= chao
-    && caixas.every((c) => c.x1 < L / 2 - meiaLargura || c.x0 > L / 2 + meiaLargura || c.y1 < f * A || c.y0 > f * A + altura);
+  // (no celular em pé, mais embaixo ficam a barra de força e o botão de chutar, apagados no fim do lance)
+  const chao = emPe ? 0.82 * A : A;
   const lugares = emPe ? LUGARES_DO_LETREIRO.emPe : LUGARES_DO_LETREIRO.deitado;
-  const tapa = !livre(lugares[0]); // (o lugar de sempre nunca passa do chão)
+  // Nota de um lugar para um letreiro desse tamanho: área tapada × peso (em pixels²); Infinity = passa do chão
+  const nota = (f, m) => {
+    const y0 = f * A;
+    const y1 = y0 + m.altura;
+    if (y1 > chao) return Infinity;
+    const x0 = L / 2 - m.largura / 2;
+    const x1 = L / 2 + m.largura / 2;
+    let soma = 0;
+    for (const c of caixas) {
+      const dx = Math.min(x1, c.x1) - Math.max(x0, c.x0);
+      const dy = Math.min(y1, c.y1) - Math.max(y0, c.y0);
+      if (dx > 0 && dy > 0) soma += dx * dy * c.peso;
+    }
+    return soma;
+  };
+  const PREFERENCIA = 300; // pixels² de jogador tapado que valem descer (ou subir) um lugar na lista
+  const melhor = (m) => {
+    let escolha = { f: lugares[0], nota: nota(lugares[0], m) };
+    lugares.forEach((f, i) => {
+      const n = nota(f, m) + i * PREFERENCIA;
+      if (n < escolha.nota) escolha = { f, nota: n };
+    });
+    return escolha;
+  };
+  const GRAVE = 1000 * 40; // tapa mais que uns 40 pixels² de gol, bola, goleiro ou cobrador
+  const tapa = nota(lugares[0], medida) >= GRAVE; // (o lugar de sempre nunca passa do chão)
   // (a câmera do replay do pênalti já enquadra o gol logo abaixo do letreiro: não mexe)
-  const fixo = Boolean(replay && replay.tomada === 'penalti');
-  const topo = !tapa || fixo ? null : lugares.find(livre) ?? null;
-  return { topo, tapa };
+  if (replay && replay.tomada === 'penalti') return { topo: null, tapa, compacto: false };
+  let escolha = melhor(medida);
+  let compacto = false;
+  if (escolha.nota >= GRAVE && medirCompacto) {
+    const outra = melhor(medirCompacto());
+    if (outra.nota < escolha.nota) {
+      escolha = outra;
+      compacto = true;
+    }
+  }
+  return { topo: escolha.f === lugares[0] ? null : escolha.f, tapa, compacto };
 }
 let ultimoLetreiro = null; // (para os testes: onde o último letreiro foi parar)
 
@@ -1706,25 +1832,56 @@ function querCameraLenta() {
   return chegando && naDirecao;
 }
 
-// Qualidade automática: se o celular não aguenta 60 quadros por segundo, desenha com menos pixels
-const qualidade = { amostras: 0, soma: 0, pixel: Math.min(window.devicePixelRatio, 2) };
+// Qualidade automática: se o celular não aguenta, o jogo desce degraus, do que menos se nota para o que mais se
+// nota: menos pixels (2 → 1,5), sombras em cruz (os quatro borrões dos refletores, sem a silhueta do corpo),
+// ainda menos pixels (1,25 e 1) e, só no fim, um borrão por jogador. A medida é por tempo (1,5 s de jogo), não
+// por número de quadros: celular lento não demora mais para ser ajudado. Os 3 primeiros segundos e os engasgos
+// soltos (montar uma falta, aquecer os bonecos) não contam. O degrau fica guardado no aparelho; ao abrir de
+// novo o jogo tenta um degrau acima do guardado, para um dia ruim não rebaixar o celular para sempre.
+// (A quantidade de jogadores em campo nunca é degrau: a bola bate neles e o Desafio do Dia é igual para todos.)
+const DEGRAUS_DE_QUALIDADE = [
+  { pixel: 2, sombras: 1 }, { pixel: 1.5, sombras: 1 }, { pixel: 1.5, sombras: 0.5 },
+  { pixel: 1.25, sombras: 0.5 }, { pixel: 1, sombras: 0.5 }, { pixel: 1, sombras: 0 },
+];
+const qualidade = { degrau: 0, tempo: 0, soma: 0, quadros: 0, engasgos: 0 };
+function aplicarQualidade(degrau) {
+  qualidade.degrau = Math.max(0, Math.min(DEGRAUS_DE_QUALIDADE.length - 1, degrau));
+  const d = DEGRAUS_DE_QUALIDADE[qualidade.degrau];
+  const pixel = Math.min(window.devicePixelRatio || 1, d.pixel);
+  if (renderer.getPixelRatio() !== pixel) {
+    renderer.setPixelRatio(pixel);
+    ajustarTela();
+  }
+  sombras.qualidade(d.sombras);
+}
 function ajustarQualidade(dtReal) {
   if (MODO_TESTE) return;
-  qualidade.soma += dtReal;
-  qualidade.amostras++;
-  if (qualidade.amostras < 90) return;
-  const media = qualidade.soma / qualidade.amostras;
-  qualidade.amostras = 0;
-  qualidade.soma = 0;
-  if (media > 1 / 45 && qualidade.pixel > 1) {
-    qualidade.pixel = Math.max(1, qualidade.pixel - 0.25);
-    renderer.setPixelRatio(qualidade.pixel);
-    ajustarTela();
-  } else if (media > 1 / 40 && qualidade.pixel <= 1 && !qualidade.sombrasSimples) {
-    // Já está no mínimo de pixels e ainda não dá conta: as sombras passam para a versão mais barata
-    qualidade.sombrasSimples = true;
-    sombras.qualidade(0);
+  if (window.tempoDeJogo < 3) return;
+  qualidade.tempo += dtReal;
+  // (o relógio do jogo corta cada quadro em 50 ms: quadro "cheio" é engasgo, ou celular abaixo de 20 por segundo)
+  if (dtReal >= 0.049) qualidade.engasgos++;
+  else {
+    qualidade.soma += dtReal;
+    qualidade.quadros++;
   }
+  if (qualidade.tempo < 1.5) return;
+  // Mais da metade dos quadros no teto: não é engasgo, é o ritmo do aparelho
+  const media = qualidade.engasgos > qualidade.quadros ? 0.05 : qualidade.quadros ? qualidade.soma / qualidade.quadros : 0;
+  qualidade.tempo = qualidade.soma = qualidade.quadros = qualidade.engasgos = 0;
+  if (media <= 1 / 45 || qualidade.degrau >= DEGRAUS_DE_QUALIDADE.length - 1) return;
+  // (o que já está no limite de pixels do aparelho pula os degraus que não mudariam nada)
+  const atual = DEGRAUS_DE_QUALIDADE[qualidade.degrau];
+  const limite = window.devicePixelRatio || 1;
+  let degrau = qualidade.degrau + (media > 1 / 30 ? 2 : 1);
+  while (degrau < DEGRAUS_DE_QUALIDADE.length - 1
+    && Math.min(limite, DEGRAUS_DE_QUALIDADE[degrau].pixel) === Math.min(limite, atual.pixel)
+    && DEGRAUS_DE_QUALIDADE[degrau].sombras === atual.sombras) degrau++;
+  aplicarQualidade(degrau);
+  salvar('fkl-qualidade', qualidade.degrau);
+}
+if (!MODO_TESTE) {
+  const guardado = lerSalvo('fkl-qualidade', 0);
+  if (Number.isInteger(guardado) && guardado > 1) aplicarQualidade(guardado - 1);
 }
 
 // Física, barreira e goleiro em passos pequenos (a ordem importa)
@@ -1833,7 +1990,7 @@ function passoDoJogo(dtReal, desenhar = true) {
   cenario.rede.bola(bola.pos, CONFIG.raioBola * bolaMesh.scale.x); // a rede de pano envolve a bola desenhada
   cenario.atualizar(dt);
   audio.atualizar(dt);
-  rastro.visivel = CONFIG.rastro;
+  rastro.visivel = CONFIG.rastro && !(replay && replay.tomada === 'chute'); // (na tomada de perto do replay, sem rastro)
   if (desenhar) renderer.render(scene, camera);
 }
 

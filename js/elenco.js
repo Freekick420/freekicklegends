@@ -33,7 +33,7 @@
 //   cabelo.preso: true = cabelo comprido preso atrás (rabo ou coque), no estilo 'longo'
 
 const PELE = {
-  clara: '#f2c9a5',
+  clara: '#f4c49c',
   claraRosada: '#f0c3a0',
   bronzeada: '#e2b48a',
   morenaClara: '#d4a072',

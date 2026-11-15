@@ -934,10 +934,10 @@ const PERFIL_TRONCO = perfil([
   [0.330, 0.195, 0.136, 0.128, 2.6],    // axilas
   [0.386, 0.190, 0.125, 0.123, 2.5],
   [0.420, 0.182, 0.111, 0.114, 2.4],
-  [0.447, 0.174, 0.097, 0.103, 2.3],    // ombros
-  [0.458, 0.165, 0.091, 0.098, 2.2],
-  [0.468, 0.150, 0.086, 0.093, 2.1],    // trapézio: sobe em rampa do ombro ao pescoço
-  [0.480, 0.123, 0.078, 0.085, 2.0, 0, -0.004],
+  [0.447, 0.176, 0.097, 0.103, 2.3],    // ombros
+  [0.458, 0.169, 0.091, 0.098, 2.2],
+  [0.468, 0.156, 0.086, 0.094, 2.1],    // trapézio: sobe em rampa do ombro ao pescoço (cheio: ombro reto, não caído)
+  [0.480, 0.130, 0.078, 0.086, 2.0, 0, -0.004],
   [0.490, 0.095, 0.070, 0.079, 2.0, 0, -0.006],   // gola
 ]);
 const ALTURA_AXILA = 0.33;
@@ -1098,7 +1098,9 @@ function yDaCamisa(v) {
   return misturar(t.ys[k], t.ys[k + 1], (v - t.v[k]) / ((t.v[k + 1] - t.v[k]) || 1));
 }
 // A gola fica mais alta atrás do que na frente (o pescoço é inclinado)
-const subidaDaGola = (y, sn) => 0.04 * (0.5 - 0.5 * sn) * suave((y - 0.41) / 0.07);
+// (e a gola inteira sobe uns 2 cm no pescoço: SUBIDA_GOLA; sem isso o pescoço ficava comprido)
+const SUBIDA_GOLA = 0.02;
+const subidaDaGola = (y, sn) => 0.04 * (0.5 - 0.5 * sn) * suave((y - 0.41) / 0.07) + SUBIDA_GOLA * suave((y - 0.452) / 0.036);
 // A barra não é um aro: ondula (5 ondas na volta) e cai um pouco mais atrás
 const caidaDaBarra = (y, cs, sn) => (y < -0.02 ? suave((-0.02 - y) / 0.06) * (-0.005 * Math.sin(5 * Math.atan2(sn, cs) + 0.7) - 0.004 - 0.011 * Math.max(0, -sn)) : 0);
 
@@ -2866,6 +2868,32 @@ function pintarRosto(ctx, r, e = 1) {
   ctx.save();
   ctx.scale(e, e);
 
+  // Pele escura: os traços são pintados em tons da própria pele e, no tamanho do celular, o rosto virava uma
+  // mancha lisa. Quanto mais escura (tomEscuro de 0 a 1), mais luz na testa, no nariz, nas maçãs e no queixo,
+  // branco do olho mais claro, lábio mais claro que a pele e sobrancelha mais cheia.
+  const tomEscuro = limitar((0.56 - (0.2126 * pele[0] + 0.7152 * pele[1] + 0.0722 * pele[2]) / 255) / 0.22, 0, 1);
+  if (tomEscuro > 0) {
+    const clara = pele.map((c) => Math.min(255, Math.round(c * 1.55 + 22)));
+    const luz = (ax, ay, rx, ry, forca) => {
+      const [x, y] = noRosto(ax, ay);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(rx, ry);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(0, css(clara, forca * tomEscuro));
+      g.addColorStop(1, css(clara, 0));
+      ctx.fillStyle = g;
+      ctx.fillRect(-1, -1, 2, 2);
+      ctx.restore();
+    };
+    luz(0, 60, 34, 13, 0.34);    // testa
+    luz(0, 96, 6, 15, 0.42);     // ponte do nariz
+    luz(0, 107, 8, 5, 0.3);      // ponta do nariz
+    luz(-29, 102, 15, 9, 0.3);   // maçãs do rosto
+    luz(29, 102, 15, 9, 0.3);
+    luz(0, 136, 12, 7, 0.24);    // queixo
+  }
+  const grossura = r.grossura * (1 + 0.22 * tomEscuro);
   // Olhos: sombra da órbita, branco, íris, pupila, brilho e pálpebra de cima
   const escura = pele.map((c) => Math.round(c * 0.45));
   for (const s of [-1, 1]) {
@@ -2880,9 +2908,9 @@ function pintarRosto(ctx, r, e = 1) {
     // Branco do olho (amêndoa)
     // (a pálpebra faz sombra em cima; os cantos são mais escuros que o meio)
     const branco = ctx.createLinearGradient(0, y - 7, 0, y + 6);
-    branco.addColorStop(0, '#9c9289');
-    branco.addColorStop(0.45, '#ddd5ca');
-    branco.addColorStop(1, '#cfc6ba');
+    branco.addColorStop(0, tomEscuro > 0.5 ? '#b3aaa0' : '#9c9289');
+    branco.addColorStop(0.45, tomEscuro > 0.5 ? '#f3ede4' : '#ddd5ca');
+    branco.addColorStop(1, tomEscuro > 0.5 ? '#e4dcd0' : '#cfc6ba');
     ctx.fillStyle = branco;
     ctx.beginPath();
     ctx.moveTo(x - 13, y + 0.5);
@@ -2891,7 +2919,7 @@ function pintarRosto(ctx, r, e = 1) {
     ctx.fill();
     for (const lado of [-1, 1]) {
       const canto = ctx.createRadialGradient(x + lado * 13, y, 0, x + lado * 13, y, 7);
-      canto.addColorStop(0, css(escura, 0.5));
+      canto.addColorStop(0, css(escura, 0.5 - 0.2 * tomEscuro));
       canto.addColorStop(1, css(escura, 0));
       ctx.fillStyle = canto;
       ctx.fillRect(x + lado * 13 - 7, y - 6, 14, 12);
@@ -2944,9 +2972,9 @@ function pintarRosto(ctx, r, e = 1) {
     const corPelo = rgb255(r.sobrancelha);
     ctx.fillStyle = css(corPelo, 0.78);
     ctx.beginPath();
-    ctx.moveTo(x0, y0 + 2.4 * r.grossura);
-    ctx.quadraticCurveTo(x1, y1 + 2 * r.grossura, x2, y2 + 0.5);
-    ctx.quadraticCurveTo(x1, y1 - 2.2 * r.grossura, x0 + s * 1.5, y0 - 1.6 * r.grossura);
+    ctx.moveTo(x0, y0 + 2.4 * grossura);
+    ctx.quadraticCurveTo(x1, y1 + 2 * grossura, x2, y2 + 0.5);
+    ctx.quadraticCurveTo(x1, y1 - 2.2 * grossura, x0 + s * 1.5, y0 - 1.6 * grossura);
     ctx.closePath();
     ctx.fill();
     ctx.lineCap = 'round';
@@ -2954,7 +2982,7 @@ function pintarRosto(ctx, r, e = 1) {
       const t = (k + 0.5) / 64;
       const bx0 = (1 - t) * (1 - t) * x0 + 2 * t * (1 - t) * x1 + t * t * x2;
       const by0 = (1 - t) * (1 - t) * y0 + 2 * t * (1 - t) * y1 + t * t * y2;
-      const meia = (2.5 * (1 - t) ** 0.7 + 0.4) * r.grossura;
+      const meia = (2.5 * (1 - t) ** 0.7 + 0.4) * grossura;
       const dy = (sorteioFixo(k, 61) - 0.5) * 2.3 * meia;
       const comp = 2 + 1.6 * sorteioFixo(k, 67);
       ctx.strokeStyle = css(corPelo.map((c) => Math.round(c * (0.85 + 0.3 * sorteioFixo(k, 71)))), 0.6);
@@ -2995,7 +3023,7 @@ function pintarRosto(ctx, r, e = 1) {
   }
   // Boca: lábio de cima mais escuro, de baixo com brilho, e a linha da boca
   const comBarba = r.estiloBarba && r.estiloBarba !== 'rala';
-  const labio = pele.map((c, i) => Math.round((c * 0.58 + [176, 74, 70][i] * 0.42 * (pele[0] > 150 ? 1 : 0.6)) * (comBarba ? 0.84 : 1)));
+  const labio = pele.map((c, i) => Math.round((c * 0.58 + [176, 74, 70][i] * 0.42 * (pele[0] > 150 ? 1 : 0.6)) * (comBarba ? 0.84 : 1) * (1 + 0.3 * tomEscuro)));
   const [bx, by] = noRosto(0, 121);
   const lw = comBarba ? 16 : 21; // meia largura da boca (px)
   ctx.fillStyle = css(labio, 0.95);
@@ -3524,7 +3552,7 @@ function texturaUniforme(uni) {
     }
     // Gola: faixa em cima e um V cheio na frente; uma linha clara/escura embaixo se ela some no padrão
     const yGola = Y(0.481);
-    const yV = Y(0.412);
+    const yV = Y(0.43); // (V raso)
     const meio = X(0.25);
     const aberta = 0.034 * R.w;
     const fundosGola = [uni.camisa, ...(uni.padrao === 'liso' ? [] : uni.cores)];
@@ -3986,7 +4014,7 @@ function criarCacheContado(guardar, descartar) {
   };
 }
 // Uniformes: um atlas por time
-const cacheUniformes = criarCacheContado(6, (v) => { if (v.mapa) v.mapa.dispose(); });
+const cacheUniformes = criarCacheContado(12, (v) => { if (v.mapa) v.mapa.dispose(); });
 function pegarUniforme(uni) {
   const chave = JSON.stringify(uni);
   return cacheUniformes.pegar(chave, () => ({ mapa: temDocumento ? texturaUniforme(uni) : null }));
@@ -4048,7 +4076,7 @@ function camadaPele() {
     // Sombra da gola (ela sobe atrás: subidaDaGola): escura junto do tecido, some uns 3 cm acima
     for (let px = -FOLGA; px < R.w + FOLGA; px += 2) {
       const u = px / R.w;
-      const [x, yGola] = P(u, 0.022 + 0.04 * (0.5 - 0.5 * Math.sin(2 * Math.PI * u)));
+      const [x, yGola] = P(u, 0.022 + SUBIDA_GOLA + 0.04 * (0.5 - 0.5 * Math.sin(2 * Math.PI * u)));
       const g = ctx.createLinearGradient(0, yGola - 10, 0, yGola + 2);
       g.addColorStop(0, 'rgba(0,0,0,0)');
       g.addColorStop(1, 'rgba(0,0,0,0.3)');
@@ -4373,7 +4401,8 @@ const descartarAparencia = (v) => {
   if (v.mapa) v.mapa.dispose();
   v.material.dispose();
 };
-const cacheAparencias = { 512: criarCacheContado(10, descartarAparencia), 256: criarCacheContado(24, descartarAparencia) };
+// (256: cabem todos os rostos genéricos, 24 de base × 2 variações; uns 16 MB de placa de vídeo no máximo)
+const cacheAparencias = { 512: criarCacheContado(10, descartarAparencia), 256: criarCacheContado(48, descartarAparencia) };
 function pegarAparencia(r, tamanho) {
   const chave = JSON.stringify(r);
   return cacheAparencias[tamanho].pegar(chave, () => {
@@ -5086,10 +5115,15 @@ export function visualAdversario(indice = 0, altura = 1.84) {
   const v = { ...r, cabelo, faixa: null, altura, coxas: 'normais', textura: 'baixa' };
   const decimos = Math.round(altura * 10000); // décimos de milímetro
   if (decimos % 100 === 0) return v; // altura em centímetros inteiros (figurantes, padrão): a aparência de base
-  const s = (k) => sorteioFixo(decimos, k + 17 * Math.floor(indice));
+  // Duas variações por aparência de base (a altura escolhe qual): são poucos rostos diferentes ao todo, e a
+  // pintura de cada um fica guardada de uma falta para a outra (antes cada falta pintava a barreira inteira
+  // de novo, porque o tom do cabelo era um número qualquer e nunca se repetia)
+  const base = ((Math.floor(indice) % n) + n) % n;
+  const variante = sorteioFixo(decimos, 17 * Math.floor(indice)) < 0.5 ? 0 : 1;
+  const s = (k) => sorteioFixo(2 * base + variante + 1, k);
   const cortes = CORTES[cabelo.estilo];
   if (cortes) cabelo.corte = cortes[Math.floor(s(1) * cortes.length)];
-  cabelo.cor = corMisturada(cabelo.cor, s(2) < 0.5 ? '#0c0a08' : '#7a5a3a', 0.1 + 0.25 * s(3));
+  cabelo.cor = corMisturada(cabelo.cor, s(2) < 0.5 ? '#0c0a08' : '#7a5a3a', s(3) < 0.5 ? 0.15 : 0.3);
   const barbas = r.barba === 'nenhuma' ? ['nenhuma', 'nenhuma', 'rala'] : [r.barba, r.barba, 'rala', 'nenhuma'];
   v.barba = barbas[Math.floor(s(4) * barbas.length)];
   if (v.barba !== 'nenhuma') v.corBarba = r.corBarba || cabelo.cor;

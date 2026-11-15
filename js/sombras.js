@@ -341,7 +341,9 @@ function criarBorroes(scene) {
 export function criarSombras(scene, opcoes = {}) {
   const refletores = opcoes.refletores || REFLETORES_PADRAO;
   const endereco = typeof location !== 'undefined' ? new URLSearchParams(location.search) : null;
-  const quemTemSilhueta = (endereco && endereco.get('silhuetas')) || opcoes.silhuetas || 'destaque';
+  // (o ?silhuetas= do endereço só vale no modo teste e nas páginas de inspeção de testes/)
+  const deTeste = endereco && (endereco.has('teste') || location.pathname.includes('/testes/'));
+  const quemTemSilhueta = (deTeste && endereco.get('silhuetas')) || opcoes.silhuetas || 'destaque';
   // (com 'todos' o teste é da aparência: as silhuetas provisórias são pesadas e não entram no orçamento)
   const orcamento = quemTemSilhueta === 'todos' ? Infinity : (opcoes.orcamento || ORCAMENTO_SILHUETAS);
 

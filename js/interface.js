@@ -95,7 +95,7 @@ export function criarInterface({
         <span class="cartao-numero">${jogador.numero}</span>
         <div class="cartao-nome">
           <b>${jogador.nome}</b>
-          <small>${jogador.apelido} · ${jogador.estilo}</small>
+          <small>${jogador.apelido}</small>
         </div>
         <div class="cartao-ovr"><b>${overall(jogador)}</b><small>OVR</small></div>
       </div>
@@ -175,7 +175,8 @@ export function criarInterface({
           <span class="ranking-nome" title="${escaparHtml(nome)}">${escaparHtml(nome)}</span>
           <span class="ranking-gols">${gols}<small>${gols === 1 ? 'gol' : 'gols'}</small></span>
         </div>`).join('')
-      : '<p class="ranking-vazio">Ninguém entrou no ranking de hoje ainda. Seja o primeiro!</p>';
+      // (com um aviso na tela, carregando ou erro, a lista vazia não quer dizer que ninguém entrou)
+      : mensagem ? '' : '<p class="ranking-vazio">Ninguém entrou no ranking de hoje ainda. Seja o primeiro!</p>';
 
     if (ranking.hidden) {
       ranking.hidden = false;
@@ -306,16 +307,44 @@ export function criarInterface({
     mostrarMensagem(texto) {
       $('mensagem').textContent = texto;
     },
-    // topo (opcional): fração da altura da tela onde o letreiro fica; sem ele, o lugar de sempre (o do CSS)
-    mostrarResultado({ tipo, titulo, sub, topo = null }) {
+    // topo (opcional): fração da altura da tela onde o letreiro fica; sem ele, o lugar de sempre (o do CSS).
+    // compacto: letra menor (quando o letreiro normal taparia o lance)
+    mostrarResultado({ tipo, titulo, sub, topo = null, compacto = false }) {
       resultado.style.top = typeof topo === 'number' ? `${(topo * 100).toFixed(1)}%` : '';
       const letreiro = $('resultado-titulo');
       letreiro.textContent = titulo;
       $('resultado-sub').textContent = sub || '';
-      resultado.className = tipo;
+      resultado.className = compacto ? `${tipo} compacto` : tipo;
       ajustarLetreiro(letreiro);
       void resultado.offsetWidth; // reinicia a animação
       resultado.classList.add('mostrar');
+    },
+    // Mede o letreiro sem mostrar (ele fica invisível até mostrarResultado): { largura, altura } em pixels e
+    // quantas linhas o texto de baixo ocupa. Quem escolhe o lugar do letreiro (js/main.js) usa a medida de verdade.
+    medirResultado({ tipo, titulo, sub, compacto = false }) {
+      const letreiro = $('resultado-titulo');
+      const texto = $('resultado-sub');
+      letreiro.textContent = titulo;
+      texto.textContent = sub || '';
+      resultado.className = compacto ? `${tipo} compacto` : tipo;
+      ajustarLetreiro(letreiro);
+      const largura = (el) => {
+        const faixa = document.createRange();
+        faixa.selectNodeContents(el);
+        return faixa.getBoundingClientRect().width || 0;
+      };
+      const alturaDaLinha = parseFloat(getComputedStyle(texto).lineHeight) || 22;
+      return {
+        largura: Math.min(window.innerWidth, Math.max(largura(letreiro), largura(texto))),
+        altura: resultado.offsetHeight,
+        linhas: sub ? Math.max(1, Math.round(texto.offsetHeight / alturaDaLinha)) : 0,
+      };
+    },
+    // Muda o letreiro de lugar (e de tamanho) sem recomeçar a animação: no corte de câmera para a reação
+    moverResultado({ topo = null, compacto = false }) {
+      resultado.style.top = typeof topo === 'number' ? `${(topo * 100).toFixed(1)}%` : '';
+      resultado.classList.toggle('compacto', compacto);
+      if (resultado.classList.contains('mostrar')) ajustarLetreiro($('resultado-titulo'));
     },
     esconderResultado() {
       resultado.className = '';
@@ -341,7 +370,7 @@ export function criarInterface({
   // No modo teste (?teste), as capturas automáticas abrem a folha do ranking sem passar pela internet
   if (new URLSearchParams(location.search).has('teste')) {
     // (e mostram um letreiro de resultado qualquer, para conferir se cabe na tela)
-    window.interfaceTeste = { mostrarRanking, fecharRanking, rankingAberto, folhaAberta, mostrarResultado: (r) => api.mostrarResultado(r) };
+    window.interfaceTeste = { mostrarRanking, fecharRanking, rankingAberto, folhaAberta, mostrarResultado: (r) => api.mostrarResultado(r), medirResultado: (r) => api.medirResultado(r) };
   }
 
   return api;

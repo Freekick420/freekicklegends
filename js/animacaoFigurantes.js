@@ -872,7 +872,10 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
     estado.cobZ = B.z - (B.z / dB) * 0.9;
     for (let i = 0; i < atores.length; i++) escolherReacao(atores[i], resultado);
     if (resultado !== 'gol') return;
-    const dist = (a) => Math.hypot(a.j.x - estado.cobX, a.j.z - estado.cobZ);
+    // (as contas usam o lugar combinado de cada um, não onde ele está neste quadro: quem ainda está andando
+    // daria uma escolha diferente no replay, que vê o resultado noutro quadro)
+    const lugar = (a) => a.j.plano || a.j.base || a.j;
+    const dist = (a) => Math.hypot(lugar(a).x - estado.cobX, lugar(a).z - estado.cobZ);
     const companheiros = atores.filter((a) => a.j.time === 'ataque' && !a.j.forcar).sort((a, b) => dist(a) - dist(b) || a.i - b.i);
     const n = companheiros.length >= 5 ? 3 : Math.min(2, companheiros.length);
     // (cada um corre de um jeito: braços abertos, punho no ar, os dois braços para cima)
@@ -891,7 +894,7 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
       for (let k = i + 1; k < resto.length; k++) {
         const b = resto[k];
         if (b.reacao.corre) continue;
-        const d = Math.hypot(a.j.x - b.j.x, a.j.z - b.j.z);
+        const d = Math.hypot(lugar(a).x - lugar(b).x, lugar(a).z - lugar(b).z);
         if (d < dMelhor) {
           dMelhor = d;
           melhor = b;
@@ -899,8 +902,8 @@ export function criarAnimadorFigurantes(scene, opcoes = {}) {
       }
       if (!melhor) continue;
       // O encontro é no meio do caminho, mas longe de quem não participa (não se abraçam em cima de um zagueiro)
-      let mx = (a.j.x + melhor.j.x) / 2;
-      let mz = (a.j.z + melhor.j.z) / 2;
+      let mx = (lugar(a).x + lugar(melhor).x) / 2;
+      let mz = (lugar(a).z + lugar(melhor).z) / 2;
       const obst = montagem.obstaculos || [];
       for (let volta = 0; volta < 3; volta++) {
         for (let q = 0; q < atores.length + obst.length; q++) {
