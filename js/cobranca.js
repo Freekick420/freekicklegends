@@ -345,6 +345,7 @@ const PONTOS_PE = (() => {
 //     foraLado/bicoAlto = quanto mudam com o lado e a altura do ponto de contato; joelho = joelho para fora
 //   pé de apoio: lat = m do centro da bola, para o lado; atras = m atrás do centro da bola
 //   corpo no contato: b1 = m que o quadril fica atrás do pé de apoio; desce = m que o quadril abaixa;
+//     calc = rad que o calcanhar do pé de apoio levanta (com a barra cheia);
 //     pontos = as partes do pé que podem pegar na bola (índices de PONTOS_PE.bate), da preferida para a reserva
 //   terminação: tPouso = s do contato até o pé do chute pisar; segue = quanto o corpo segue a direção do
 //     chute (0 = continua na linha da corrida); salto = sai do chão e cai no pé que chutou; pousoLado = m que
@@ -352,35 +353,35 @@ const PONTOS_PE = (() => {
 //     pé de apoio); pivo = rad que o pé de apoio gira no chão; anda = quanto o corpo ainda anda depois
 const BATIDAS = {
   peito: {
-    fora: 0.42, bico: 0.95, foraLado: -0.3, bicoAlto: 0.55, joelho: 0.22, lat: 0.235, atras: 0.07, b1: 0.1, desce: 0.03, pontos: [0, 1, 3, 4, 8, 7],
+    fora: 0.42, bico: 0.95, foraLado: -0.3, bicoAlto: 0.55, joelho: 0.22, lat: 0.235, atras: 0.07, b1: 0.12, desce: 0.02, calc: 0.3, pontos: [0, 1, 3, 4, 8, 7],
     tPouso: 0.36, segue: 0.7, salto: true, pousoLado: 0.1, vira: 0.0, pivo: 0.0, anda: 1,
   },
   pancada: {
-    fora: 0.32, bico: 1.02, foraLado: -0.3, bicoAlto: 0.5, joelho: 0.18, lat: 0.24, atras: 0.09, b1: 0.13, desce: 0.035, pontos: [0, 1, 3, 4, 8, 7],
+    fora: 0.32, bico: 1.02, foraLado: -0.3, bicoAlto: 0.5, joelho: 0.18, lat: 0.24, atras: 0.09, b1: 0.14, desce: 0.022, calc: 0.32, pontos: [0, 1, 3, 4, 8, 7],
     tPouso: 0.4, segue: 0.8, salto: true, pousoLado: 0.1, vira: 0.0, pivo: 0.0, anda: 1.15,
   },
   semGiro: {
-    fora: 0.28, bico: 1.02, foraLado: -0.25, bicoAlto: 0.5, joelho: 0.18, lat: 0.23, atras: 0.06, b1: 0.08, desce: 0.028, pontos: [0, 1, 3, 4, 8, 7],
+    fora: 0.28, bico: 1.02, foraLado: -0.25, bicoAlto: 0.5, joelho: 0.18, lat: 0.23, atras: 0.06, b1: 0.1, desce: 0.02, calc: 0.3, pontos: [0, 1, 3, 4, 8, 7],
     tPouso: 0.28, segue: 0.8, salto: true, pousoLado: 0.08, vira: 0.0, pivo: 0.0, anda: 0.6,
   },
   chapa: {
-    fora: 0.85, bico: 0.45, foraLado: -0.75, bicoAlto: 0.45, joelho: 0.5, lat: 0.235, atras: 0.06, b1: 0.1, desce: 0.03, pontos: [5, 6, 3, 4, 7],
+    fora: 0.85, bico: 0.45, foraLado: -0.75, bicoAlto: 0.45, joelho: 0.5, lat: 0.235, atras: 0.06, b1: 0.12, desce: 0.02, calc: 0.15, pontos: [5, 6, 3, 4, 7],
     tPouso: 0.38, segue: 0.45, salto: false, pousoLado: -0.06, vira: 0.3, pivo: 0.4, anda: 0.85,
   },
   trivela: {
-    fora: -0.38, bico: 0.8, foraLado: -0.3, bicoAlto: 0.5, joelho: -0.05, lat: 0.26, atras: 0.08, b1: 0.1, desce: 0.03, pontos: [8, 9, 10, 11],
+    fora: -0.38, bico: 0.8, foraLado: -0.3, bicoAlto: 0.5, joelho: -0.05, lat: 0.26, atras: 0.08, b1: 0.12, desce: 0.02, calc: 0.22, pontos: [8, 9, 10, 11],
     tPouso: 0.36, segue: 0.75, salto: false, pousoLado: 0.26, vira: -0.2, pivo: -0.15, anda: 0.85,
   },
   cavadinha: {
-    fora: 0.25, bico: 0.3, foraLado: -0.2, bicoAlto: 0.4, joelho: 0.25, lat: 0.22, atras: 0.12, b1: 0.15, desce: 0.04, pontos: [2, 1, 7, 11],
+    fora: 0.25, bico: 0.3, foraLado: -0.2, bicoAlto: 0.4, joelho: 0.25, lat: 0.22, atras: 0.12, b1: 0.15, desce: 0.04, calc: 0.05, pontos: [2, 1, 7, 11],
     tPouso: 0.27, segue: 0.7, salto: false, pousoLado: 0.08, vira: 0.0, pivo: 0.0, anda: 0.5,
   },
   rasteiro: {
-    fora: 0.38, bico: 1.12, foraLado: -0.3, bicoAlto: 0.3, joelho: 0.22, lat: 0.23, atras: 0.02, b1: 0.03, desce: 0.045, pontos: [0, 1, 3, 4, 8, 7],
+    fora: 0.38, bico: 0.98, foraLado: -0.3, bicoAlto: -0.45, joelho: 0.22, lat: 0.23, atras: 0.02, b1: 0.06, desce: 0.03, calc: 0.34, dentro: 0.03, pontos: [0, 1, 3, 4, 8, 7],
     tPouso: 0.3, segue: 0.75, salto: false, pousoLado: 0.1, vira: 0.0, pivo: 0.0, anda: 0.9,
   },
   folhaSeca: {
-    fora: 0.35, bico: 0.92, foraLado: -0.3, bicoAlto: 0.5, joelho: 0.22, lat: 0.235, atras: 0.08, b1: 0.11, desce: 0.03, pontos: [0, 1, 3, 4, 8, 7],
+    fora: 0.35, bico: 0.92, foraLado: -0.3, bicoAlto: 0.5, joelho: 0.22, lat: 0.235, atras: 0.08, b1: 0.12, desce: 0.02, calc: 0.24, pontos: [0, 1, 3, 4, 8, 7],
     tPouso: 0.32, segue: 0.7, salto: false, pousoLado: 0.1, vira: 0.0, pivo: 0.0, anda: 0.7,
   },
 };
@@ -416,45 +417,48 @@ const CANAIS_PERNA = ['pf', 'pl', 'pg', 'pj', 'pt', 'pp', 'pz'];
 function valoresDoChute(batida, pw, aberto, ik) {
   const k = ik || { pf: 0.45, pl: 0.05, pg: 0.2, pj: 1.0, pt: 0.4, pp: 0, pz: 0 };
   const ab = aberto ? 1 : 0;
+  const f = limitar((pw - 0.3) / 0.7, 0, 1); // a barra de força: 0 = toque, 1 = cheia
   const v = {
     // Perna armada atrás: quadril estendido, joelho dobrado, bacia girada para trás do lado do chute, tronco
-    // contra-girando e inclinado para o lado do apoio (o "arco"), braço do lado do apoio aberto, alto e para trás
+    // contra-girando e inclinado para o lado do apoio (o "arco"), braço do lado do apoio aberto, alto e para
+    // trás; o braço do lado do chute vem dobrado na frente do corpo. Com a barra baixa, tudo isso é pequeno.
     armada: {
-      qf: 0.08, qg: -0.38 - 0.16 * pw, ql: -0.02,
-      tf: -0.06 - 0.06 * pw, tl: -0.14 - 0.06 * pw, tg: 0.45 + 0.25 * pw,
-      ef: -0.35 - 0.35 * pw, el: 1.05 + 0.3 * pw + 0.2 * ab, ec: 0.35 - 0.1 * ab, eg: 0,
-      df: 0.45 + 0.1 * pw, dl: 0.2, dc: 1.0, dg: 0,
-      pf: -0.4 - 0.22 * pw, pl: 0.16, pg: 0.2, pj: 1.5 + 0.45 * pw, pt: 0.55, pp: 0, pz: 0,
+      qf: 0.08, qg: -0.28 - 0.22 * f, ql: -0.02,
+      tf: -0.03 - 0.08 * f, tl: -0.08 - 0.16 * f, tg: 0.24 + 0.24 * f,
+      ef: -0.2 - 0.5 * f, el: 0.8 + 0.6 * f + 0.2 * ab, ec: 0.35 - 0.1 * ab, eg: 0,
+      df: 0.2 + 0.1 * f, dl: 0.12, dc: 1.3, dg: -0.9,
+      pf: -0.14 - 0.48 * f, pl: 0.16, pg: 0.2, pj: 1.0 + 0.95 * f, pt: 0.55, pp: 0, pz: 0,
     },
     // Contato: bacia de frente, lado do chute mais alto, tronco inclinado para o lado do apoio e um pouco
     // para trás (ombros atrás do quadril), braço de equilíbrio ainda aberto
     contato: {
       qf: -0.02, qg: -0.04, ql: -0.15,
-      tf: -0.04, tl: -0.26 - 0.06 * pw, tg: 0.2,
-      ef: 0, el: 1.15 + 0.2 * pw + 0.25 * ab, ec: 0.3 - 0.1 * ab, eg: 0,
-      df: -0.2, dl: 0.35, dc: 0.7, dg: 0,
+      tf: -0.04, tl: -0.16 - 0.18 * f, tg: 0.18,
+      ef: 0, el: 0.95 + 0.45 * f + 0.25 * ab, ec: 0.3 - 0.1 * ab, eg: 0,
+      df: -0.15, dl: 0.25, dc: 1.0, dg: -0.2,
     },
     // Logo depois da bola: o joelho acaba de estender
     estende: {
-      qf: -0.02, qg: 0.12, ql: -0.14, tf: 0.02, tl: -0.26, tg: 0,
-      ef: 0.3, el: 1.0 + 0.2 * ab, ec: 0.45, eg: 0, df: -0.4, dl: 0.45, dc: 0.55, dg: 0,
+      qf: -0.02, qg: 0.12, ql: -0.14, tf: 0.02, tl: -0.16 - 0.12 * f, tg: 0,
+      ef: 0.25, el: 0.8 + 0.2 * f + 0.2 * ab, ec: 0.6, eg: -0.2, df: -0.35, dl: 0.3, dc: 0.9, dg: 0,
       pf: k.pf + 0.42, pl: k.pl * 0.5, pg: k.pg * 0.6, pj: Math.max(0.12, k.pj * 0.2), pt: k.pt, pp: k.pp * 0.7, pz: k.pz * 0.5,
     },
-    // O alto da terminação: a perna sobe, o tronco fecha por cima dela, os braços trocam de lado
+    // O alto da terminação: a perna sobe, o tronco fecha por cima dela, os braços trocam de lado (o do lado
+    // do chute vai para baixo e para trás, dobrado, de contrapeso)
     alto: {
-      qf: 0.02, qg: 0.3, ql: -0.08, tf: 0.26 + 0.1 * pw, tl: -0.12, tg: -0.4,
-      ef: 0.9, el: 0.45, ec: 1.0, eg: 0, df: -0.7, dl: 0.6, dc: 0.4, dg: 0,
-      pf: 0.95 + 0.55 * pw, pl: -0.05, pg: 0.05, pj: 0.25 + 0.2 * (1 - pw), pt: 0.4, pp: 0, pz: 0,
+      qf: 0.02, qg: 0.3, ql: -0.08, tf: 0.26 + 0.1 * pw, tl: -0.12, tg: -0.36,
+      ef: 0.35, el: 0.3, ec: 1.45, eg: -1.0, df: -0.6, dl: 0.32, dc: 0.95, dg: 0,
+      pf: 0.9 + 0.7 * pw, pl: -0.05, pg: 0.05, pj: 0.18 + 0.2 * (1 - pw), pt: 0.4, pp: 0, pz: 0,
     },
     // A perna desce para pisar
     queda: {
       qf: 0.02, qg: 0.14, ql: 0, tf: 0.24, tl: -0.02, tg: -0.15,
-      ef: 0.35, el: 0.4, ec: 0.8, eg: 0, df: -0.3, dl: 0.45, dc: 0.6, dg: 0,
+      ef: 0.15, el: 0.25, ec: 0.9, eg: -0.6, df: -0.3, dl: 0.3, dc: 0.8, dg: 0,
       pf: 0.66, pl: 0.02, pg: 0, pj: 1.1, pt: 0.1, pp: 0, pz: 0,
     },
     pouso: {
-      qf: 0.02, qg: 0.05, ql: 0, tf: 0.26, tl: 0, tg: 0,
-      ef: 0.05, el: 0.35, ec: 0.6, eg: 0, df: 0.05, dl: 0.35, dc: 0.6, dg: 0,
+      qf: 0.02, qg: 0.05, ql: 0, tf: 0.22, tl: 0, tg: 0,
+      ef: 0.05, el: 0.28, ec: 0.55, eg: -0.2, df: 0.02, dl: 0.28, dc: 0.55, dg: -0.2,
     },
     fim: {
       qf: 0, qg: 0, ql: 0, tf: 0.05, tl: 0, tg: 0,
@@ -463,57 +467,62 @@ function valoresDoChute(batida, pw, aberto, ik) {
   };
   const mudar = (chave, valores) => Object.assign(v[chave], valores);
   switch (batida) {
+    case 'peito':
+      mudar('alto', { tf: 0.34 + 0.08 * pw });
+      mudar('queda', { tf: 0.3 });
+      break;
     case 'pancada':
-      mudar('armada', { qg: -0.42 - 0.18 * pw, tg: 0.4 + 0.22 * pw, tf: -0.05 - 0.07 * pw, pf: -0.42 - 0.26 * pw, pj: 1.55 + 0.45 * pw, ef: -0.4 - 0.35 * pw });
-      mudar('contato', { tf: 0.04, tl: -0.24 });
-      mudar('alto', { pf: 0.95 + 0.55 * pw, tf: 0.3, tg: -0.38, pj: 0.25 });
+      mudar('armada', { qg: -0.3 - 0.26 * f, tg: 0.22 + 0.24 * f, tf: -0.03 - 0.09 * f, pf: -0.18 - 0.5 * f, pj: 1.1 + 0.9 * f, ef: -0.25 - 0.5 * f });
+      mudar('contato', { tf: 0.04, tl: -0.14 - 0.16 * f });
+      mudar('alto', { pf: 0.95 + 0.7 * pw, tf: 0.38, tg: -0.36, pj: 0.18 });
+      mudar('queda', { tf: 0.32 });
       break;
     case 'semGiro':
       // Batida seca: armada curta, tornozelo travado e a perna trava logo depois da bola
-      mudar('armada', { qg: -0.3 - 0.12 * pw, pf: -0.3 - 0.16 * pw, pj: 1.4 + 0.35 * pw, tg: 0.28 + 0.16 * pw, ef: -0.2 - 0.25 * pw, el: 0.85 + 0.2 * pw + 0.25 * ab });
-      mudar('contato', { tf: 0.06, tl: -0.14, el: 1.0 + 0.15 * pw + 0.3 * ab });
-      mudar('estende', { pf: k.pf + 0.2, pj: Math.max(0.3, k.pj * 0.5), qg: 0.04, tg: 0.04, ef: 0.1, el: 0.95, df: -0.15, dl: 0.6 });
-      mudar('alto', { pf: k.pf + 0.3, pj: 0.42, pt: k.pt, qg: 0.1, tf: 0.1, tg: -0.06, ef: 0.15, el: 0.9, ec: 0.5, df: -0.2, dl: 0.75, dc: 0.45 });
-      mudar('queda', { pf: 0.6, pj: 1.0, tf: 0.1, ef: 0.1, el: 0.6, df: -0.1, dl: 0.55 });
+      mudar('armada', { qg: -0.22 - 0.18 * f, pf: -0.12 - 0.34 * f, pj: 1.0 + 0.75 * f, tg: 0.16 + 0.2 * f, ef: -0.1 - 0.35 * f, el: 0.7 + 0.4 * f + 0.25 * ab });
+      mudar('contato', { tf: 0.06, tl: -0.08 - 0.08 * f, el: 0.9 + 0.3 * f + 0.3 * ab });
+      mudar('estende', { pf: k.pf + 0.2, pj: Math.max(0.3, k.pj * 0.5), qg: 0.04, tg: 0.04, tl: -0.12, ef: 0.1, el: 0.95, df: -0.2, dl: 0.4, dc: 0.8 });
+      mudar('alto', { pf: k.pf + 0.3, pj: 0.42, pt: k.pt, qg: 0.1, tf: 0.1, tg: -0.06, ef: 0.15, el: 0.9, ec: 0.5, eg: 0, df: -0.3, dl: 0.45, dc: 0.8 });
+      mudar('queda', { pf: 0.6, pj: 1.0, tf: 0.1, ef: 0.1, el: 0.6, df: -0.15, dl: 0.4 });
       break;
     case 'chapa':
       // Parte de dentro do pé: a perna inteira gira para fora e, depois da bola, cruza na frente do corpo
-      mudar('armada', { qg: -0.42 - 0.14 * pw, pf: -0.34 - 0.2 * pw, pl: 0.26, pg: 0.42, pj: 1.35 + 0.4 * pw, tl: -0.2 - 0.08 * pw, ef: -0.4 - 0.3 * pw, el: 1.15 + 0.3 * pw + 0.25 * ab });
-      mudar('contato', { qg: 0, ql: -0.17, tf: -0.02, tl: -0.32 - 0.06 * pw, tg: 0.12, el: 1.25 + 0.2 * pw + 0.2 * ab });
-      mudar('estende', { pf: k.pf + 0.36, pl: k.pl - 0.16, pg: k.pg * 0.9, pj: Math.max(0.18, k.pj * 0.28), qg: 0.2, tl: -0.3, tg: -0.1 });
-      mudar('alto', { pf: 0.9 + 0.5 * pw, pl: -0.4 - 0.15 * pw, pg: 0.3, pj: 0.4, pt: 0.25, pp: 0.2, qg: 0.5, ql: -0.1, tf: 0.24, tl: -0.3, tg: -0.35, ef: 0.6, el: 0.35, ec: 1.1, df: -0.35, dl: 0.9, dc: 0.3 });
-      mudar('queda', { pf: 0.64, pl: -0.22, pg: 0.15, pj: 1.05, qg: 0.34, tl: -0.12, df: -0.1, dl: 0.6 });
+      mudar('armada', { qg: -0.3 - 0.24 * f, pf: -0.12 - 0.42 * f, pl: 0.26, pg: 0.42, pj: 0.95 + 0.8 * f, tl: -0.12 - 0.18 * f, ef: -0.2 - 0.5 * f, el: 0.9 + 0.55 * f + 0.25 * ab });
+      mudar('contato', { qg: 0, ql: -0.17, tf: -0.02, tl: -0.2 - 0.2 * f, tg: 0.12, el: 1.05 + 0.4 * f + 0.2 * ab });
+      mudar('estende', { pf: k.pf + 0.36, pl: k.pl - 0.16, pg: k.pg * 0.9, pj: Math.max(0.18, k.pj * 0.28), qg: 0.2, tl: -0.2 - 0.12 * f, tg: -0.1 });
+      mudar('alto', { pf: 0.85 + 0.7 * pw, pl: -0.4 - 0.15 * pw, pg: 0.3, pj: 0.22, pt: 0.25, pp: 0.2, qg: 0.45, ql: -0.1, tf: 0.24, tl: -0.3, tg: -0.3, ef: 0.3, el: 0.3, ec: 1.4, df: -0.5, dl: 0.45, dc: 0.9 });
+      mudar('queda', { pf: 0.64, pl: -0.22, pg: 0.15, pj: 1.05, qg: 0.34, tl: -0.12, df: -0.25, dl: 0.4 });
       mudar('pouso', { qg: 0.14, tl: -0.04 });
       break;
     case 'trivela':
       // Parte de fora do pé: pé girado para dentro, a perna sai de dentro para fora
-      mudar('armada', { pl: 0.06, pg: -0.1, qg: -0.3 - 0.14 * pw });
-      mudar('contato', { ql: -0.16, tl: -0.26, tg: 0.2, tf: 0.06 });
-      mudar('estende', { pf: k.pf + 0.34, pl: k.pl + 0.14, pg: k.pg - 0.1, pj: Math.max(0.15, k.pj * 0.25), pp: k.pp, tl: -0.28 });
-      mudar('alto', { pf: 0.75 + 0.35 * pw, pl: 0.4 + 0.1 * pw, pg: -0.2, pj: 0.3, pp: -0.3, qg: 0.1, tl: -0.3, tg: -0.1, ef: 0.6, el: 0.7, ec: 0.6, df: -0.4, dl: 0.7 });
+      mudar('armada', { pl: 0.06, pg: -0.1, qg: -0.22 - 0.2 * f });
+      mudar('contato', { ql: -0.16, tl: -0.14 - 0.14 * f, tg: 0.2, tf: 0.06 });
+      mudar('estende', { pf: k.pf + 0.34, pl: k.pl + 0.14, pg: k.pg - 0.1, pj: Math.max(0.15, k.pj * 0.25), pp: k.pp, tl: -0.24 });
+      mudar('alto', { pf: 0.75 + 0.35 * pw, pl: 0.4 + 0.1 * pw, pg: -0.2, pj: 0.3, pp: -0.3, qg: 0.1, tl: -0.3, tg: -0.1, ef: 0.4, el: 0.6, ec: 0.9, eg: -0.3, df: -0.45, dl: 0.5, dc: 0.8 });
       mudar('queda', { pf: 0.62, pl: 0.28, pg: -0.05, pj: 1.05, tl: -0.1 });
       break;
     case 'cavadinha':
       // O pé entra por baixo da bola, o corpo vai para trás e a terminação é curta
-      mudar('armada', { qg: -0.2, pf: -0.25 - 0.1 * pw, pj: 1.15 + 0.2 * pw, tg: 0.2, tf: 0.02, ef: -0.15, el: 0.6 + 0.25 * ab, df: 0.25 });
+      mudar('armada', { qg: -0.2, pf: -0.12 - 0.22 * f, pj: 0.9 + 0.5 * f, tg: 0.2, tf: 0.02, ef: -0.15, el: 0.6 + 0.25 * ab, df: 0.2 });
       mudar('contato', { tf: -0.08, tl: -0.12, el: 0.75 + 0.3 * ab });
-      mudar('estende', { pf: k.pf + 0.2, pj: Math.max(0.35, k.pj * 0.55), tf: -0.1, qg: 0.04, tg: 0.04, ef: 0.15, el: 0.7, df: -0.1, dl: 0.4 });
-      mudar('alto', { pf: k.pf + 0.34, pj: 0.5, pt: 0.1, tf: -0.06, qg: 0.08, tg: -0.05, ef: 0.25, el: 0.55, ec: 0.6, df: -0.15, dl: 0.45, dc: 0.5 });
+      mudar('estende', { pf: k.pf + 0.2, pj: Math.max(0.35, k.pj * 0.55), tf: -0.1, tl: -0.12, qg: 0.04, tg: 0.04, ef: 0.15, el: 0.7, df: -0.15, dl: 0.35 });
+      mudar('alto', { pf: k.pf + 0.34, pj: 0.5, pt: 0.1, tf: -0.06, qg: 0.08, tg: -0.05, ef: 0.25, el: 0.55, ec: 0.6, eg: -0.2, df: -0.2, dl: 0.4, dc: 0.7 });
       mudar('queda', { pf: 0.58, pj: 1.0, tf: 0.04, ef: 0.1, el: 0.35, df: 0, dl: 0.35 });
       break;
     case 'rasteiro':
       // Corpo por cima da bola e terminação baixa
-      mudar('armada', { tf: 0.1, pf: -0.4 - 0.2 * pw });
-      mudar('contato', { tf: 0.3, tl: -0.14, qf: 0.06 });
+      mudar('armada', { tf: 0.1, pf: -0.14 - 0.46 * f });
+      mudar('contato', { tf: 0.3, tl: -0.1 - 0.06 * f, qf: 0.06 });
       mudar('estende', { pf: k.pf + 0.3, pj: Math.max(0.2, k.pj * 0.3), tf: 0.34 });
-      mudar('alto', { pf: 0.62 + 0.2 * pw, pj: 0.45, tf: 0.36, tg: -0.25, ef: 0.6, el: 0.45 });
+      mudar('alto', { pf: 0.62 + 0.2 * pw, pj: 0.45, tf: 0.36, tg: -0.25 });
       mudar('queda', { pf: 0.62, pj: 1.05, tf: 0.28 });
       break;
     case 'folhaSeca':
       // Peito do pé de baixo para cima, joelho subindo dobrado, corpo um pouco para trás
-      mudar('contato', { tf: 0.02, tl: -0.18 });
+      mudar('contato', { tf: 0.02, tl: -0.1 - 0.1 * f });
       mudar('estende', { pf: k.pf + 0.36, pj: Math.max(0.3, k.pj * 0.45), tf: 0.02 });
-      mudar('alto', { pf: 0.9 + 0.3 * pw, pj: 0.75, pt: 0.35, tf: 0.06, tg: -0.2, ef: 0.6, el: 0.55 });
+      mudar('alto', { pf: 0.9 + 0.3 * pw, pj: 0.75, pt: 0.35, tf: 0.06, tg: -0.2, el: 0.45 });
       mudar('queda', { pf: 0.64, pj: 1.1, tf: 0.1 });
       break;
     default:
@@ -530,10 +539,12 @@ function valoresDoChute(batida, pw, aberto, ik) {
 function reacaoGol(variacao, tr, R) {
   const entra = suave(tr / 0.3);
   R.olha = 1 - entra;
+  // Um pulo redondo (sai e chega sem tranco): 0 → 1 → 0 com u de 0 a 1
+  const pulo = (u) => (u <= 0 || u >= 1 ? 0 : Math.sin(Math.PI * u) ** 2);
   if (variacao === 0) {
-    // Agacha, pula e soca o ar; depois os dois braços para cima
+    // Agacha, pula e soca o ar; depois os dois braços para cima, vibrando
     const prep = sino(tr / 0.5) * (tr < 0.25 ? 1 : 0.4);
-    const salto = tr > 0.22 && tr < 0.8 ? Math.sin(((tr - 0.22) / 0.58) * Math.PI) : 0;
+    const salto = pulo((tr - 0.2) / 0.62);
     const depois = rampa(tr, 0.8, 1.2);
     const bate = 0.5 + 0.5 * Math.sin((tr - 1.1) * 7);
     R.dh = -0.11 * prep * (1 - salto) - 0.03 * depois * bate;
@@ -547,35 +558,45 @@ function reacaoGol(variacao, tr, R) {
     R.el = misturar(0.35, 2.6, depois);
     R.ec = misturar(1.7, 0.35, depois) + 0.25 * depois * bate;
   } else if (variacao === 1) {
-    // Braços bem abertos, peito estufado, queixo para cima
-    const balanca = Math.sin(tr * 3.1);
-    R.dh = -0.02 * entra * (0.5 + 0.5 * Math.sin(tr * 6.2));
-    R.tf = -0.16 * entra;
-    R.tl = 0.04 * balanca * entra;
-    R.cf = -0.32 * entra;
-    R.ef = -0.15 * entra;
-    R.df = -0.15 * entra;
-    R.el = misturar(0.15, 1.5 + 0.06 * balanca, entra);
-    R.dl = misturar(0.15, 1.5 - 0.06 * balanca, entra);
+    // "Aviãozinho": braços bem abertos, peito estufado, o corpo balança de um lado para o outro com pulinhos
+    const lado = Math.sin(tr * 3.6) * entra;
+    const quica = (0.5 - 0.5 * Math.cos(tr * 7.2)) * entra;
+    R.pulo = 0.07 * quica * rampa(tr, 0.3, 0.6);
+    R.dh = -0.05 * entra * (1 - quica);
+    R.tf = -0.12 * entra;
+    R.tl = 0.24 * lado;
+    R.tg = 0.12 * lado;
+    R.ql = -0.06 * lado;
+    R.cf = -0.3 * entra;
+    R.ef = -0.12 * entra;
+    R.df = -0.12 * entra;
+    R.el = misturar(0.15, 1.5 + 0.3 * lado, entra);
+    R.dl = misturar(0.15, 1.5 - 0.3 * lado, entra);
     R.ec = misturar(0.3, 0.12, entra);
     R.dc = misturar(0.3, 0.12, entra);
     R.eg = 0.5 * entra;
     R.dg = 0.5 * entra;
   } else if (variacao === 2) {
-    // Punhos cerrados na frente do corpo, grita e bate os braços
-    const bate = Math.max(0, Math.sin(tr * 9));
-    R.dh = -0.07 * entra + 0.02 * bate * entra;
-    R.tf = 0.26 * entra - 0.06 * bate * entra;
-    R.cf = -0.25 * entra;
-    R.ef = misturar(0.05, 0.55 + 0.2 * bate, entra);
-    R.df = misturar(0.05, 0.55 + 0.2 * bate, entra);
+    // Punhos cerrados: agacha, vibra com os dois braços e pula socando o ar (e de novo)
+    const fase = (tr - 0.25) / 1.5;
+    const ciclo = fase - Math.floor(fase);
+    const vale = tr > 0.25 ? 1 : 0;
+    const salto = vale * pulo((ciclo - 0.3) / 0.42);
+    const agacha = vale * (pulo(ciclo / 0.4) * (1 - salto) + 0.6 * pulo((ciclo - 0.68) / 0.3));
+    const vibra = Math.max(0, Math.sin(tr * 11)) * (1 - salto);
+    R.pulo = 0.2 * salto;
+    R.dh = -0.05 * entra - 0.07 * agacha;
+    R.tf = (0.2 - 0.05 * vibra) * entra + 0.1 * agacha - 0.3 * salto;
+    R.cf = -0.25 * entra - 0.15 * salto;
+    R.ef = misturar(0.05, 0.55 + 0.15 * vibra, entra);
     R.el = misturar(0.15, 0.45, entra);
-    R.dl = misturar(0.15, 0.45, entra);
-    R.ec = misturar(0.3, 2.0 - 0.3 * bate, entra);
-    R.dc = misturar(0.3, 2.0 - 0.3 * bate, entra);
+    R.ec = misturar(0.3, 2.0 - 0.3 * vibra, entra);
+    R.df = misturar(0.05, misturar(0.55 + 0.15 * vibra, 0.35, salto), entra);
+    R.dl = misturar(0.15, misturar(0.45, 2.7, salto), entra);
+    R.dc = misturar(0.3, misturar(2.0 - 0.3 * vibra, 0.25, salto), entra);
   } else {
     // Pulinhos com os dois braços para o alto
-    const salto = Math.abs(Math.sin(tr * 4.4)) * entra;
+    const salto = (0.5 - 0.5 * Math.cos(tr * 8.8)) * entra;
     R.pulo = 0.16 * salto;
     R.dh = -0.06 * entra * (1 - salto);
     R.tf = -0.14 * entra;
@@ -617,14 +638,14 @@ function reacaoErro(tipo, tr, R) {
     R.cf = 0.42 * entra;
     R.cg = 0.22 * balanca * entra;
     R.dh = -0.015 * entra;
-    R.ef = -0.12 * entra;
-    R.df = -0.12 * entra;
-    R.el = misturar(0.15, 0.62, entra);
-    R.dl = misturar(0.15, 0.62, entra);
-    R.ec = misturar(0.3, 1.75, entra);
-    R.dc = misturar(0.3, 1.75, entra);
-    R.eg = -0.85 * entra;
-    R.dg = -0.85 * entra;
+    R.ef = -0.3 * entra;
+    R.df = -0.3 * entra;
+    R.el = misturar(0.15, 0.6, entra);
+    R.dl = misturar(0.15, 0.6, entra);
+    R.ec = misturar(0.3, 1.6, entra);
+    R.dc = misturar(0.3, 1.6, entra);
+    R.eg = -1.0 * entra;
+    R.dg = -1.0 * entra;
   } else {
     // Abre os braços ("como assim?") e deixa cair
     const abre = sino(tr / 1.1);
@@ -657,9 +678,13 @@ export const PADRAO_COBRANCA = {
   giroCorpo: 0.45,   // no contato, quanto do ângulo da corrida o corpo ainda guarda (0 = de frente para o gol; 1 = na linha da corrida)
 };
 
+// O relógio da espera no instante do último chute (para o replay repetir o começo da corrida igualzinho)
+let ultimaEspera = null;
+
 const QUEDA_AGACHAR = 0.26; // m que o quadril desce com agachar = 1 (como em js/jogadores.js)
 const TAU_MAX = 1.3;        // rad: o máximo que o calcanhar levanta com a ponta do pé no chão
 const CHAO_MIN = 0.004;     // m: o pé no ar não passa mais rente à grama do que isso
+const FOLGA_VOLTA = 0.05;   // m: altura mínima do pé do chute enquanto volta para pisar, depois da bola
 
 // Vetores e rotações de trabalho (reaproveitados: nada de lixo a cada quadro)
 const _a = new THREE.Vector3();
@@ -696,7 +721,9 @@ const novosCanais = () => {
 //   tempoContato, duracao        s do começo da corrida até o pé tocar a bola / até o corpo parar
 //   direcao                      vetor para onde o chute vai
 //   parado(t)                    pose de espera (t: relógio, em s)
-//   preparar({ forca, contato, alvo, tecnica })   uma vez, quando a corrida começa: escolhe a batida do corpo
+//   preparar({ forca, contato, alvo, tecnica, relogio })   uma vez, quando a corrida começa: escolhe a batida do
+//                                corpo. relogio (opcional): o animacao.relogio da cobrança original, para o replay
+//   relogio                      o relógio da espera no começo da corrida (leia depois de preparar())
 //   atualizar(t, { bola, resultado, tFim })       t = s desde o começo da corrida. Devolve { etapa, progresso, contato }
 //   reage: true                  a comemoração e o lamento são feitos aqui (dentro de atualizar)
 //   Para testes e inspeção: batida, passos, pisadas(), medir(), pontoDaBola, pontoDoPe.
@@ -738,8 +765,9 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
   const DMIN = Math.abs(COXA - CANELA) + 0.06;
   const DMAX = PERNA * 0.9985;
   const ESTICA = PERNA * 0.985;
+  const D_MACIO = PERNA * 0.9; // daqui em diante a perna no ar estica aos poucos
   const DLEAD = 0.27 * EX;  // m que o pé pisa à frente do quadril, no máximo
-  const DTRAIL = 0.5 * EX;  // m que o pé fica para trás do quadril antes de sair do chão, no máximo
+  const DTRAIL = 0.43 * EX;  // m que o pé fica para trás do quadril antes de sair do chão, no máximo
   // Juntas reais de cada perna virtual: 0 = a do apoio (esquerda do destro), 1 = a do chute
   const ladoReal = esp > 0 ? ['E', 'D'] : ['D', 'E'];
   const jPerna = ladoReal.map((l) => J[`perna${l}`]);
@@ -764,6 +792,8 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     joelho: 0,
     qPe: new THREE.Quaternion(), // tornozelo (local)
     falta: 0,
+    folga: 0,                   // m a mais de altura mínima do pé no ar
+    macio: 0,                   // 0..1: a perna no ar estica aos poucos perto do limite
     seg: null,
   });
   const novoQuadro = () => ({
@@ -832,7 +862,12 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     _a.x -= i === 0 ? QX : -QX;
     _a.y -= QJY;
     const dist = _a.length() || 1e-6;
-    const d = limitar(dist, DMIN, DMAX);
+    let d = limitar(dist, DMIN, DMAX);
+    if (L.macio > 0 && dist > D_MACIO) {
+      // Pé no ar chegando longe: a perna estica aos poucos, em vez de travar reta de uma vez
+      const ds = D_MACIO + (DMAX - D_MACIO) * (1 - Math.exp(-(dist - D_MACIO) / (DMAX - D_MACIO)));
+      d = misturar(d, ds, L.macio);
+    }
     _a.multiplyScalar(1 / dist);
     _p.copy(polo).applyQuaternion(F.qQi);
     _p.addScaledVector(_a, -_p.dot(_a));
@@ -985,6 +1020,7 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     const melhorA = new THREE.Vector3();
     let ponto = null;
     const FOLGA = 0.006;
+    const DENTRO_MAX = 0.046; // (o peito do pé abraça a bola: o bico passa por baixo dela)
     const pontos = B.pontos.map((i) => PONTOS_PE.bate[i]);
     // Tornozelo e ponto mais baixo da sola com o ponto p do pé encostado em Pc
     const colocar = (p) => {
@@ -995,19 +1031,49 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       for (const q of PONTOS_PE.sola) menor = Math.min(menor, A.y + v.copy(q).applyQuaternion(qLocal).y * EY);
       return menor;
     };
+    // Quanto o resto do pé entra na bola com o ponto p encostado (o pé abraça a bola por baixo e pelo lado,
+    // mas não a atravessa)
+    const centro = new THREE.Vector3(C.x, raio, C.z);
+    const dentro = () => {
+      let maior = 0;
+      for (const lista of [PONTOS_PE.bate, PONTOS_PE.sola]) {
+        for (const q of lista) {
+          v.copy(q).applyQuaternion(qLocal);
+          v.set(v.x * EX, v.y * EY, v.z * EX).applyQuaternion(qYaw).add(A);
+          maior = Math.max(maior, raio - v.distanceTo(centro));
+        }
+      }
+      return maior;
+    };
+    // Primeiro a parte do pé própria da batida (os dois primeiros pontos), com o bico um pouco menos para baixo
+    // se for preciso para o pé não entrar na grama: pegar com o peito do pé perto do tornozelo deixa a perna
+    // mais esticada do que pegar com a ponta
+    const tau0 = tau;
+    const limite = B.dentro ?? DENTRO_MAX;
+    for (let k = 0; k < Math.min(2, pontos.length) && !ponto; k++) {
+      for (let t2 = tau0; t2 >= Math.max(-0.15, tau0 - 0.45) - 1e-9 && !ponto; t2 -= 0.05) {
+        qLocal.setFromAxisAngle(EIXO_X, t2);
+        if (colocar(pontos[k]) >= FOLGA && dentro() <= limite) {
+          ponto = pontos[k];
+          tau = t2;
+          melhorA.copy(A);
+        }
+      }
+    }
     for (let n = 0; n < 40 && !ponto; n++) {
       qLocal.setFromAxisAngle(EIXO_X, tau);
-      // Direção do centro da bola vista do pé → o ponto do pé mais avançado nessa direção, entre os que
-      // deixam o pé inteiro acima da grama
-      d.copy(dW).applyQuaternion(_q.copy(qYaw).invert()).applyQuaternion(_q.copy(qLocal).invert());
-      let melhor = -Infinity;
+      // Depois os outros pontos, em ordem de preferência: vale o primeiro que deixa o pé inteiro acima da
+      // grama e fora da bola; se nenhum deixa o pé fora da bola, o que entra menos
+      let melhor = Infinity;
       for (const p of pontos) {
-        const s = p.dot(d);
-        if (s > melhor && colocar(p) >= FOLGA) {
-          melhor = s;
+        if (colocar(p) < FOLGA) continue;
+        const e = dentro();
+        if (e < melhor - 1e-9) {
+          melhor = e;
           ponto = p;
           melhorA.copy(A);
         }
+        if (e <= limite) break;
       }
       if (!ponto) {
         if (tau <= -0.15) break;
@@ -1034,6 +1100,7 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     const p = { chute };
     const forca = limitar(chute.forca ?? 0.7, 0, 1);
     const pw = 0.3 + 0.7 * forca;
+    const kf = 1.5 - 0.5 * forca; // a descida da perna: natural com a barra cheia, mais lenta com a barra baixa
     const alvoV = { x: esp * chute.alvo.x, z: chute.alvo.z };
     let psiK = Math.atan2(alvoV.x - C.x, alvoV.z - C.z);
     if (psiRef === null) psiRef = psiK;
@@ -1070,70 +1137,71 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     const Fc = novoQuadro();
     Object.assign(Fc.c, vals.contato);
     Fc.yaw = psiC;
-    Fc.H = H_PE - B.desce;
     Fc.gx = PN.x - fcx * B.b1 * EX - fcz * (QX + 0.03) * EX;
     Fc.gz = PN.z - fcz * B.b1 * EX + fcx * (QX + 0.03) * EX;
     atualizarQuadril(Fc);
-    // A perna do chute precisa alcançar o tornozelo com o joelho dobrado na medida: o quadril chega um pouco
-    // mais perto ou mais longe do pé do chute (sem sair de perto do pé de apoio) e sobe ou desce um pouco
+    // A perna do chute chega à bola quase esticada (joelho a uns 35° a 50°): para isso o quadril passa ALTO
+    // por cima do pé de apoio (perna de apoio quase reta, calcanhar já saindo do chão nas batidas fortes) e a
+    // bacia sobe do lado do chute. A altura é a maior que a perna de apoio alcança.
+    const tauC = B.calc * pw; // rad que o calcanhar do pé de apoio levanta no contato
+    const apoioC = tornozeloApoiado(PN.ponta, 2, PN.yaw, tauC, 0, new THREE.Vector3());
+    const assentar = () => {
+      Fc.H = H_PE + 0.04 - B.desce;
+      for (let n = 0; n < 40 && distQuadril(0, Fc, apoioC) > 0.965 * PERNA; n++) Fc.H -= 0.003;
+    };
+    assentar();
+    for (let n = 0; n < 6 && Fc.c.ql > -0.31 && distQuadril(1, Fc, pePose.A) < 0.905 * PERNA; n++) {
+      Fc.c.ql -= 0.03;
+      atualizarQuadril(Fc);
+      assentar();
+    }
+    // (ponto de contato baixo, perna sobrando: o quadril desce um pouco)
+    for (let n = 0; n < 30 && distQuadril(1, Fc, pePose.A) > 0.96 * PERNA; n++) Fc.H -= 0.003;
     {
-      const g0 = { x: Fc.gx, z: Fc.gz };
-      for (let n = 0; n < 10; n++) {
-        const d = distQuadril(1, Fc, pePose.A);
-        const alvoD = d > 0.955 * PERNA ? 0.94 * PERNA : d < 0.66 * PERNA ? 0.69 * PERNA : 0;
-        if (!alvoD) break;
-        paraMundo(Fc, juntaDoQuadril(1, Fc, _h), _v);
-        const hx = pePose.A.x - _v.x;
-        const hz = pePose.A.z - _v.z;
-        const hh = Math.hypot(hx, hz);
-        const longe = Math.hypot(Fc.gx - g0.x, Fc.gz - g0.z);
-        if (hh < 0.03 || longe > 0.09) {
-          Fc.H = limitar(Fc.H + (alvoD - d) * 0.9, H_PE - 0.09, H_PE - 0.012);
-        } else {
-          // A distância muda mais ou menos (hh/d) por metro andado na horizontal
-          const passo = limitar(((d - alvoD) * d * EX) / hh, -0.05, 0.05);
-          Fc.gx += (hx / hh) * passo;
-          Fc.gz += (hz / hh) * passo;
-        }
-      }
-      // E a perna de apoio também (pé inteiro no chão, joelho dobrado pelo menos um pouco)
-      _A.set(PN.x, -SOLA[0][1] * EY, PN.z);
-      for (let n = 0; n < 12 && distQuadril(0, Fc, _A) > 0.975 * PERNA; n++) Fc.H -= 0.006;
+      const mais = -0.15 - Fc.c.ql; // rad a mais de bacia inclinada
+      vals.contato.ql = Fc.c.ql;
+      vals.contato.tl += 0.75 * mais;
+      Fc.c.tl = vals.contato.tl;
+      vals.estende.ql = Math.min(vals.estende.ql, Fc.c.ql + 0.02);
+      vals.estende.tl += 0.6 * mais;
     }
     const Lc = novaPerna();
     const poloC = new THREE.Vector3(Math.sin(psiK - B.joelho - psiC), -0.3, Math.cos(psiK - B.joelho - psiC));
     ik(1, Fc, pePose.A, pePose.yaw, pePose.tau, pePose.rolo, poloC, Lc);
     const ikc = paraCanais(Fc, Lc, {});
     p.ikc = ikc;
+    // Quanto a coxa gira da armada até o contato (rad): a descida não pode ser mais rápida do que uma perna consegue
+    fkChute(Fc, vals.armada, mix);
+    const giroDaCoxa = mix.q.angleTo(Lc.q);
 
     // --- A corrida: do lugar da espera até o pé de apoio ---
     const N = passos;
-    const fr = (i) => (N <= 1 ? 1 : (i / N) ** 1.65); // passadas que crescem: arranca curto, chega comprido
-    // Tempo do pé de apoio pisar até o contato, e quanto o quadril anda nesse tempo (iterado: um depende do outro)
+    // Instantes (a cadência da lenda): T[i] = o quadril passa ao lado da pisada i + 1; tN = o pé de apoio pisa
+    const T = [];
+    for (let i = 1; i <= N - 1; i++) {
+      T.push(i === 1 ? dtPasso * 1.25 : T[T.length - 1] + dtPasso * (1.04 - (0.08 * (i - 1)) / Math.max(1, N - 2)));
+    }
+    const tN = N > 1 ? T[N - 2] + dtPasso * 0.72 : dtPasso * 1.35;
     let a = { x: Math.sin(psiK - angulo), z: Math.cos(psiK - angulo) };
     if (S0) {
       const d = Math.hypot(Fc.gx - S0.x, Fc.gz - S0.z) || 1;
       a = { x: (Fc.gx - S0.x) / d, z: (Fc.gz - S0.z) / d };
     }
-    let delta = 0.14 * ks;
-    let dAnda = 0.25;
+    // Do pé de apoio pisar até o contato: o tempo (delta), quanto o quadril anda (dAnda: da perna esticada à
+    // frente até quase em cima do pé) e a que velocidade (iterado: um depende do outro)
+    let delta = 0.13 * ks;
+    let dAnda = 0.22;
     let E = null;
-    let sN = 0;
-    let vN = 0;
-    let dN = 0;
+    let dN = 0.3;
     let Lrun = distancia;
-    for (let n = 0; n < 4; n++) {
+    for (let n = 0; n < 5; n++) {
       const b1a = (PN.x - Fc.gx) * a.x + (PN.z - Fc.gz) * a.z; // m que o quadril fica atrás do pé de apoio no contato
-      sN = Lrun * (1 - fr(N - 1));
-      vN = sN / (dtPasso * 1.05);
-      const dMax = 0.385 * EX;
-      dAnda = limitar(0.7 * vN * delta, 0.06, Math.max(0.07, dMax - b1a));
+      const vMed = Math.max(0.3, (Lrun - dN) / tN);
+      const vApoio = limitar(0.6 * vMed + 0.3, 0.8, 2.1);       // m/s médios do quadril com o pé de apoio no chão
+      const dMax = 0.4 * EX;
+      dAnda = limitar(vApoio * delta, 0.06, Math.max(0.07, dMax - b1a));
+      delta = limitar(dAnda / vApoio, 0.115 * ks, 0.2 * ks);
       dN = b1a + dAnda;
-      if (N > 1 && sN - dN < 0.1) dN = Math.max(0.12, sN - 0.1);
-      dAnda = Math.max(0.04, dN - b1a);
-      const dtrailK = Math.min(DTRAIL, 0.62 * sN);
-      const voo = N > 1 ? (sN - dtrailK - dN) / Math.max(0.5, vN) : -0.05;
-      delta = Math.max(0.13 * ks, 0.235 * ks - Math.max(-0.06, voo));
       E = { x: Fc.gx - a.x * dAnda, z: Fc.gz - a.z * dAnda };
       if (S0) {
         const d = Math.hypot(E.x - S0.x, E.z - S0.z) || 1;
@@ -1150,7 +1218,7 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     const psiA = perto(Math.atan2(a.x, a.z), psi0);
     const lax = Math.cos(psiA); // esquerda de quem corre
     const laz = -Math.sin(psiA);
-    Object.assign(p, { a, psiA, psiC, PN, N, E, delta });
+    Object.assign(p, { a, psiA, psiC, PN, N, E, delta, tauC });
     p.ax = a.x;
     p.az = a.z;
 
@@ -1166,7 +1234,44 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     });
     p.espera = pesEspera;
 
-    // Pisadas 1..N (a N é a do pé de apoio; as outras alternam para trás a partir dela)
+    // A velocidade do quadril ao longo da corrida: arranca, embala e já vem freando desde a penúltima passada,
+    // para plantar o pé de apoio sem tranco e passar por cima dele ainda andando (nada de parar de repente).
+    // sEm(t) = m andados na linha da corrida até o instante t (até o contato).
+    const tc = tN + delta;
+    const D = Math.max(0.05, Lrun - dN);
+    const vAp = dAnda / delta;
+    const fa = N <= 2 ? 0.6 : N === 3 ? 0.5 : 0.42;             // fração do tempo acelerando
+    const fb = Math.max(fa, 1 - limitar(1.5 / N, 0.22, 0.4)); // daqui em diante vem freando
+    let vp = 1.12 * vAp;                                      // m/s quando o pé de apoio pisa
+    let vmax = (D / tN - (vp * (1 - fb)) / 2) / (fb - fa / 2 + (1 - fb) / 2);
+    if (vmax < vp) {
+      vmax = D / (tN * (1 - fa / 2));
+      vp = vmax;
+    }
+    const gp = vp / vmax;
+    const vcR = Math.max(0.3, 2 * vAp - vp);                  // m/s no contato
+    const sEm = (t) => {
+      if (t >= tN) {
+        const tau = Math.min(t, tc) - tN;
+        return D + vp * tau + ((vcR - vp) * tau * tau) / (2 * delta);
+      }
+      const u = Math.max(0, t) / tN;
+      let G;
+      if (u <= fa) {
+        const w = u / fa;
+        G = fa * (w * w * w - (w * w * w * w) / 2);
+      } else if (u <= fb) {
+        G = fa / 2 + (u - fa);
+      } else {
+        const w = (u - fb) / (1 - fb);
+        G = fa / 2 + (u - fa) - (1 - gp) * (1 - fb) * (w * w * w - (w * w * w * w) / 2);
+      }
+      return vmax * tN * G;
+    };
+    const vN = N > 1 ? (D - sEm(T[N - 2])) / (tN - T[N - 2]) : vp; // m/s na última passada
+
+    // Pisadas 1..N (a N é a do pé de apoio; as outras alternam para trás a partir dela): cada uma fica onde o
+    // quadril está no instante dela (passadas que crescem com a velocidade; a última é a mais comprida)
     const largura = 0.065 * EX;
     const pis = [];
     for (let i = 1; i <= N; i++) {
@@ -1175,8 +1280,8 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
         PN.sigma = Lrun;
         pis.push(PN);
       } else {
-        let sigma = Lrun * fr(i);
-        if (i === 1) sigma = Math.max(sigma, Math.min(pesEspera[peI].sigma + 0.16, Lrun * fr(2) - 0.12));
+        let sigma = sEm(T[i - 1]);
+        if (i === 1) sigma = Math.max(sigma, Math.min(pesEspera[peI].sigma + 0.16, (N > 2 ? sEm(T[1]) : Lrun) - 0.12));
         const lado = peI === 0 ? largura : -largura;
         const q = novaPisada(peI, S0.x + a.x * sigma + lax * lado, S0.z + a.z * sigma + laz * lado, psiA);
         q.sigma = sigma;
@@ -1184,26 +1289,19 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       }
     }
     p.pis = pis;
-
-    // Instantes: T[i] = o quadril passa ao lado da pisada i; tN = o pé de apoio pisa; tc = contato
-    const T = [];
-    for (let i = 1; i <= N - 1; i++) {
-      T.push(i === 1 ? dtPasso * 1.25 : T[T.length - 1] + dtPasso * (1.04 - (0.08 * (i - 1)) / Math.max(1, N - 2)));
-    }
-    const tN = N > 1 ? T[N - 2] + Math.max(0.05, (Lrun - dN - pis[N - 2].sigma) / Math.max(0.5, vN)) : dtPasso * 1.35;
-    const tc = tN + delta;
     Object.assign(p, { T, tN, tc });
 
-    // --- Depois da bola: o corpo segue, o pé do chute pisa, o de apoio dá mais um passo e o corpo para ---
-    const corre = limitar((vN - 1.2) / 2.4, 0, 1); // 0 = chega andando, 1 = chega correndo
-    const vc = limitar((dAnda / delta) * 0.85, 0.5, 2.6); // m/s do quadril no contato
+    // --- Depois da bola: o corpo segue andando, cai no pé do chute e emenda um ou dois passos até parar ---
+    const corre = limitar((vmax - 1.2) / 2.2, 0, 1); // 0 = chega andando, 1 = chega correndo
+    const vc = limitar(vcR, 0.5, 2.6);               // m/s do quadril no contato
     const tPouso = tc + (B.tPouso + 0.05 * pw) * ks;
     let mx = misturar(a.x, fx, B.segue);
     let mz = misturar(a.z, fz, B.segue);
     const mm = Math.hypot(mx, mz) || 1;
     mx /= mm;
     mz /= mm;
-    const dVoo = Math.max(0.16, vc * (tPouso - tc) * 0.72 * B.anda);
+    const segue = 0.55 + 0.45 * Math.min(1, B.anda);  // quanto da velocidade o corpo guarda depois da batida
+    const dVoo = Math.max(0.14, vc * (tPouso - tc) * 0.82 * segue);
     const salto = B.salto && pw * (0.4 + 0.6 * corre) > 0.5;
     const F1 = { x: Fc.gx + mx * dVoo, z: Fc.gz + mz * dVoo };
     const psi1 = psiK + B.vira;
@@ -1211,18 +1309,31 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     const r1z = Math.sin(psi1);
     const L1 = novaPisada(1, F1.x + mx * 0.2 * EX + r1x * (QX * EX * 0.9 + B.pousoLado), F1.z + mz * 0.2 * EX + r1z * (QX * EX * 0.9 + B.pousoLado), psi1 - 0.08);
     const psi2 = psiK + 0.4 * B.vira;
-    const passoFinal = (0.16 + 0.3 * corre * B.anda) * EX;
-    const L2 = novaPisada(0, L1.x + mx * passoFinal + Math.cos(psi2) * 0.23 * EX, L1.z + mz * passoFinal - Math.sin(psi2) * 0.23 * EX, psi2 + 0.1);
-    const F2 = { x: (L1.x + L2.x) / 2, z: (L1.z + L2.z) / 2 };
+    // O passo seguinte (pé de apoio) tem o tamanho da velocidade que sobrou: quem vem correndo dá um passo de verdade
+    const tPasso2 = tPouso + 0.3 + 0.04 * corre;
+    const v1 = 0.72 * vc * segue;
+    const anda2 = v1 * (tPasso2 - tPouso) * 0.85;      // m que o quadril anda do pouso até esse passo
+    const passo2 = Math.max(0.14 * EX, anda2 + 0.05 * EX);
+    const e2x = Math.cos(psi2);                        // esquerda de quem chuta
+    const e2z = -Math.sin(psi2);
+    const L2 = novaPisada(0, L1.x + mx * passo2 + e2x * 0.23 * EX, L1.z + mz * passo2 + e2z * 0.23 * EX, psi2 + 0.1);
+    // E quem ainda vem embalado junta o pé do chute ao lado (terceiro passo), em vez de parar de pernas abertas
+    const tres = passo2 > 0.3 * EX;
+    const tPasso3 = tPasso2 + 0.34;
+    const L3 = tres ? novaPisada(1, L2.x - mx * 0.04 * EX - e2x * 0.21 * EX, L2.z - mz * 0.04 * EX - e2z * 0.21 * EX, psi2 - 0.06) : null;
+    const F2 = tres ? { x: (L2.x + L3.x) / 2 - mx * 0.03, z: (L2.z + L3.z) / 2 - mz * 0.03 } : { x: (L1.x + L2.x) / 2, z: (L1.z + L2.z) / 2 };
+    const total2 = Math.hypot(F2.x - F1.x, F2.z - F1.z) || 1;
+    const k2 = tres ? limitar(anda2 / total2, 0.3, 0.8) : 0.8; // onde o quadril está quando o segundo passo pisa
     const tSaiN = salto ? tc + 0.1 * ks : tPouso + 0.05;
-    const tPasso2 = tPouso + 0.3 + 0.06 * corre;
-    const tFim = tPasso2 + 0.36;
-    Object.assign(p, { tPouso, tSaiN, tPasso2, tFim, L1, L2, salto, corre });
+    const tFim = tres ? tPasso3 + 0.28 : tPasso2 + 0.36;
+    Object.assign(p, { tPouso, tSaiN, tPasso2, tPasso3, tFim, L1, L2, L3, salto, corre });
 
     // --- Curvas do quadril: lugar no campo, altura e para onde o corpo vira ---
-    const kt = [0];
-    const kx = [S0.x];
-    const kz = [S0.z];
+    const kt = [];
+    const kx = [];
+    const kz = [];
+    const tLat = [0];
+    const vLat = [0];
     const kh = [[0, repouso.H]];
     const krap = [[0, 0]];
     const balanco = 0.016 * EX;
@@ -1233,30 +1344,55 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       const tAntes = i === 1 ? 0 : T[i - 2];
       const tDepois = i === N - 1 ? tN : T[i];
       const vel = (depois - antes) / Math.max(0.1, tDepois - tAntes);
-      const r = limitar((vel - 1.4) / 1.8, 0, 1);
+      const r = limitar((vel - 1.2) / 1.7, 0, 1);
       q.vel = vel;
       q.rap = r;
       const lado = (q.pe === 0 ? 1 : -1) * balanco * (1 - 0.6 * r); // o quadril vai um pouco para o lado do pé que pisa
-      kt.push(T[i - 1]);
-      kx.push(S0.x + a.x * q.sigma + lax * lado);
-      kz.push(S0.z + a.z * q.sigma + laz * lado);
+      tLat.push(T[i - 1]);
+      vLat.push(lado);
       const tMeio = i === 1 ? T[0] * 0.55 : (T[i - 2] + T[i - 1]) / 2;
       kh.push([tMeio, H_PE - misturar(0.05, 0.036, r)]);
       kh.push([T[i - 1], H_PE - misturar(0.022, 0.07, r)]);
       krap.push([T[i - 1], r]);
     }
-    kt.push(tN, tc, tPouso, tPasso2, tFim);
-    kx.push(E.x, Fc.gx, F1.x, misturar(F1.x, F2.x, 0.8), F2.x);
-    kz.push(E.z, Fc.gz, F1.z, misturar(F1.z, F2.z, 0.8), F2.z);
+    // (chaves bem juntas, tiradas de sEm: a curva do quadril repete o perfil de velocidade, sem degraus)
+    tLat.push(tN);
+    vLat.push(0);
+    const cLat = new Curva(tLat, vLat);
+    const tsK = [];
+    const nK = Math.max(4, Math.ceil(tN / 0.05));
+    for (let i = 0; i < nK; i++) tsK.push((tN * i) / nK);
+    tsK.push(tN, tN + delta / 2);
+    for (const t of tsK) {
+      const sg = sEm(t);
+      const lt = cLat.em(t);
+      kt.push(t);
+      kx.push(S0.x + a.x * sg + lax * lt);
+      kz.push(S0.z + a.z * sg + laz * lt);
+    }
+    const tD = Math.min(tc + 0.09, misturar(tc, tPouso, 0.4));
+    const dD = Math.min(0.5 * dVoo, misturar(vc, dVoo / (tPouso - tc), 0.5) * (tD - tc)); // o corpo ainda vem na velocidade do contato
+    kt.push(tc, tD, tPouso, tPasso2);
+    kx.push(Fc.gx, Fc.gx + mx * dD, F1.x, misturar(F1.x, F2.x, k2));
+    kz.push(Fc.gz, Fc.gz + mz * dD, F1.z, misturar(F1.z, F2.z, k2));
+    if (tres) {
+      kt.push(tPasso3);
+      kx.push(misturar(F1.x, F2.x, misturar(k2, 1, 0.8)));
+      kz.push(misturar(F1.z, F2.z, misturar(k2, 1, 0.8)));
+    }
+    kt.push(tFim);
+    kx.push(F2.x);
+    kz.push(F2.z);
     p.cx = new Curva(kt, kx);
     p.cz = new Curva(kt, kz);
-    const rN = limitar((vN - 1.4) / 1.8, 0, 1);
+    const rN = limitar((vN - 1.2) / 1.7, 0, 1);
     if (N > 1) kh.push([(T[N - 2] + tN) / 2, H_PE - misturar(0.05, 0.03, rN)]);
     kh.push([tN, H_PE - 0.065 - 0.03 * rN]);
     kh.push([tc, Fc.H]);
     if (salto) kh.push([misturar(tc, tPouso, 0.5), Fc.H + 0.015 + 0.05 * pw]);
-    kh.push([tPouso + 0.07, H_PE - 0.05 - 0.035 * corre * pw]);
-    kh.push([tPasso2 + 0.05, H_PE - 0.045]);
+    kh.push([tPouso + 0.07, H_PE - 0.035 - 0.02 * corre * pw]); // cai no pé do chute com o joelho pouco dobrado
+    kh.push([tPasso2 + 0.05, H_PE - 0.04]);
+    if (tres) kh.push([tPasso3 + 0.05, H_PE - 0.03]);
     kh.push([tFim, H_PE - 0.022]);
     kh.sort((u, v) => u[0] - v[0]);
     p.ch = new Curva(kh.map((k) => k[0]), kh.map((k) => k[1]));
@@ -1321,13 +1457,13 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       const bate = limitar(0.55 * dN, 0.08, 0.26);
       const tPlano = tN + Math.min(0.05, delta * 0.4);
       const ts = [tN, tPlano, tc];
-      const vs = [-bate, 0, 0];
+      const vs = [-bate, 0, tauC];
       if (salto) {
         ts.push(tSaiN);
         vs.push(0.75);
       } else {
         ts.push(tc + 0.09 * ks, tPouso, tSaiN);
-        vs.push(B.pivo ? 0.24 : 0.1, 0.7, 0.95);
+        vs.push(Math.max(tauC + 0.04, B.pivo ? 0.24 : 0.1), 0.7, 0.95);
       }
       PN.ctau = new Curva(ts, vs, 'livre', 'livre');
       PN.cyaw = B.pivo && !salto ? new Curva([tc + 0.09 * ks, tPouso], [0, B.pivo]) : null;
@@ -1335,6 +1471,12 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     L1.modo = 'curva';
     L1.tBate = tPouso;
     L1.ctau = new Curva([tPouso, tPouso + 0.06], [salto ? 0.12 : -0.14, 0], 'livre', 0);
+    if (tres) {
+      L1.tSai = tPasso2 + 0.07;
+      L3.modo = 'curva';
+      L3.tBate = tPasso3;
+      L3.ctau = new Curva([tPasso3, tPasso3 + 0.07], [-0.1, 0], 'livre', 0);
+    }
     L2.modo = 'curva';
     L2.tBate = tPasso2;
     L2.ctau = new Curva([tPasso2, tPasso2 + 0.07], [-0.16, 0], 'livre', 0);
@@ -1342,10 +1484,13 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     // --- O corpo: chaves do chute (os canais das pernas entram depois, com a perna do chute medida) ---
     const cadeiaK = [pesEspera[1], ...pis.filter((q) => q.pe === 1)];
     const ultimaK = cadeiaK[cadeiaK.length - 1]; // de onde o pé do chute sai para bater
+    // Quem chega andando deixaria o pé do chute no chão até em cima da hora, e a armada sairia num tranco:
+    // o pé sai do chão a tempo de armar com calma (uns 0,25 s antes da bola, como numa passada de verdade)
+    ultimaK.tSai = Math.min(ultimaK.tSai, Math.max(tc - (0.28 + 0.04 * forca) * ks, ultimaK.tBate > -1 ? ultimaK.tBate + 0.1 : 0.04));
     const tSaiK = ultimaK.tSai;
-    const tb = limitar(tc - 0.115 * ks, tSaiK + 0.07 * ks, tc - 0.085 * ks); // o alto da armada
-    const td = tc - 0.045 * ks;
-    const te = tc + 0.055 * ks;
+    const tb = limitar(tc - Math.max(0.115 * ks * kf, 0.075 * giroDaCoxa), tSaiK + 0.07 * ks, tc - 0.085 * ks); // o alto da armada
+    const td = tc - 0.045 * ks * kf;
+    const te = tc + 0.055 * ks * kf;
     const ta = Math.min(tc + (batida === 'semGiro' || batida === 'cavadinha' ? 0.13 : 0.18) * ks, tPouso - 0.14);
     const tq = Math.max(ta + 0.05, tPouso - 0.08);
     Object.assign(p, { tSaiK, tb, td, te, ta, tq, vals });
@@ -1356,11 +1501,11 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     };
     const desc = {};
     for (const n of CANAIS_CORPO) desc[n] = misturar(vals.armada[n], vals.contato[n], n === 'qg' ? 0.55 : n[0] === 'e' || n[0] === 'd' ? 0.35 : 0.45);
-    const passo2 = {};
-    for (const n of CANAIS_CORPO) passo2[n] = misturar(vals.pouso[n], vals.fim[n], 0.6);
+    const corpoPasso2 = {};
+    for (const n of CANAIS_CORPO) corpoPasso2[n] = misturar(vals.pouso[n], vals.fim[n], tres ? 0.35 : 0.6);
     p.cc = curvasDasChaves([
       corpo(vals.armada, tb), corpo(desc, td), corpo(vals.contato, tc), corpo(vals.estende, te), corpo(vals.alto, ta),
-      corpo(vals.queda, tq), corpo(vals.pouso, tPouso + 0.04), corpo(passo2, tPasso2), corpo(vals.fim, tFim),
+      corpo(vals.queda, tq), corpo(vals.pouso, tPouso + 0.04), corpo(corpoPasso2, tPasso2), corpo(vals.fim, tFim),
     ]);
     // De quando a corrida passa o comando para as chaves do chute
     p.tk0 = ultimaK.tBate > -1 ? misturar(ultimaK.tBate, tSaiK, 0.45) : tSaiK * 0.3;
@@ -1381,14 +1526,15 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
           tarefas.push({ t: q.tSai, fazer: () => montarChute(p) });
           break;
         }
-        const seg = { tipo: 'balanco', t0: q.tSai, t1: prox.tBate, de: q, para: prox, A0: new THREE.Vector3(), A1: new THREE.Vector3(), tau0: 0, tau1: 0, tauMeio: 0, yaw0: 0, yaw1: 0, altura: 0.1, pico: 0.8 };
+        const seg = { tipo: 'balanco', t0: q.tSai, t1: prox.tBate, de: q, para: prox, atraso: q === PN && salto ? 0.38 : 0, A0: new THREE.Vector3(), A1: new THREE.Vector3(), tau0: 0, tau1: 0, tauMeio: 0, yaw0: 0, yaw1: 0, altura: 0.1, pico: 0.8, baixa: 0, v0: 0 };
         p.segs[i].push(seg);
         tarefas.push({ t: q.tSai, fazer: () => montarBalanco(p, i, seg) });
       }
     }
     // Em ordem de tempo: cada trecho novo parte de como a perna estava no instante em que começa
     tarefas.sort((u, v) => u.t - v.t);
-    for (const tarefa of tarefas) tarefa.fazer();
+    p.tarefas = tarefas;
+    for (let n = 0; n < tarefas.length; n++) tarefas[n].fazer(); // (montarChute pode pôr mais uma no fim: o terceiro passo)
     for (let i = 0; i < 2; i++) p.segs[i].sort((u, v) => u.t0 - v.t0);
 
     p.tChute = Math.max(0, Math.min(p.tk0, tN - 0.05));
@@ -1410,8 +1556,12 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     const dist = Math.hypot(seg.A1.x - seg.A0.x, seg.A1.z - seg.A0.z);
     const vel = dist / Math.max(0.08, seg.t1 - seg.t0);
     const r = limitar((vel - 2.2) / 3.5, 0, 1);
-    seg.altura = limitar(0.07 * (vel - 1.6), 0.025, 0.3) * EY; // o calcanhar sobe mais quanto mais rápido o passo
-    seg.pico = misturar(1, 0.72, r);                           // e sobe mais cedo
+    // A velocidade do quadril na saída, na direção do passo, em "passos por passo" (inclinação inicial da curva)
+    const vq = dist > 0.05 ? (p.cx.vel(seg.t0) * (seg.A1.x - seg.A0.x) + p.cz.vel(seg.t0) * (seg.A1.z - seg.A0.z)) / dist : 0;
+    seg.v0 = seg.atraso ? 0 : limitar((vq * (seg.t1 - seg.t0)) / Math.max(0.05, dist), 0, 1); // 0 = sai parado, 1 = sai correndo
+    seg.altura = limitar(0.07 * (vel - 1.6), 0.025, 0.24) * limitar((seg.t1 - seg.t0) / 0.28, 0.6, 1) * EY; // (passo curto no tempo: sobe menos) // o calcanhar sobe mais quanto mais rápido o passo
+    seg.pico = misturar(1, 0.7, r);                            // e sobe mais cedo
+    seg.baixa = 0.6 * r;                                       // e na frente passa mais baixo (o joelho não sobe demais)
     seg.tauMeio = seg.tau0 * 0.7 + 0.45 * r;
   }
 
@@ -1461,7 +1611,14 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     chute.t0 = tb;
     p.segs[1].splice(p.segs[1].indexOf(chute), 0, decola);
     p.segs[1].push(pouso);
-    p.segs[1].push({ tipo: 'apoio', t0: tPouso, t1: Infinity, pis: p.L1 });
+    p.segs[1].push({ tipo: 'apoio', t0: tPouso, t1: p.L1.tSai, pis: p.L1 });
+    if (p.L3) {
+      // Terceiro passo: o pé do chute sai de onde caiu e vem pisar ao lado do outro
+      const seg = { tipo: 'balanco', t0: p.L1.tSai, t1: p.L3.tBate, de: p.L1, para: p.L3, atraso: 0, A0: new THREE.Vector3(), A1: new THREE.Vector3(), tau0: 0, tau1: 0, tauMeio: 0, yaw0: 0, yaw1: 0, altura: 0.1, pico: 0.8, baixa: 0, v0: 0 };
+      p.segs[1].push(seg);
+      p.segs[1].push({ tipo: 'apoio', t0: p.L3.tBate, t1: Infinity, pis: p.L3 });
+      p.tarefas.push({ t: seg.t0, fazer: () => montarBalanco(p, 1, seg) });
+    }
   }
 
   // ---------- Avaliar o plano num instante ----------
@@ -1489,6 +1646,8 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     L.seg = seg;
     L.rolo = 0;
     L.peso = 1;
+    L.folga = 0;
+    L.macio = 0;
     const lado = i === 0 ? 0.07 : -0.07;
     if (seg.tipo === 'apoio') {
       const q = seg.pis;
@@ -1500,7 +1659,7 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       } else {
         const prog = (F.gx - q.x) * p.ax + (F.gz - q.z) * p.az; // quadril em relação à pisada, na linha da corrida
         if (prog < 0 && q.dlead > 0) tau = -q.tauBate * (1 - suave((prog + q.dlead) / (0.55 * q.dlead)));
-        else tau = misturar(q.tau0, q.tauSai, suave((prog - q.p0) / Math.max(0.05, q.dtrail - q.p0)));
+        else tau = misturar(q.tau0, q.tauSai * (q.tBate > -1 ? 0.5 : 1), suave((prog - q.p0) / Math.max(0.05, q.dtrail - q.p0)));
       }
       L.modo = 'ik';
       L.plantado = true;
@@ -1509,7 +1668,10 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       L.qual = tau >= 0 ? 2 : 0;
       L.ancora = tau >= 0 ? q.ponta : q.calc;
       tornozeloApoiado(L.ancora, L.qual, yaw, tau, F.pulo, L.A);
-      if (F.pulo > 0) L.tau = tau + 0.5 * Math.min(1, F.pulo / 0.08);
+      if (F.pulo > 0) {
+        L.tau = tau + 0.5 * Math.min(1, F.pulo / 0.08);
+        L.plantado = F.pulo < 0.004;
+      }
       poloFrente(F, L, yaw, lado);
       if (q.polo) {
         const k = rampa(t, 0, 0.3);
@@ -1520,14 +1682,34 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     if (seg.tipo === 'balanco') {
       const u = limitar((t - seg.t0) / Math.max(1e-4, seg.t1 - seg.t0), 0, 1);
       const e = suave(u);
-      const eh = suave((u - 0.06) / 0.86); // na horizontal sai um pouco depois e chega um pouco antes: o começo do passo é só subir e o fim é só descer
+      // Na horizontal sai um pouco depois e chega um pouco antes: o começo do passo é só subir e o fim é só
+      // descer. (No salto depois do chute o pé de apoio ainda fica um tempo para trás, como numa passada.)
+      // Na corrida (v0 > 0) o pé pega velocidade logo ao sair do chão e chega mais devagar: se ficasse para
+      // trás, a perna travaria reta e o joelho dobraria num tranco.
+      const ua = seg.atraso ? Math.max(0, (u - seg.atraso) / (1 - seg.atraso)) : u;
+      const uh = limitar((ua - 0.04) / 0.96, 0, 1);
+      const eh = suave(uh ** (1 - 0.3 * seg.v0));
       L.modo = 'ik';
       L.plantado = false;
       L.A.x = misturar(seg.A0.x, seg.A1.x, eh);
       L.A.z = misturar(seg.A0.z, seg.A1.z, eh);
-      L.A.y = misturar(seg.A0.y, seg.A1.y, e) + seg.altura * Math.sin(Math.PI * u ** seg.pico) ** 1.2 + F.pulo;
+      // (saindo da espera, parado, o pé levanta devagar; na corrida ele já sai do chão com o calcanhar alto)
+      const sobe = seg.de.tBate === -Infinity ? 0.25 + 0.75 * suave(u / 0.4) : 1;
+      // (o alto do passo vem cedo, com o calcanhar atrás; pico < 1 adianta o alto; começa sem tranco)
+      const w = u / (u + (1 - u) * seg.pico);
+      L.A.y = misturar(seg.A0.y, seg.A1.y, e) + seg.altura * sobe * Math.sin(Math.PI * w) ** (w < 0.5 ? 2 : 1.2) * (1 - seg.baixa * rampa(u, 0.3, 0.85)) + F.pulo;
       L.tau = u < 0.3 ? misturar(seg.tau0, seg.tauMeio, suave(u / 0.3)) : misturar(seg.tauMeio, seg.tau1, suave((u - 0.3) / 0.62));
       L.yaw = misturar(seg.yaw0, seg.yaw1, e);
+      {
+        // A ponta do pé descola da grama logo que o passo começa (e só volta a encostar no fim): não raspa
+        const cs = Math.cos(L.tau);
+        const sn = Math.sin(L.tau);
+        let menor = Infinity;
+        for (let k = 0; k < SOLA.length; k++) menor = Math.min(menor, SOLA[k][1] * cs - SOLA[k][2] * sn);
+        const livre = 0.022 * rampa(u, 0, 0.1) * (1 - rampa(u, 0.8, 1)) + F.pulo;
+        if (L.A.y + menor * EY < livre) L.A.y = livre - menor * EY;
+      }
+      L.macio = rampa(u, 0.3, 0.5) * (1 - rampa(u, 0.72, 1)); // só na segunda metade do passo, com o pé indo à frente
       poloFrente(F, L, L.yaw, lado);
       return;
     }
@@ -1535,8 +1717,8 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       // Entre o pé preso no chão e os ângulos do chute: o alvo segue um caminho no ar e o peso troca aos poucos
       const u = limitar((t - seg.t0) / Math.max(1e-4, seg.t1 - seg.t0), 0, 1);
       const e = suave(u);
-      const sobe = seg.tipo === 'decola' ? 1 - (1 - u) * (1 - u) : e; // decola: sai do chão logo
-      const eh = seg.tipo === 'decola' ? e : suave(u / 0.9);          // pouso: chega por cima e desce
+      const sobe = seg.tipo === 'decola' ? misturar(e, 1 - (1 - u) * (1 - u), 0.5) : e; // decola: sai do chão logo
+      const eh = seg.tipo === 'decola' ? suave((u - 0.14) / 0.86) : suave(u / 0.9); // decola: primeiro sobe; pouso: chega por cima e desce
       L.modo = 'mix';
       L.plantado = false;
       L.A.x = misturar(seg.A0.x, seg.A1.x, eh);
@@ -1545,11 +1727,16 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       L.tau = seg.tau;
       L.yaw = seg.yaw;
       L.peso = seg.tipo === 'decola' ? 1 - e : e;
+      // Indo pisar: o pé vem por cima da grama e só encosta quando chega (não raspa no caminho)
+      if (seg.tipo === 'pouso') L.folga = FOLGA_VOLTA * rampa(t, p.tc + 0.08, p.tc + 0.16) * Math.sqrt(1 - eh);
+      else L.folga = 0.035 * rampa(u, 0.03, 0.25); // saindo do chão: a ponta do pé descola logo, não raspa
       poloFrente(F, L, L.yaw, lado);
       return;
     }
     L.modo = 'fk'; // chute
     L.plantado = false;
+    // Depois da bola a perna não volta rente à grama (terminações baixas: rasteiro, cavadinha)
+    L.folga = FOLGA_VOLTA * rampa(t, p.tc + 0.08, p.tc + 0.16);
   }
 
   // O corpo todo no instante t do plano p (sem a espera nem a reação por cima)
@@ -1586,11 +1773,11 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
       corrida.tg = -0.27 * fase * (0.55 + 0.45 * r);
       corrida.ef = amp * fase + 0.06;
       corrida.el = 0.15 + 0.03 * r;
-      corrida.ec = cot + 0.28 * Math.max(0, fase) - 0.1 * Math.max(0, -fase);
+      corrida.ec = cot * (1 + 0.1 * Math.max(0, fase) - 0.5 * Math.max(0, -fase));
       corrida.eg = 0;
       corrida.df = -amp * fase + 0.06;
       corrida.dl = 0.15 + 0.03 * r;
-      corrida.dc = cot + 0.28 * Math.max(0, -fase) - 0.1 * Math.max(0, fase);
+      corrida.dc = cot * (1 + 0.1 * Math.max(0, -fase) - 0.5 * Math.max(0, fase));
       corrida.dg = 0;
       F.fase = fase;
     }
@@ -1673,7 +1860,7 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     _qf.copy(_q).multiply(L.qPe);    // pé (corpo)
     let menor = Infinity;
     for (const ponto of PONTOS_PE.sola) menor = Math.min(menor, _h.y + _v.copy(ponto).applyQuaternion(_qf).y);
-    const falta = (CHAO_MIN + Fq.pulo) / EY - menor;
+    const falta = (CHAO_MIN + L.folga + Fq.pulo) / EY - menor;
     if (falta <= 0) return;
     _h.y += falta;
     paraMundo(Fq, _h, _A);
@@ -1691,6 +1878,7 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
   const olho = { giro: 0, frente: 0, t: null, base: '' }; // a cabeça agora (com limite de velocidade)
   const alvoOlhar = new THREE.Vector3();
   let relogio = 0;             // o relógio da espera na última vez que ela foi desenhada
+  let relogioDeFora = false;   // o jogo já desenhou a espera desta animação (parado(t))?
   let plano = null;
   let variacaoGol = 0;
 
@@ -1699,20 +1887,28 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
   const balancoEspera = { x: 0, z: 0, h: 0 };
   function espera(t) {
     const respira = Math.sin(t * 1.9);
-    const peso = Math.sin(t * 0.62 + 0.4) + 0.35 * Math.sin(t * 1.31);
+    // O peso passa uns segundos numa perna e troca devagar para a outra
+    const peso = 0.85 * Math.tanh(1.7 * Math.sin(t * 0.55 + 0.4)) + 0.2 * Math.sin(t * 1.31);
+    // De vez em quando ele se ajeita: um quique curto nos joelhos e os braços soltam (a cada ~5,3 s)
+    const cA = (((t + 1.9) % 5.3) + 5.3) % 5.3;
+    const ajeita = sino(cA / 0.7) ** 2;
+    const solta = sino((cA - 0.12) / 0.95) ** 2;
     const c = repouso.canais;
     for (const n of CANAIS_CORPO) esperaC[n] = c[n];
-    esperaC.tf += 0.012 * respira;
-    esperaC.tl += 0.02 * peso;
-    esperaC.ql += -0.028 * peso;
-    esperaC.tg += 0.02 * Math.sin(t * 0.43);
-    esperaC.el += 0.012 * respira;
-    esperaC.dl += 0.012 * respira;
-    esperaC.ef += 0.025 * Math.sin(t * 0.8);
-    esperaC.df += 0.025 * Math.sin(t * 0.8 + 2);
-    balancoEspera.x = 0.014 * peso * EX;
-    balancoEspera.z = 0.006 * Math.sin(t * 0.9) * EX;
-    balancoEspera.h = -0.004 * respira - 0.004 * Math.abs(peso);
+    esperaC.tf += 0.018 * respira + 0.05 * ajeita;
+    esperaC.tl += 0.03 * peso;
+    esperaC.ql += -0.045 * peso;
+    esperaC.qg += 0.02 * Math.sin(t * 0.37 + 1);
+    esperaC.tg += 0.035 * Math.sin(t * 0.43);
+    esperaC.el += 0.02 * respira + 0.07 * solta;
+    esperaC.dl += 0.02 * respira + 0.07 * solta;
+    esperaC.ef += 0.05 * Math.sin(t * 0.8) - 0.08 * solta;
+    esperaC.df += 0.05 * Math.sin(t * 0.8 + 2) - 0.08 * solta;
+    esperaC.ec += 0.08 * Math.sin(t * 0.6 + 0.5) + 0.22 * solta;
+    esperaC.dc += 0.08 * Math.sin(t * 0.6 + 2.1) + 0.22 * solta;
+    balancoEspera.x = 0.03 * peso * EX;
+    balancoEspera.z = 0.012 * Math.sin(t * 0.9) * EX;
+    balancoEspera.h = -0.005 * respira - 0.008 * Math.abs(peso) - 0.03 * ajeita;
     return balancoEspera;
   }
   // Para onde ele olha enquanto espera: a bola, e de vez em quando o gol (a cada ~4,5 s, por ~1,3 s)
@@ -1849,13 +2045,24 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
 
   function parado(t = 0) {
     relogio = t;
+    relogioDeFora = true;
+    api.relogio = t;
     desenharEspera(t, t, 'espera');
   }
 
   // O chute escolhido chega aqui, uma vez, quando a corrida começa (e de novo, igual, no replay)
-  function preparar({ forca = 0.7, contato = { x: 0, y: 0 }, alvo: mira = alvo, tecnica = 'colocado' } = {}) {
+  function preparar({ forca = 0.7, contato = { x: 0, y: 0 }, alvo: mira = alvo, tecnica = 'colocado', relogio: relogioDado = null } = {}) {
     plano = planejar({ forca, contato: { x: contato.x, y: contato.y }, alvo: { x: mira.x, z: mira.z }, tecnica });
     publicar();
+    // A espera sai aos poucos no começo da corrida, a partir de onde estava (o balanço do corpo depende do
+    // relógio da espera). Para o replay repetir o lance desde o primeiro quadro ele precisa do mesmo relógio:
+    //   - o jeito firme: o jogo guarda animacao.relogio depois de preparar() e devolve em preparar({ relogio });
+    //   - sem isso, a animação nova (que ainda não esperou) retoma o relógio guardado da última cobrança igual.
+    const chave = [pe, bola.x, bola.z, alvo.x, alvo.z, postura, distancia, angulo, passos, cadencia, costume, forca, contato.x, contato.y, mira.x, mira.z, tecnica].join('|');
+    if (typeof relogioDado === 'number' && Number.isFinite(relogioDado)) relogio = relogioDado;
+    else if (!relogioDeFora && ultimaEspera && ultimaEspera.chave === chave) relogio = ultimaEspera.relogio;
+    ultimaEspera = { chave, relogio };
+    api.relogio = relogio;
     // A comemoração varia com o chute (e é a mesma no replay)
     variacaoGol = Math.abs(Math.round(forca * 97 + esp * contato.x * 31 + contato.y * 17 + esp * mira.x * 7)) % 4;
   }
@@ -1953,6 +2160,7 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     preparar,
     atualizar,
     reage: true,
+    relogio: 0,        // o relógio da espera (parado(t)) no começo da corrida: guarde depois de preparar() e devolva em preparar({ relogio }) no replay
     // Para os testes e a inspeção
     batida: '',
     passos,
@@ -1960,7 +2168,7 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
     pontoDoPe: null,   // { junta, ponto: [x, y, z] }: o ponto do pé que bate, no espaço do tornozelo
     pisadas: () => {
       const p = plano;
-      const lista = [...p.espera, ...p.pis, p.L1, p.L2];
+      const lista = [...p.espera, ...p.pis, p.L1, p.L2, ...(p.L3 ? [p.L3] : [])];
       return lista.map((q) => ({ pe: ladoReal[q.pe], x: esp * q.x, z: q.z, rotacaoY: esp * q.yaw, pisa: q.tBate, sai: q.tSai }));
     },
     // Números do último quadro desenhado (para os testes): pés no chão e quanto o quadril teve de descer
@@ -1987,5 +2195,6 @@ export function criarCobranca(personagem, { bola, alvo = { x: 0, z: 0 }, pe = 'D
   publicar();
   api.inicio = { x: esp * S0.x, z: S0.z, rotacaoY: esp * psi0 };
   parado(0);
+  relogioDeFora = false; // (só vale a espera que o jogo desenhar daqui em diante)
   return api;
 }

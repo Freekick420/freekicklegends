@@ -123,7 +123,7 @@ function rodar(c, chute, { resultado = 'gol', guardar = false, tInicio = 0, relo
   const inicio0 = { ...animacao.inicio };
   // Espera (como no jogo: parado(t) a cada quadro) e o chute
   if (tInicio >= 0) for (let t = relogio - 0.3; t <= relogio; t += DT) animacao.parado(t);
-  animacao.preparar({ forca: chute.forca, contato: chute.contato, alvo: chute.alvo, tecnica: chute.tecnica });
+  animacao.preparar({ forca: chute.forca, contato: chute.contato, alvo: chute.alvo, tecnica: chute.tecnica, relogio: chute.relogio });
   assert.deepEqual({ ...animacao.inicio }, inicio0, 'inicio não pode mudar com preparar()');
   const tc = animacao.tempoContato;
   const fim = animacao.duracao;
@@ -207,7 +207,8 @@ function rodar(c, chute, { resultado = 'gol', guardar = false, tInicio = 0, relo
       const a = anterior.get(nome);
       if (a) {
         const w = (2 * Math.acos(Math.min(1, Math.abs(a.dot(q))))) / DT;
-        if (nome === joelhoChute) m.joelhoChute = Math.max(m.joelhoChute, w);
+        // (só o chicote da canela, de 0,1 s antes a 0,1 s depois da bola, pode passar do limite das juntas)
+        if (nome === joelhoChute && Math.abs(t - tc) < 0.1) m.joelhoChute = Math.max(m.joelhoChute, w);
         else if (w > m.juntaMax) {
           m.juntaMax = w;
           m.juntaQual = nome;
@@ -252,7 +253,8 @@ function rodar(c, chute, { resultado = 'gol', guardar = false, tInicio = 0, relo
   const rel = { x: apoio.x - c.bola.x, z: apoio.z - c.bola.z };
   m.apoioLado = Math.abs(-rel.x * f.z + rel.z * f.x);
   m.apoioAtras = -(rel.x * f.x + rel.z * f.z);
-  m.apoioAltura = apoio.y;
+  // (o calcanhar do pé de apoio pode estar saindo do chão; a ponta não)
+  m.apoioAltura = Math.min(...PONTOS_SOLA.map((p) => mundo(c, `tornozelo${c.pe === 'D' ? 'E' : 'D'}`, p).y));
   m.joelhoNoContato = personagem.juntas[joelhoChute].rotation.x;
   return m;
 }
@@ -270,6 +272,7 @@ const CHUTES = [
   { nome: 'trivela', forca: 0.8, contato: { x: -0.5, y: 0 }, mira: -2.0 },
   { nome: 'canto da bola', forca: 1, contato: { x: 0.67, y: -0.67 }, mira: 6.5 },
   { nome: 'toque fraco', forca: 0.1, contato: { x: -0.3, y: 0.3 }, mira: -6.5 },
+  { nome: 'pancada', forca: 1, contato: { x: 0.1, y: -0.2 }, mira: 1.0 },
 ];
 const FALTAS = [{ distancia: 22, angulo: 0 }, { distancia: 18, angulo: 28 }, { distancia: 30, angulo: -22 }, { distancia: 11, angulo: 0 }];
 const NUMEROS = SO_LENDA ? [SO_LENDA] : [8, 3, 23, 80, 9, 21, 7, 30, 1, 19, 2, 10];
@@ -337,7 +340,7 @@ for (const numero of NUMEROS) {
     conferir(m.joelhoAoContrario < 1e-6 && m.cotoveloAoContrario < 1e-6, `${rotulo}: joelho ou cotovelo dobrou ao contrário`);
     conferir(m.tempoContato >= LIM.tempoMin && m.tempoContato <= LIM.tempoMax, `${rotulo}: contato em ${m.tempoContato.toFixed(2)} s`);
     conferir(m.apoioLado > 0.15 && m.apoioLado < 0.32, `${rotulo}: pé de apoio a ${cm(m.apoioLado)} do centro da bola, para o lado`);
-    conferir(m.apoioAltura < 0.085 * (jogador.visual.altura / 1.8) + 0.01, `${rotulo}: pé de apoio fora do chão no contato`);
+    conferir(m.apoioAltura < 0.01, `${rotulo}: pé de apoio fora do chão no contato (${cm(m.apoioAltura)})`);
     conferir(m.dentroDaBola < 0.05, `${rotulo}: sola do pé do chute ${cm(m.dentroDaBola)} dentro da bola no contato`);
     conferir(m.desce < 0.03, `${rotulo}: o quadril teve de descer ${cm(m.desce)} para a perna alcançar (t=${(m.desceEm || 0).toFixed(3)})`);
     for (const chave of Object.keys(piorDaLenda)) {
@@ -375,9 +378,10 @@ console.log(`Custo: ${((custoQuadro / quadrosMedidos) * 1000).toFixed(0)} µs po
     const rotulo = `${jogador.apelido}`;
     conferir(m.tempoContato >= LIM.tempoMin && m.tempoContato <= LIM.tempoMax, `${rotulo}: contato em ${m.tempoContato.toFixed(2)} s`);
     conferir(m.escorrega < LIM.escorrega && m.abaixo < LIM.abaixo && m.contatoErro < LIM.contato && m.juntaMax < LIM.junta,
-      `${rotulo}: escorrega ${cm(m.escorrega)}, abaixo ${cm(m.abaixo)}, pé–bola ${cm(m.contatoErro)}, junta ${m.juntaMax.toFixed(1)} rad/s (${m.juntaQual})`);
+      `${rotulo}: escorrega ${cm(m.escorrega)}, abaixo ${cm(m.abaixo)}, pé–bola ${cm(m.contatoErro)}, junta ${m.juntaMax.toFixed(1)} rad/s (${m.juntaQual} t=${m.juntaEm.toFixed(3)})`);
     const pisadas = c.animacao.pisadas();
-    conferir(pisadas.length === jogador.cobranca.passos + 4, `${rotulo}: ${pisadas.length - 4} pisadas na corrida (a lenda dá ${jogador.cobranca.passos} passos)`);
+    const naCorrida = pisadas.filter((q) => q.pisa > 0 && q.pisa < m.tempoContato).length;
+    conferir(naCorrida === jogador.cobranca.passos, `${rotulo}: ${naCorrida} pisadas na corrida (a lenda dá ${jogador.cobranca.passos} passos)`);
     c.personagem.dispose();
   }
   console.log(`\nAs ${ELENCO.length} lendas: contato de ${menor.toFixed(2)} s a ${maior.toFixed(2)} s, cada uma com o seu número de passos`);
@@ -419,7 +423,8 @@ console.log(`Custo: ${((custoQuadro / quadrosMedidos) * 1000).toFixed(0)} µs po
 // ---------- Replay: os mesmos valores dão a mesma animação ----------
 {
   let igual = 0;
-  let comeco = 0;
+  let cabeca = 0;
+  let comRelogio = 0;
   for (const numero of [8, 3]) {
     const jogador = ELENCO.find((j) => j.numero === numero);
     const falta = FALTAS[2];
@@ -436,19 +441,33 @@ console.log(`Custo: ${((custoQuadro / quadrosMedidos) * 1000).toFixed(0)} µs po
     ma.quadros.forEach((qa, n) => {
       const qb = mb.quadros.find((q) => Math.abs(q.t - qa.t) < 1e-6);
       const qc = mc.quadros[n];
+      assert.ok(qb, 'o replay pulou um quadro');
       qa.pos.forEach((p, i) => {
-        if (i === 2) return; // a cabeça acompanha a bola com atraso (depende de por onde ela vinha)
-        const d = qb ? p.distanceTo(qb.pos[i]) : 0;
-        if (qa.t < 0.3) comeco = Math.max(comeco, d);
+        const d = p.distanceTo(qb.pos[i]);
+        // (a cabeça olha o alvo com atraso; no replay ela parte do alvo, e a diferença some em décimos de segundo)
+        if (i === 2) cabeca = Math.max(cabeca, d);
         else igual = Math.max(igual, d);
         assert.ok(p.distanceTo(qc.pos[i]) < 1e-12, 'a mesma sequência de chamadas deu outra animação');
       });
     });
-    for (const x of [a, b, c]) x.personagem.dispose();
+    // Com o relógio guardado (animacao.relogio → preparar({ relogio })) o replay é igual mesmo que a animação
+    // nova já tenha esperado em outro instante
+    const d = montar(jogador, falta);
+    d.animacao.parado(9.13);
+    const md = rodar(d, { ...chute, relogio: a.animacao.relogio }, { guardar: true, tInicio: -0.8 });
+    assert.ok(Math.abs(a.animacao.relogio - 7.3) < 1e-9, 'animacao.relogio não é o relógio da espera');
+    ma.quadros.forEach((qa) => {
+      const qd = md.quadros.find((q) => Math.abs(q.t - qa.t) < 1e-6);
+      qa.pos.forEach((p, i) => {
+        if (i !== 2) comRelogio = Math.max(comRelogio, p.distanceTo(qd.pos[i]));
+      });
+    });
+    for (const x of [a, b, c, d]) x.personagem.dispose();
   }
-  conferir(igual < 1e-6, `replay diferente depois de 0,3 s: ${(igual * 1000).toFixed(3)} mm`);
-  conferir(comeco < 0.06, `replay muito diferente no começo: ${cm(comeco)}`);
-  console.log(`Replay: juntas iguais a partir de 0,3 s (diferença ${(igual * 1000).toFixed(4)} mm); nos primeiros 0,3 s a espera ainda sai aos poucos (até ${cm(comeco)})`);
+  conferir(igual < 1e-6, `replay diferente do lance: ${(igual * 1000).toFixed(3)} mm`);
+  conferir(cabeca < 1e-3, `cabeça do replay diferente do lance: ${(cabeca * 1000).toFixed(3)} mm`);
+  conferir(comRelogio < 1e-6, `replay com preparar({ relogio }) diferente do lance: ${(comRelogio * 1000).toFixed(3)} mm`);
+  console.log(`Replay: juntas iguais desde o primeiro quadro (diferença ${(igual * 1000).toFixed(4)} mm; cabeça ${(cabeca * 1000).toFixed(4)} mm) e o mesmo tempoContato; com preparar({ relogio }) ${(comRelogio * 1000).toFixed(4)} mm`);
 }
 
 // ---------- Sem preparar() e as poses avulsas (página de inspeção) ----------
