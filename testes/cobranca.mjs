@@ -375,7 +375,7 @@ console.log(`Custo: ${((custoQuadro / quadrosMedidos) * 1000).toFixed(0)} µs po
     const rotulo = `${jogador.apelido}`;
     conferir(m.tempoContato >= LIM.tempoMin && m.tempoContato <= LIM.tempoMax, `${rotulo}: contato em ${m.tempoContato.toFixed(2)} s`);
     conferir(m.escorrega < LIM.escorrega && m.abaixo < LIM.abaixo && m.contatoErro < LIM.contato && m.juntaMax < LIM.junta,
-      `${rotulo}: escorrega ${cm(m.escorrega)}, abaixo ${cm(m.abaixo)}, pé–bola ${cm(m.contatoErro)}, junta ${m.juntaMax.toFixed(1)} rad/s (${m.juntaQual})`);
+      `${rotulo}: escorrega ${cm(m.escorrega)}, abaixo ${cm(m.abaixo)}, pé–bola ${cm(m.contatoErro)}, junta ${m.juntaMax.toFixed(1)} rad/s (${m.juntaQual} t=${m.juntaEm.toFixed(3)})`);
     const pisadas = c.animacao.pisadas();
     conferir(pisadas.length === jogador.cobranca.passos + 4, `${rotulo}: ${pisadas.length - 4} pisadas na corrida (a lenda dá ${jogador.cobranca.passos} passos)`);
     c.personagem.dispose();
@@ -419,7 +419,7 @@ console.log(`Custo: ${((custoQuadro / quadrosMedidos) * 1000).toFixed(0)} µs po
 // ---------- Replay: os mesmos valores dão a mesma animação ----------
 {
   let igual = 0;
-  let comeco = 0;
+  let cabeca = 0;
   for (const numero of [8, 3]) {
     const jogador = ELENCO.find((j) => j.numero === numero);
     const falta = FALTAS[2];
@@ -436,19 +436,20 @@ console.log(`Custo: ${((custoQuadro / quadrosMedidos) * 1000).toFixed(0)} µs po
     ma.quadros.forEach((qa, n) => {
       const qb = mb.quadros.find((q) => Math.abs(q.t - qa.t) < 1e-6);
       const qc = mc.quadros[n];
+      assert.ok(qb, 'o replay pulou um quadro');
       qa.pos.forEach((p, i) => {
-        if (i === 2) return; // a cabeça acompanha a bola com atraso (depende de por onde ela vinha)
-        const d = qb ? p.distanceTo(qb.pos[i]) : 0;
-        if (qa.t < 0.3) comeco = Math.max(comeco, d);
+        const d = p.distanceTo(qb.pos[i]);
+        // (a cabeça olha o alvo com atraso; no replay ela parte do alvo, e a diferença some em décimos de segundo)
+        if (i === 2) cabeca = Math.max(cabeca, d);
         else igual = Math.max(igual, d);
         assert.ok(p.distanceTo(qc.pos[i]) < 1e-12, 'a mesma sequência de chamadas deu outra animação');
       });
     });
     for (const x of [a, b, c]) x.personagem.dispose();
   }
-  conferir(igual < 1e-6, `replay diferente depois de 0,3 s: ${(igual * 1000).toFixed(3)} mm`);
-  conferir(comeco < 0.06, `replay muito diferente no começo: ${cm(comeco)}`);
-  console.log(`Replay: juntas iguais a partir de 0,3 s (diferença ${(igual * 1000).toFixed(4)} mm); nos primeiros 0,3 s a espera ainda sai aos poucos (até ${cm(comeco)})`);
+  conferir(igual < 1e-6, `replay diferente do lance: ${(igual * 1000).toFixed(3)} mm`);
+  conferir(cabeca < 1e-3, `cabeça do replay diferente do lance: ${(cabeca * 1000).toFixed(3)} mm`);
+  console.log(`Replay: juntas iguais desde o primeiro quadro (diferença ${(igual * 1000).toFixed(4)} mm; cabeça ${(cabeca * 1000).toFixed(4)} mm) e o mesmo tempoContato`);
 }
 
 // ---------- Sem preparar() e as poses avulsas (página de inspeção) ----------
