@@ -4040,7 +4040,8 @@ function pintarNuca(ctx, r) {
   if (!casca && !r.raspado) return;
   const caida = casca && parametros.mapa.caida;
   // Até que altura (m acima da base do pescoço) o cabelo desce no meio da nuca
-  const hBaixo = caida ? -0.01 : casca ? 0.082 : 0.094;
+  // (o crânio encontra o pescoço, atrás, uns 9 a 10 cm acima da base: mais alto que isso fica escondido)
+  const hBaixo = caida ? -0.01 : casca ? 0.08 : 0.068;
   const fundo = ((PESCOCO_ALTO - hBaixo) / (PESCOCO_ALTO - PESCOCO_BAIXO)) * R.h;
   const cor = rgb255(casca ? r.cabelo : (r.corRaspado || r.cabelo));
   const forca = casca ? 1 : 0.78 * r.raspado.densidade;
