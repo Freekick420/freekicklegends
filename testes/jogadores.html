@@ -31,7 +31,7 @@
                      ?zoom (rosto), ?corpo (corpo inteiro), ?pernas, ?tronco, ?pes, ?maos  enquadramento;
                      ?pose=parado|corrida|chute|bracos|agachado|barreira|goleiro  pose do retrato
       ?malha         mostra os triângulos por cima;  ?noite  luzes parecidas com as do jogo
-      ?detalhe=baixo bonecos com menos triângulos (como os figurantes)
+      ?detalhe=baixo bonecos com menos triângulos (no jogo, a barreira e os figurantes: é o padrão dos genéricos)
       ?fila=1        rostos dos reservas;  ?nuca / ?perfil  gira os rostos
       ?cobrador=Nome quem bate em jogo-tras, jogo-aerea e sequencia (ex.: Pibe);  ?t=s  instante da cobrança
       ?caso=0|1|2    chute no goleiro-real (alto à direita, rasteiro à esquerda, no meio);  ?maos  mostra as mãos da colisão
@@ -990,10 +990,32 @@
     };
     const contas = [
       ...ELENCO.map((j) => linhaDeContas(j.apelido, { visual: j.visual, uniforme: uniformeDaLenda(j), numero: j.numero, nome: nomeCurto(j) })),
-      linhaDeContas('genérico', { visual: visualAdversario(1), uniforme: UNIFORMES.adversario, numero: 4 }),
       linhaDeContas('goleiro adversário', { visual: VISUAL_GOLEIRO_ADVERSARIO, uniforme: UNIFORMES.goleiroAdversario, numero: 1 }),
-      linhaDeContas('figurante (baixo)', { visual: visualAdversario(2), uniforme: UNIFORMES.adversario, numero: 7, detalhe: 'baixo' }),
+      linhaDeContas('genérico (alto)', { visual: visualAdversario(1), uniforme: UNIFORMES.adversario, numero: 4, detalhe: 'alto' }),
+      // Sem pedir detalhe, os genéricos (barreira e figurantes) saem no baixo
+      linhaDeContas('genérico (auto = baixo)', { visual: visualAdversario(2), uniforme: UNIFORMES.adversario, numero: 7 }),
     ];
+
+    // Silhueta da sombra: uma malha só, presa ao mesmo esqueleto, com o atributo 'copia' (0 a copias − 1)
+    function verificarSilhueta() {
+      const p = criarPersonagem({ visual: ELENCO[0].visual, uniforme: uniformeDaLenda(ELENCO[0]), numero: 1 });
+      const antes = p.grupo.children.length;
+      const sil = p.criarSilhueta(matMalha, 4);
+      const g = sil.geometry;
+      const copia = g.attributes.copia;
+      const vistos = new Set();
+      for (let i = 0; i < copia.count; i++) vistos.add(copia.getX(i));
+      const r = {
+        silhueta_ok: sil.isSkinnedMesh && sil.skeleton === p.esqueleto && sil.parent === p.grupo && sil.frustumCulled === false
+          && p.grupo.children.length === antes + 1 && vistos.size === 4 && [0, 1, 2, 3].every((k) => vistos.has(k))
+          && !!g.attributes.skinIndex && !!g.attributes.skinWeight,
+        silhueta_triangulos: g.index.count / 3,
+      };
+      p.dispose();
+      r.silhueta_someNoDispose = sil.parent === null;
+      return r;
+    }
+    checagens.push(verificarSilhueta());
     const altos = contas.filter((c) => !c.nome.includes('baixo'));
     const maxTri = Math.max(...altos.map((c) => c.tri));
     const maxMalhas = Math.max(...contas.map((c) => c.malhas));

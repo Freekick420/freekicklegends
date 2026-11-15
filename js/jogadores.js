@@ -1,8 +1,13 @@
 // Bonecos 3D dos jogadores: feitos por código (sem arquivos de modelo), leves para o celular.
 // Cada lenda é reconhecida pelo cabelo, barba, tom de pele, altura, porte, cor da chuteira e número.
 // O corpo tem juntas (tronco, cabeça, ombros, cotovelos, quadris, joelhos e tornozelos) movidas por poses.
-// Cada parte é uma peça lisa (normais suaves) com sombreado leve pintado nos vértices (dobras, axilas,
-// virilha), e o rosto é uma textura pintada (olhos, sobrancelhas, boca, barba rala, raiz do cabelo).
+// Cada boneco são 2 chamadas de desenho: a malha do uniforme (camisa com mangas, calção, meiões e luvas; uma
+// textura por time, com o número e o nome postos pelo shader) e a malha da pele (braços, mãos, pernas,
+// chuteiras, pescoço, cabeça e cabelo; uma textura por jogador). As duas são malhas com pele
+// (THREE.SkinnedMesh) presas ao mesmo esqueleto: as juntas são os ossos, e nas dobras cada vértice mistura
+// dois ou três ossos. Há sombreado pintado nos vértices (dobras, axilas, virilha) e um sombreado de volume no
+// shader. Três níveis de detalhe: 'alto' (~5.400 triângulos), 'baixo' (~2.500: os genéricos, vistos de longe)
+// e a silhueta da sombra (~550 por cópia: criarSilhueta).
 //
 // Eixos do boneco: pés em y = 0, de frente para +z local. A direita do jogador fica em −x local.
 // Medidas em metros; ângulos em radianos.
@@ -226,9 +231,9 @@ class EsqueletoBoneco extends THREE.Skeleton {
 // Quantos segmentos cada peça tem. 'alto': o boneco de perto (cobrador, barreira, goleiro); 'baixo': figurantes
 // vistos de longe; 'sombra': a silhueta que vira sombra no gramado (só o contorno importa).
 const DETALHES = {
-  alto: { nome: 'alto', lobo: 6, frente: 8, costas: 8, bacia: 24, ponte: 6, braco: 10, perna: 12, pe: 12, mao: 8, fino: true },
+  alto: { nome: 'alto', lobo: 6, frente: 8, costas: 8, bacia: 24, ponte: 6, braco: 12, perna: 16, pe: 12, mao: 8, fino: true },
   baixo: { nome: 'baixo', lobo: 4, frente: 6, costas: 6, bacia: 16, ponte: 4, braco: 8, perna: 8, pe: 8, mao: 6, fino: false },
-  sombra: { nome: 'sombra', lobo: 2, frente: 2, costas: 2, bacia: 8, ponte: 2, braco: 6, perna: 6, pe: 6, mao: 4, fino: false },
+  sombra: { nome: 'sombra', lobo: 2, frente: 2, costas: 2, bacia: 8, ponte: 2, braco: 4, perna: 5, pe: 6, mao: 4, fino: false, sombra: true },
 };
 
 // ---------- Cache (geometrias, texturas e materiais compartilhados entre todos os bonecos) ----------
@@ -433,11 +438,6 @@ function fundir(partes) {
 
 function lerAnel(a) {
   return { y: a[0], l: a[1], f: a[2], t: a[3] ?? a[2], q: a[4] ?? 2, dx: a[5] ?? 0, dz: a[6] ?? 0 };
-}
-function anelMisturado(a, b, k) {
-  const r = {};
-  for (const c of ['y', 'l', 'f', 't', 'q', 'dx', 'dz']) r[c] = misturar(a[c], b[c], k);
-  return r;
 }
 
 // seg + 1 pontos [x, z] espalhados por igual no comprimento de cada quarto do anel
@@ -924,25 +924,25 @@ const PERFIL_TRONCO = perfil([
   [-0.105, 0.181, 0.127, 0.137, 2.3],   // barra (solta, por cima do calção)
   [-0.040, 0.171, 0.121, 0.126, 2.3],
   [0.030, 0.160, 0.115, 0.114, 2.4],    // cintura
-  [0.150, 0.166, 0.122, 0.112, 2.5],
-  [0.270, 0.181, 0.134, 0.119, 2.6],    // peito e dorsais
-  [0.330, 0.184, 0.131, 0.121, 2.6],    // axilas
-  [0.386, 0.180, 0.121, 0.117, 2.5],
-  [0.420, 0.173, 0.108, 0.109, 2.4],
-  [0.447, 0.166, 0.094, 0.098, 2.3],    // ombros
-  [0.458, 0.150, 0.086, 0.092, 2.2],
-  [0.468, 0.121, 0.080, 0.087, 2.1],    // trapézio
-  [0.480, 0.091, 0.071, 0.078, 2.0, 0, -0.004],
+  [0.150, 0.170, 0.125, 0.115, 2.5],
+  [0.270, 0.191, 0.139, 0.125, 2.6],    // peito e dorsais
+  [0.330, 0.195, 0.136, 0.128, 2.6],    // axilas
+  [0.386, 0.190, 0.125, 0.123, 2.5],
+  [0.420, 0.182, 0.111, 0.114, 2.4],
+  [0.447, 0.173, 0.096, 0.102, 2.3],    // ombros
+  [0.458, 0.157, 0.088, 0.095, 2.2],
+  [0.468, 0.130, 0.081, 0.089, 2.1],    // trapézio
+  [0.480, 0.097, 0.072, 0.079, 2.0, 0, -0.004],
   [0.490, 0.078, 0.067, 0.074, 2.0, 0, -0.006],   // gola
 ]);
 const ALTURA_AXILA = 0.33;
 const ALTURAS_CAMISA = {
   alto: [-0.105, -0.07, -0.035, 0.0, 0.03, 0.09, 0.15, 0.21, 0.27, 0.30, 0.33, 0.358, 0.386, 0.412, 0.433, 0.447, 0.457, 0.468, 0.480, 0.490],
   baixo: [-0.105, -0.04, 0.03, 0.15, 0.27, 0.33, 0.378, 0.418, 0.447, 0.463, 0.480, 0.490],
-  sombra: [-0.105, 0.03, 0.27, 0.33, 0.40, 0.447, 0.47, 0.49],
+  sombra: [-0.105, 0.27, 0.33, 0.40, 0.447, 0.49],
 };
 // Esfera do deltoide: altura do centro (acima da cintura), raio e desvio do centro em relação à junta do ombro
-const DELTOIDE = { y: 0.388, r: 0.063, dx: 0.007, dz: -0.008 };
+const DELTOIDE = { y: 0.388, r: 0.067, dx: 0.007, dz: -0.008 };
 const DOBRA_MINIMA = 14 * GRAUS;  // meia abertura mínima da zona do ombro, em volta do corpo
 
 const raioTronco = (sec, cs, sn) => (Math.abs(cs / sec.l) ** sec.q + Math.abs(sn / (sn >= 0 ? sec.f : sec.t)) ** sec.q) ** (-1 / sec.q);
@@ -975,12 +975,15 @@ function dobraDoBraco(sec, bx, bz, r, sinal) {
 // meio do ombro direito (u = 0), passa pela frente (0,25), pelo ombro esquerdo (0,5) e pelas costas (0,75)
 function angulosCamisa(det, pf, pb) {
   const { lobo: nL, frente: nF, costas: nB } = det;
+  // Ombro esquerdo: da dobra da frente (pf) à de trás (−pb). O direito é o espelho exato dele (a manga direita
+  // é a esquerda espelhada e tem que cair nos mesmos vértices)
+  const esq = (k) => pf - ((pf + pb) * k) / nL;
   const a = [];
-  for (let k = 0; k < nL / 2; k++) a.push(Math.PI - (pf * k) / (nL / 2));
+  for (let k = 0; k < nL / 2; k++) a.push(Math.PI - esq(nL / 2 - k));
   for (let k = 0; k < nF; k++) a.push(Math.PI - pf - ((Math.PI - 2 * pf) * k) / nF);
-  for (let k = 0; k < nL; k++) a.push(pf - ((pf + pb) * k) / nL);
+  for (let k = 0; k < nL; k++) a.push(esq(k));
   for (let k = 0; k < nB; k++) a.push(-pb - ((Math.PI - 2 * pb) * k) / nB);
-  for (let k = 0; k <= nL / 2; k++) a.push(-Math.PI + pb - (pb * k) / (nL / 2));
+  for (let k = 0; k <= nL / 2; k++) a.push(-Math.PI - esq(nL - k));
   return a;
 }
 
@@ -1152,8 +1155,8 @@ function parteCamisa(c, m, det, goleiro) {
 
   const filas = [];
   let axila = null;
-  // Beirada de dentro da barra
-  {
+  // Beirada de dentro da barra (a silhueta da sombra não precisa das beiradas)
+  if (!det.sombra) {
     const k = contornoCamisa(alturas[0], m, det, dobrasAxila);
     filas.push(fileira(alturas[0], k, { encolhe: 0.9, dy: 0.016, v: 0, sombra: () => 0.5 }));
   }
@@ -1162,24 +1165,24 @@ function parteCamisa(c, m, det, goleiro) {
     const k = contornoCamisa(y, m, det, j < jAxila ? dobrasAxila : null);
     if (j === jAxila) {
       // Na axila há duas fileiras: a de dentro (o corpo da camisa, que desce) e a de fora (com os braços, que sobe)
-      const dentro = fileira(y, k, { raio: (p) => p.re, axila: true, sombra: (i, p, lado, t) => (lado && t > 0 ? 0.62 : sombraTronco(y)(i, p, lado, t)) });
+      const dentro = fileira(y, k, { raio: (p) => p.re, axila: true, sombra: (i, p, lado, t) => sombraTronco(y)(i, p, lado, t) * (lado ? 1 - 0.34 * suave(t * 1.4) : 1) });
       const fora = fileira(y, k, { sombra: sombraTronco(y) });
       // Fora dos ombros (e nas dobras) as duas fileiras são o mesmo vértice
       for (let i = 0; i <= N; i++) {
         const [lado, t] = zona(i);
         if (!lado || t === 0) fora[i] = dentro[i];
       }
-      c.faixa(filas[filas.length - 1], dentro);
+      if (filas.length) c.faixa(filas[filas.length - 1], dentro);
       filas.push(fora);
       axila = { dentro, fora };
     } else {
       const fila = fileira(y, k, { sombra: sombraTronco(y) });
-      c.faixa(filas[filas.length - 1], fila);
+      if (filas.length) c.faixa(filas[filas.length - 1], fila);
       filas.push(fila);
     }
   }
   // Beirada de dentro da gola
-  {
+  if (!det.sombra) {
     const y = alturas[alturas.length - 1];
     const k = contornoCamisa(y, m, det);
     const fila = fileira(y, k, { encolhe: 0.8, dy: -0.014, v: 1, sombra: () => 0.55 });
@@ -1199,17 +1202,17 @@ function parteCamisa(c, m, det, goleiro) {
 
 // Seções do braço (pele) pela distância abaixo do ombro: [a, meia largura, frente, trás]
 const PERFIL_BRACO = perfil([
-  [0.115, 0.047, 0.050, 0.050],
-  [0.170, 0.047, 0.052, 0.049],   // bíceps e tríceps
-  [0.225, 0.043, 0.045, 0.045],
-  [0.265, 0.038, 0.037, 0.041],
-  [0.290, 0.037, 0.035, 0.042],   // cotovelo
-  [0.318, 0.041, 0.039, 0.041],
-  [0.365, 0.040, 0.039, 0.037],   // antebraço
-  [0.425, 0.034, 0.034, 0.032],
-  [0.485, 0.026, 0.029, 0.027],
-  [0.525, 0.021, 0.027, 0.025],   // punho: mais largo de frente para trás
-  [0.548, 0.019, 0.030, 0.027],
+  [0.115, 0.052, 0.056, 0.056],
+  [0.170, 0.053, 0.059, 0.056],   // bíceps e tríceps
+  [0.225, 0.048, 0.051, 0.051],
+  [0.265, 0.042, 0.041, 0.045],
+  [0.290, 0.040, 0.038, 0.045],   // cotovelo
+  [0.318, 0.045, 0.043, 0.045],
+  [0.365, 0.044, 0.043, 0.041],   // antebraço
+  [0.425, 0.037, 0.037, 0.035],
+  [0.485, 0.028, 0.031, 0.029],
+  [0.525, 0.022, 0.028, 0.026],   // punho: mais largo de frente para trás
+  [0.548, 0.020, 0.030, 0.027],
 ]);
 // Grossura do braço pelo porte (o punho quase não muda)
 const grossuraBraco = (a, kb) => 1 + (kb - 1) * (1 - suave((a - 0.40) / 0.12));
@@ -1255,7 +1258,8 @@ function parteManga(c, m, det, goleiro, topo) {
     ? [[0.094, 0.55, 0.012], [0.118, 1, 0.012], [0.165, 1, 0.009], [0.215, 1, 0.007], [0.262, 1, 0.007], [0.29, 1, 0.008], [0.318, 1, 0.007],
       [0.37, 1, 0.006], [0.43, 1, 0.006], [0.49, 1, 0.006], [0.522, 1, 0.008], [PUNHO_MANGA, 1, 0.008]]
     : [[0.094, 0.55, 0.014], [0.118, 1, 0.015], [0.146, 1, 0.017], [BARRA_MANGA, 1, 0.019]];
-  const lista = det.fino ? secoes : secoes.filter((s, i) => i === secoes.length - 1 || i % 2 === 0 || (goleiro && Math.abs(s[0] - 0.29) < 0.04));
+  let lista = det.fino ? secoes : secoes.filter((s, i) => i === secoes.length - 1 || i % 2 === 0 || (goleiro && Math.abs(s[0] - 0.29) < 0.04));
+  if (det.sombra) lista = secoes.filter((s, i) => i === secoes.length - 1 || (goleiro && (i === 1 || Math.abs(s[0] - 0.29) < 0.001)));
   const anel = (a, mix, folga, sombra) => {
     const s = PERFIL_BRACO(Math.max(0.115, a));
     const g = grossuraBraco(a, m.kb);
@@ -1290,8 +1294,7 @@ function parteManga(c, m, det, goleiro, topo) {
     anterior = fila;
   }
   // Beirada de dentro: fecha no braço (ou no punho da luva)
-  const borda = anel(fim - 0.007, 1, -0.004, 0.5);
-  c.faixa(anterior, borda);
+  if (!det.sombra) c.faixa(anterior, anel(fim - 0.007, 1, -0.004, 0.5));
 }
 
 // ---------- Calção: bacia e as duas pernas numa peça contínua ----------
@@ -1363,9 +1366,11 @@ function parteCalcao(c, m, det) {
     }
     if (j === 0) {
       // Tampa de cima (fica por dentro da camisa)
-      const [tu, tv] = noRetangulo(RET.calcao, 0.5, 1);
-      const meio = c.ponto(0, QUADRIL_Y + y + 0.012, 0, tu, tv, [O.quadril, 1], 0.7, BRILHO.tecido);
-      c.leque(fila.slice().reverse(), meio);
+      if (!det.sombra) {
+        const [tu, tv] = noRetangulo(RET.calcao, 0.5, 1);
+        const meio = c.ponto(0, QUADRIL_Y + y + 0.012, 0, tu, tv, [O.quadril, 1], 0.7, BRILHO.tecido);
+        c.leque(fila.slice().reverse(), meio);
+      }
     } else {
       c.faixa(anterior, fila);
     }
@@ -1431,7 +1436,13 @@ function parteCalcao(c, m, det) {
       return [x, yy, z];
     };
     const ossosFora = mix < 1 ? ossosDe(O.pernaE, 0.7, O.meioPernaE, 0.3) : [O.pernaE, 1];
-    const ossosDentro = mix < 1 ? ossosDe(O.pernaE, 0.6, O.meioPernaE, 0.2, O.quadril, 0.2) : [O.pernaE, 1];
+    // Por dentro o tecido ainda segue um pouco a bacia; nas duas costuras com o lado de fora (p = 0 e p = nP) os
+    // pesos são os mesmos dele, senão a costura abre quando a perna se mexe
+    const ossosDentro = (p) => {
+      if (mix >= 1) return [O.pernaE, 1];
+      const q = 0.2 * Math.sin((Math.PI * p) / nP);
+      return ossosDe(O.pernaE, 0.7 - q / 2, O.meioPernaE, 0.3 - q / 2, O.quadril, q);
+    };
     const f = [];
     for (let o = 0; o <= nH; o++) {
       const [x, yy, z] = ponto(angFora(o), topoFora[o]);
@@ -1442,11 +1453,12 @@ function parteCalcao(c, m, det) {
     for (let p = 0; p <= nP; p++) {
       const [x, yy, z] = ponto(angDentro(p), topoDentro[p]);
       const [tu, tv] = noRetangulo(RET.calcaoDentro, p / nP, vCalcao(y));
-      d.push(c.ponto(x, yy, z, tu, tv, ossosDentro, sombra * 0.72, BRILHO.tecido));
+      d.push(c.ponto(x, yy, z, tu, tv, ossosDentro(p), sombra * 0.72, BRILHO.tecido));
     }
     return [f, d];
   };
-  const secoes = det.fino ? [[-0.14, 0.5], [-0.17, 1], [-0.215, 1], [BARRA_CALCAO, 1]] : [[-0.15, 0.6], [-0.2, 1], [BARRA_CALCAO, 1]];
+  const secoes = det.fino ? [[-0.14, 0.5], [-0.17, 1], [-0.215, 1], [BARRA_CALCAO, 1]]
+    : det.sombra ? [[-0.19, 1], [BARRA_CALCAO, 1]] : [[-0.15, 0.6], [-0.2, 1], [BARRA_CALCAO, 1]];
   for (const [yp, mix] of secoes) {
     const [f, d] = anel(yp, mix, 1, 1);
     c.faixa(fora, f);
@@ -1455,7 +1467,7 @@ function parteCalcao(c, m, det) {
     dentro = d;
   }
   // Beirada de dentro da barra: fecha na coxa
-  {
+  if (!det.sombra) {
     const [f, d] = anel(BARRA_CALCAO + 0.008, 1, 0.74, 0.5);
     c.faixa(fora, f);
     c.faixa(dentro, d);
@@ -1472,10 +1484,10 @@ const PERFIL_CANELA = perfil([
   [-0.405, 0.033, 0.038, 0.040],    // tornozelo
   [-0.370, 0.031, 0.035, 0.038],
   [-0.320, 0.036, 0.040, 0.045],
-  [-0.260, 0.044, 0.046, 0.056],
-  [-0.200, 0.052, 0.051, 0.066],
-  [-0.140, 0.057, 0.053, 0.072],    // barriga da panturrilha
-  [-0.095, 0.055, 0.051, 0.066],
+  [-0.260, 0.045, 0.046, 0.058],
+  [-0.200, 0.054, 0.051, 0.070],
+  [-0.140, 0.060, 0.053, 0.077],    // barriga da panturrilha
+  [-0.095, 0.057, 0.051, 0.069],
   [-0.060, 0.053, 0.049, 0.059],
   [-0.030, 0.051, 0.051, 0.052],    // logo abaixo do joelho
 ]);
@@ -1483,7 +1495,7 @@ const TOPO_MEIAO = -0.056;
 const ALTURAS_MEIAO = {
   alto: [TOPO_MEIAO, -0.064, -0.088, -0.094, -0.115, -0.14, -0.17, -0.20, -0.235, -0.27, -0.31, -0.35, -0.385, -0.415, -0.445],
   baixo: [TOPO_MEIAO, -0.09, -0.14, -0.20, -0.27, -0.34, -0.40, -0.445],
-  sombra: [TOPO_MEIAO, -0.14, -0.27, -0.37, -0.445],
+  sombra: [TOPO_MEIAO, -0.14, -0.30, -0.445],
 };
 const relevoCanela = calombos([
   { y: JOELHO_ALT - 0.165, u: 0.88, sy: 0.07, su: 0.12, h: 0.006 },   // gêmeo de dentro (mais baixo)
@@ -1501,7 +1513,8 @@ function parteMeiao(c, m, det) {
     const dobra = y > -0.09 ? 0.0035 : 0; // a dobra de cima é mais grossa
     return { y: JOELHO_ALT + y, l: s.l * m.kp + dobra + extra, f: s.f * m.kp + dobra + extra, t: s.t * m.kp + dobra + extra, q: 2, dx: 0, dz: 0 };
   };
-  const secoes = [{ ...secao(TOPO_MEIAO + 0.008, -0.009), borda: true }, ...alturas.map((y) => secao(y))];
+  const secoes = alturas.map((y) => secao(y));
+  if (!det.sombra) secoes.unshift({ ...secao(TOPO_MEIAO + 0.008, -0.009), borda: true });
   tuboPele(c, {
     secoes,
     seg: det.perna,
@@ -1531,7 +1544,7 @@ function parteMao(c, m, det, luva) {
   const punho = new THREE.Vector3(m.ombroX, OMBRO_ALT - BRACO - ANTEBRACO, 0);
   const dobrar = (x, y, z) => {
     const d = Math.max(0, -0.085 * (luva ? 1.08 : 1) - y); // dedos dobrando para a palma
-    return [x - d * 0.5 - d * d * 3.5, y + d * 0.12, z];
+    return [x - d * 0.3 - d * d * 1.6, y + d * 0.06, z];
   };
   // [y, meia grossura, para a frente, para trás, q]
   const base = [
@@ -1541,9 +1554,9 @@ function parteMao(c, m, det, luva) {
     [-0.085, 0.0155, 0.042, 0.036, 3.2],  // nós dos dedos
     [-0.120, 0.012, 0.039, 0.034, 3.2],
     [-0.155, 0.010, 0.033, 0.029, 3],
-    [-0.178, 0.008, 0.024, 0.021, 2.6],
+    [-0.178, 0.0085, 0.029, 0.025, 2.8],
   ];
-  const usar = det.fino ? base : base.filter((s, i) => i !== 1 && i !== 4);
+  const usar = det.fino ? base : det.sombra ? [base[0], base[3], base[5]] : base.filter((s, i) => i !== 1 && i !== 4);
   const comprimento = 0.192;
   const fileiras = [];
   usar.forEach((s, j) => {
@@ -1567,6 +1580,10 @@ function parteMao(c, m, det, luva) {
   }
   c.orientar(marca);
   // Dedão: sai da frente da palma, apontando para baixo e para a frente
+  if (det.sombra) {
+    c.espelhar(marca);
+    return;
+  }
   const marcaDedao = c.marca();
   const md = matriz(punho.x - 0.006 * k, punho.y - 0.034, punho.z + 0.031 * k, -0.5, 0, -0.25);
   const v3 = new THREE.Vector3();
@@ -1622,7 +1639,7 @@ function geoUniforme(porte, coxas, goleiro, det) {
 const ALTURAS_BRACO = {
   alto: [0.125, 0.17, 0.215, 0.25, 0.272, 0.29, 0.308, 0.33, 0.37, 0.42, 0.47, 0.51, 0.538],
   baixo: [0.125, 0.19, 0.255, 0.29, 0.325, 0.39, 0.46, 0.52, 0.538],
-  sombra: [0.16, 0.29, 0.38, 0.47, 0.538],
+  sombra: [0.16, 0.29, 0.40, 0.538],
 };
 const relevoBraco = calombos([
   { y: OMBRO_ALT - 0.292, u: 0.75, sy: 0.018, su: 0.07, h: 0.004 },   // ponta do cotovelo
@@ -1669,10 +1686,10 @@ const PERFIL_COXA = perfil([
   [-0.030, 0.051, 0.051, 0.051],
   [0.000, 0.054, 0.058, 0.052],    // joelho
   [0.035, 0.055, 0.060, 0.054],
-  [0.080, 0.061, 0.067, 0.060],
-  [0.140, 0.069, 0.076, 0.068],    // quadríceps
-  [0.200, 0.076, 0.083, 0.075],
-  [0.270, 0.079, 0.085, 0.079],    // daqui para cima fica dentro do calção
+  [0.080, 0.063, 0.070, 0.063],
+  [0.140, 0.072, 0.081, 0.073],    // quadríceps
+  [0.200, 0.079, 0.088, 0.080],
+  [0.270, 0.081, 0.088, 0.083],    // daqui para cima fica dentro do calção
 ]);
 const ALTURAS_PERNA = {
   alto: [0.265, 0.205, 0.145, 0.095, 0.055, 0.027, 0.0, -0.027, -0.052, -0.088],
@@ -1735,7 +1752,8 @@ function parteChuteira(c, m, det) {
   const marca = c.marca();
   const seg = det.pe;
   const travas = det.fino;
-  const estacoes = det.fino ? ESTACOES_CHUTEIRA : ESTACOES_CHUTEIRA.filter((e, i) => [0, 1, 3, 4, 6, 8, 10].includes(i));
+  const estacoes = det.fino ? ESTACOES_CHUTEIRA
+    : ESTACOES_CHUTEIRA.filter((e, i) => (det.sombra ? [0, 2, 5, 8, 10] : [0, 1, 3, 4, 6, 8, 10]).includes(i));
   const z0 = ESTACOES_CHUTEIRA[0][0];
   const z1 = ESTACOES_CHUTEIRA[ESTACOES_CHUTEIRA.length - 1][0];
   const ox = QUADRIL_X;
@@ -1789,9 +1807,9 @@ function parteChuteira(c, m, det) {
 const SECOES_PESCOCO = [
   [-0.065, 0.088, 0.070, 0.082, 2, 0, -0.008],
   [-0.020, 0.071, 0.064, 0.071, 2, 0, -0.007],
-  [0.030, 0.061, 0.059, 0.062, 2, 0, -0.004],
-  [0.080, 0.056, 0.054, 0.058, 2, 0, -0.004],
-  [0.130, 0.052, 0.050, 0.056, 2, 0, -0.006],
+  [0.030, 0.065, 0.062, 0.066, 2, 0, -0.004],
+  [0.080, 0.060, 0.057, 0.062, 2, 0, -0.004],
+  [0.130, 0.055, 0.052, 0.059, 2, 0, -0.006],
 ];
 const CABECA_Y = TRONCO_Y + PESCOCO;
 // O pescoço dobra entre o tronco e a cabeça
@@ -1819,7 +1837,7 @@ function partePescoco(c, det) {
 function parteCabecaSimples(c) {
   const marca = c.marca();
   tuboPele(c, {
-    secoes: [[0.305, 0.03, 0.035, 0.035], [0.275, 0.07, 0.078, 0.08], [0.215, 0.088, 0.1, 0.102], [0.15, 0.085, 0.098, 0.096], [0.1, 0.07, 0.086, 0.07], [0.07, 0.05, 0.06, 0.056], [-0.05, 0.075, 0.066, 0.076]]
+    secoes: [[0.305, 0.03, 0.035, 0.035], [0.268, 0.074, 0.082, 0.084], [0.185, 0.088, 0.1, 0.1], [0.1, 0.07, 0.086, 0.07], [0.07, 0.05, 0.06, 0.056], [-0.05, 0.075, 0.066, 0.076]]
       .map((s) => ({ y: CABECA_Y + s[0], l: s[1], f: s[2], t: s[3], q: 2, dx: 0, dz: 0 })),
     seg: 6,
     ret: RET.pele,
@@ -1916,6 +1934,7 @@ function pontoCabeca(x, y, z, folga = 0, escala = 1, mand = 0.5) {
     CRANIO.z + z * (CRANIO.rz * escala * kz * (1 + 0.12 * cima * (1 - cima)) + folga + rel) + queixo,
   );
 }
+
 // Direção na cabeça pelo ângulo em volta (az, graus; + para a esquerda do jogador) e a partir do alto (pol)
 const dirAzPol = (az, pol) => new THREE.Vector3(
   Math.sin(az * GRAUS) * Math.sin(pol * GRAUS), Math.cos(pol * GRAUS), Math.cos(az * GRAUS) * Math.sin(pol * GRAUS));
@@ -2344,7 +2363,7 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
           ondas: { amplitude: 0.018, frequencia: 13 }, faixa: comFaixa,
           ruido: (phi) => 3 * Math.sin(phi * 17),
         },
-        cachos: { n: 8, raio: 0.021, t0: 0.3, afundar: 0.5, filtro: comFaixa ? (phi, t) => Math.abs(t - 0.62) > 0.1 : null },
+        cachos: { n: 14, raio: 0.018, t0: 0.3, afundar: 0.6, filtro: comFaixa ? (phi, t) => Math.abs(t - 0.62) > 0.1 : null },
       };
     case 'cacheadoLongo':
       // Cachos grandes e compridos (descem pela nuca até os ombros), presos pela faixa na testa
@@ -2357,7 +2376,7 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
           ruido: (phi, ax, az) => Math.max(0, -az + 0.4) * 9 * Math.sin(phi * 11) + 2.5 * Math.sin(phi * 23),
           faixa: comFaixa,
         },
-        cachos: { n: 12, raio: 0.028, t0: 0.6, afundar: 0.45, filtro: (phi, t) => Math.sin(phi) < 0.35 && (!comFaixa || t > 0.62) },
+        cachos: { n: 26, raio: 0.022, t0: 0.42, afundar: 0.6, filtro: (phi, t) => Math.sin(phi) < 0.35 && (!comFaixa || t > 0.62) },
       };
     case 'volumoso':
       // Volume grande e redondo (anos 70/80), cachos que descem até a nuca
@@ -2370,7 +2389,7 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
           ruido: (phi) => 3 * Math.sin(phi * 15),
           faixa: comFaixa,
         },
-        cachos: { n: 6, raio: 0.027, t0: 0.65, afundar: 0.55 },
+        cachos: { n: 14, raio: 0.022, t0: 0.5, afundar: 0.62 },
       };
     default:
       return null;
@@ -2782,7 +2801,7 @@ function dobra(ctx, x0, y0, x1, y1, largura, forca = 0.2) {
   if (comp < 1) return;
   const g = ctx.createLinearGradient(0, -largura, 0, largura);
   g.addColorStop(0, 'rgba(255,255,255,0)');
-  g.addColorStop(0.28, `rgba(255,255,255,${forca * 0.3})`);
+  g.addColorStop(0.28, `rgba(255,255,255,${forca * 0.55})`);
   g.addColorStop(0.5, 'rgba(128,128,128,0)');
   g.addColorStop(0.72, `rgba(0,0,0,${forca})`);
   g.addColorStop(1, 'rgba(0,0,0,0)');
@@ -2928,9 +2947,9 @@ function camadaTecido() {
     mancha(ctx, X(0.25 - 0.055), Y(0.3), 36, 22, 0.05);
     mancha(ctx, X(0.25 + 0.055), Y(0.3), 36, 22, 0.05);
     mancha(ctx, X(0.25), Y(0.2), 90, 26, -0.05);
-    mancha(ctx, X(0.75), Y(0.2), 10, 64, -0.08);
-    mancha(ctx, X(0.75 - 0.065), Y(0.33), 32, 26, 0.06);
-    mancha(ctx, X(0.75 + 0.065), Y(0.33), 32, 26, 0.06);
+    mancha(ctx, X(0.75), Y(0.2), 10, 64, -0.12);
+    mancha(ctx, X(0.75 - 0.065), Y(0.33), 32, 26, 0.11);
+    mancha(ctx, X(0.75 + 0.065), Y(0.33), 32, 26, 0.11);
     mancha(ctx, X(0.75), Y(0.04), 70, 20, -0.06);
     // Lados do corpo, embaixo dos braços
     for (const u of [0, 0.5]) mancha(ctx, X(u), Y(0.2), 26, 70, -0.12);
@@ -3388,13 +3407,17 @@ function texturaAlgarismos() {
       const texto = String(d);
       const medida = ctx.measureText(texto);
       const alto = medida.actualBoundingBoxAscent || alturaLetra;
-      const sx = Math.min(1, larguraMax / medida.width);
+      const sx = Math.min(1.3, larguraMax / medida.width); // número largo e cheio, como nas camisas
       const sy = alturaLetra / alto;
       ctx.save();
       ctx.translate(cx, cy + alturaLetra / 2);
       ctx.scale(sx, sy);
       ctx.lineWidth = 9 / Math.min(sx, sy);
       ctx.strokeStyle = '#00ff00';
+      ctx.strokeText(texto, 0, 0);
+      // Miolo engrossado: onde a fonte pesada não existe (celular), o algarismo não fica fino
+      ctx.lineWidth = 2.5 / Math.min(sx, sy);
+      ctx.strokeStyle = '#ffff00';
       ctx.strokeText(texto, 0, 0);
       ctx.fillStyle = '#ffff00';
       ctx.fillText(texto, 0, 0);
@@ -3452,7 +3475,8 @@ const quadrosDoNumero = (() => {
   return () => {
     if (!q) {
       const M = medidasPintura();
-      const proporcao = (2 * ALG.w * ALG.caixa[0]) / (ALG.h * ALG.caixa[1]); // largura / altura de dois algarismos
+      // largura / altura de dois algarismos (um pouco mais largos na camisa do que na textura)
+      const proporcao = (1.18 * 2 * ALG.w * ALG.caixa[0]) / (ALG.h * ALG.caixa[1]);
       const naCamisa = (u, y, altura, largura) => {
         const du = largura / (u > 0.5 ? M.metrosCostas(y) : M.metrosFrente(y));
         const [u0, v0] = noRetangulo(RET.camisa, u - du / 2, vCamisa(y - altura / 2));
@@ -3466,10 +3490,10 @@ const quadrosDoNumero = (() => {
       const [c0, cv0] = noRetangulo(RET.calcao, 0.615 - duCalcao / 2, vCalcao(yCalcao - alturaCalcao / 2));
       const [c1, cv1] = noRetangulo(RET.calcao, 0.615 + duCalcao / 2, vCalcao(yCalcao + alturaCalcao / 2));
       q = {
-        costas: naCamisa(0.75, 0.195, 0.22, 0.22 * proporcao),
+        costas: naCamisa(0.75, 0.172, 0.28, 0.28 * proporcao),
         frente: naCamisa(M.uDaFrente(-0.083, 0.33), 0.33, 0.07, 0.07 * proporcao),
         calcao: new THREE.Vector4(c0, cv0, c1 - c0, cv1 - cv0),
-        nome: naCamisa(0.75, 0.377, 0.076, 0.076 * (NOME.w / NOME.h)),
+        nome: naCamisa(0.75, 0.378, 0.09, 0.09 * (NOME.w / NOME.h)),
       };
     }
     return q;
@@ -3531,15 +3555,27 @@ const SHADER_NUMERO = /* glsl */ `
   }
 #endif
 `;
+// Sombreado de volume, que não depende das luzes da cena: o que está virado para baixo (embaixo do queixo, do
+// braço, da coxa) fica mais escuro, e a superfície escurece um pouco onde vira de lado para a câmera. É o que
+// faz braço e perna parecerem roliços mesmo com a luz chapada dos refletores.
+const SHADER_VOLUME = /* glsl */ `
+diffuseColor.rgb *= vColor.rgb;
+{
+  vec3 nVol = normalize( vNormal );
+  float cimaVol = dot( nVol, normalize( ( viewMatrix * vec4( 0.0, 1.0, 0.0, 0.0 ) ).xyz ) );
+  float ladoVol = 1.0 - abs( dot( nVol, normalize( vViewPosition ) ) );
+  diffuseColor.rgb *= ( 0.7 + 0.3 * smoothstep( -0.95, 0.45, cimaVol ) ) * ( 1.0 - 0.42 * ladoVol * ladoVol );
+}
+`;
 function compilarBoneco(shader) {
   Object.assign(shader.uniforms, this.userData.uniformes);
   shader.fragmentShader = shader.fragmentShader
     .replace('#include <map_pars_fragment>', `#include <map_pars_fragment>\n${SHADER_PARS}`)
     .replace('#include <map_fragment>', `#include <map_fragment>\n${SHADER_NUMERO}`)
-    .replace('#include <color_fragment>', 'diffuseColor.rgb *= vColor.rgb;')
+    .replace('#include <color_fragment>', SHADER_VOLUME)
     .replace('#include <specularmap_fragment>', 'float specularStrength = vColor.a;');
 }
-const chaveDoPrograma = () => 'boneco-etapa9';
+const chaveDoPrograma = () => 'boneco-etapa9c';
 
 // mapa: o atlas (uniforme ou aparência); cor: usada quando não há textura (no Node, sem tela)
 function materialBoneco(mapa, cor = '#cccccc') {
@@ -3702,7 +3738,11 @@ function camadaPele() {
       mancha(ctx, x, y, 4, 34, 0.13);
     }
     [x, y] = P(0.75, 0.16);
-    mancha(ctx, x, y, 5, 60, -0.07);                    // sulco de trás da coxa
+    mancha(ctx, x, y, 5, 60, -0.13);                    // sulco de trás da coxa
+    for (const u of [0.655, 0.845]) {                   // os dois músculos de trás da coxa
+      [x, y] = P(u, 0.15);
+      mancha(ctx, x, y, 9, 46, 0.1);
+    }
     ctx.restore();
   }
   // --- Mão: u: 0 = meio da palma, 0,25 = frente (dedão), 0,5 = costas da mão, 0,75 = lado do mindinho; v = 1 no punho
@@ -3996,18 +4036,20 @@ const IDENTIDADE = new THREE.Matrix4();
 //   cabelo.preso: no estilo 'longo', o cabelo fica preso atrás (rabo curto)
 //   olhos: cor da íris (padrão castanho-escuro); sobrancelha: cor das sobrancelhas
 //   textura: 'baixa' = textura do rosto e da pele com metade do tamanho (os genéricos, vistos de longe)
-// detalhe: 'alto' (padrão) ou 'baixo' (menos triângulos e textura menor: figurantes vistos de longe).
+// detalhe: 'alto', 'baixo' (menos da metade dos triângulos e textura menor: quem é visto de longe) ou 'auto'
+// (padrão: 'baixo' para os genéricos de visualAdversario, 'alto' para os outros).
 // Devolve { grupo, aplicarPose(pose), altura, alturaQuadril, juntas, pontoNoGrupo, alcancar, visual, uniforme,
 // criarSilhueta(material, copias), dispose() }.
 // O boneco são 2 chamadas de desenho: a malha do uniforme (textura do time) e a da pele (textura do jogador),
 // as duas com pele (THREE.SkinnedMesh) no mesmo esqueleto. As juntas são os ossos.
-export function criarPersonagem({ visual = {}, uniforme, numero, nome, detalhe = 'alto' } = {}) {
+export function criarPersonagem({ visual = {}, uniforme, numero, nome, detalhe = 'auto' } = {}) {
   const v = { ...VISUAL_PADRAO, ...visual, cabelo: { ...VISUAL_PADRAO.cabelo, ...(visual.cabelo || {}) } };
   if (!(v.porte in LARGURA_PORTE)) v.porte = 'normal';
   v.coxas = v.coxas === 'grossas' ? 'grossas' : 'normais';
   const goleiro = !!v.goleiro;
   const uni = normalizarUniforme(uniforme || (goleiro ? UNIFORMES.goleiroLendas : UNIFORMES.lendas));
-  const det = DETALHES[detalhe === 'baixo' ? 'baixo' : 'alto'];
+  // Sem pedir, os genéricos (visualAdversario: barreira e figurantes, sempre a 9 m ou mais) saem no detalhe baixo
+  const det = DETALHES[detalhe === 'baixo' || (detalhe !== 'alto' && v.textura === 'baixa') ? 'baixo' : 'alto'];
   const altura = v.altura || 1.8;
   const escala = altura / ALTURA_REF;
   const largura = LARGURA_PORTE[v.porte];
@@ -4216,7 +4258,7 @@ export function criarPersonagem({ visual = {}, uniforme, numero, nome, detalhe =
   // geometria aparece repetida na mesma malha; cada vértice tem o atributo float `copia` (0, 1, ... copias − 1),
   // para o shader projetar cada cópia numa direção de luz. A malha acompanha o esqueleto do boneco (mesmos
   // ossos), já entra no grupo dele com frustumCulled = false e some no dispose(). Atributos: position, normal,
-  // skinIndex, skinWeight e copia (uns 600 triângulos por cópia).
+  // skinIndex, skinWeight e copia (uns 550 triângulos por cópia).
   function criarSilhueta(material, copias = 1) {
     const n = Math.max(1, Math.floor(copias));
     const m = new THREE.SkinnedMesh(geoSilhueta(v.porte, v.coxas, goleiro, n), material);
@@ -4526,10 +4568,26 @@ const GENERICOS = [
   { pele: '#6b4026', cabelo: { estilo: 'raspado', cor: '#111111' }, barba: 'nenhuma', chuteira: '#f7d84a', porte: 'normal' },
   { pele: '#b57d52', cabelo: { estilo: 'curto', cor: '#2b1d14', corte: 'lado' }, barba: 'bigode', corBarba: '#2b1d14', chuteira: '#f5f5f5', porte: 'normal' },
 ];
+const CHUTEIRAS_GENERICAS = ['#111111', '#f5f5f5', '#111111', '#1e5bd8', '#d7263d', '#ff6a00', '#111111', '#f7d84a', '#2ecc71', '#e8e8e8'];
+// O índice escolhe a aparência de base. Quando a altura é "quebrada" (a barreira sorteia a de cada um), ela muda
+// detalhes: corte, tom do cabelo, barba e chuteira. Assim dois da barreira que caírem no mesmo índice não saem
+// gêmeos. (Os figurantes têm altura em centímetros inteiros e variam só pelo índice.)
 export function visualAdversario(indice = 0, altura = 1.84) {
   const n = GENERICOS.length;
   const r = GENERICOS[((Math.floor(indice) % n) + n) % n];
-  return { ...r, cabelo: { ...r.cabelo }, faixa: null, altura, coxas: 'normais', textura: 'baixa' };
+  const cabelo = { ...r.cabelo };
+  const v = { ...r, cabelo, faixa: null, altura, coxas: 'normais', textura: 'baixa' };
+  const decimos = Math.round(altura * 10000); // décimos de milímetro
+  if (decimos % 100 === 0) return v; // altura em centímetros inteiros (figurantes, padrão): a aparência de base
+  const s = (k) => sorteioFixo(decimos, k + 17 * Math.floor(indice));
+  const cortes = CORTES[cabelo.estilo];
+  if (cortes) cabelo.corte = cortes[Math.floor(s(1) * cortes.length)];
+  cabelo.cor = corMisturada(cabelo.cor, s(2) < 0.5 ? '#0c0a08' : '#7a5a3a', 0.1 + 0.25 * s(3));
+  const barbas = r.barba === 'nenhuma' ? ['nenhuma', 'nenhuma', 'rala'] : [r.barba, r.barba, 'rala', 'nenhuma'];
+  v.barba = barbas[Math.floor(s(4) * barbas.length)];
+  if (v.barba !== 'nenhuma') v.corBarba = r.corBarba || cabelo.cor;
+  v.chuteira = CHUTEIRAS_GENERICAS[Math.floor(s(5) * CHUTEIRAS_GENERICAS.length)];
+  return v;
 }
 export const VISUAL_GOLEIRO_ADVERSARIO = {
   pele: '#e2b48a', cabelo: { estilo: 'raspado', cor: '#2a1d14' }, barba: 'rala', corBarba: '#2a1d14',
