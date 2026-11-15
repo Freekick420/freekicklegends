@@ -6,8 +6,8 @@
 // chuteiras, pescoço, cabeça e cabelo; uma textura por jogador). As duas são malhas com pele
 // (THREE.SkinnedMesh) presas ao mesmo esqueleto: as juntas são os ossos, e nas dobras cada vértice mistura
 // dois ou três ossos. Há sombreado pintado nos vértices (dobras, axilas, virilha) e um sombreado de volume com
-// luz de recorte no shader. Três níveis de detalhe: 'alto' (5.600 a 7.400 triângulos: lendas e goleiro),
-// 'baixo' (uns 2.500: os genéricos, vistos de longe) e a silhueta da sombra (546 por cópia; 578 nos goleiros,
+// luz de recorte no shader. Três níveis de detalhe: 'alto' (5.900 a 8.300 triângulos: lendas e goleiro),
+// 'baixo' (uns 2.900: os genéricos, vistos de longe) e a silhueta da sombra (546 por cópia; 578 nos goleiros,
 // por causa das luvas: criarSilhueta).
 // Corte do uniforme: o dos jogos de futebol dos anos 2000 (camisa folgada caindo por fora, manga larga até
 // perto do cotovelo, calção largo até uns 9 cm acima do joelho).
@@ -236,7 +236,7 @@ class EsqueletoBoneco extends THREE.Skeleton {
 // vistos de longe; 'sombra': a silhueta que vira sombra no gramado (só o contorno importa).
 const DETALHES = {
   alto: { nome: 'alto', lobo: 6, frente: 8, costas: 8, bacia: 24, ponte: 6, braco: 12, perna: 16, pe: 12, mao: 8, fino: true },
-  baixo: { nome: 'baixo', lobo: 4, frente: 6, costas: 6, bacia: 16, ponte: 4, braco: 8, perna: 8, pe: 8, mao: 6, fino: false },
+  baixo: { nome: 'baixo', lobo: 6, frente: 6, costas: 6, bacia: 16, ponte: 4, braco: 8, perna: 8, pe: 8, mao: 6, fino: false },
   sombra: { nome: 'sombra', lobo: 2, frente: 2, costas: 2, bacia: 8, ponte: 2, braco: 4, perna: 5, pe: 6, mao: 4, fino: false, sombra: true },
 };
 
@@ -1280,7 +1280,9 @@ function parteManga(c, m, det, goleiro, topo) {
     const bx = m.ombroX + DELTOIDE.dx * (1 - t);
     const bz = DELTOIDE.dz * (1 - t);
     // Por dentro (na axila) o começo da manga ainda segue um pouco o ajudante do ombro: o tecido estica aos poucos
-    const wMeio = a < 0.1 ? 0.4 : a < 0.125 ? 0.15 : 0;
+    // Na manga curta, o lado de baixo inteiro segue em parte o ajudante (meio giro): com o braço erguido o
+    // tecido fica esticado da boca da manga até a axila, em vez de subir com o braço como um tubo duro
+    const wMeio = a < 0.1 ? 0.4 : goleiro ? (a < 0.125 ? 0.15 : 0) : 0.32;
     const fila = [];
     for (let k = 0; k <= n; k++) {
       const th = angulo(k);
@@ -1295,7 +1297,11 @@ function parteManga(c, m, det, goleiro, topo) {
       let ossos;
       if (goleiro && a > 0.5) ossos = [O.cotoveloE, 1];
       else if (goleiro && a > 0.2) ossos = ossosDaDobra(a - BRACO, 0.04, O.ombroE, O.meioCotoveloE, O.cotoveloE);
-      else ossos = dentro(k) ? ossosDe(O.ombroE, 1 - wMeio, O.meioOmbroE, wMeio) : [O.ombroE, 1];
+      else {
+        // (o peso cresce aos poucos do lado para o meio de baixo da manga)
+        const embaixo = dentro(k) ? suave((k < meio ? meio - k : k - 3 * meio) / (0.6 * meio)) : 0;
+        ossos = ossosDe(O.ombroE, 1 - wMeio * embaixo, O.meioOmbroE, wMeio * embaixo);
+      }
       fila.push(c.ponto(x, OMBRO_ALT - a, z, tu, tv, ossos, sombra * (dentro(k) ? 0.84 : 1), BRILHO.tecido));
     }
     return fila;
@@ -1969,7 +1975,8 @@ const dirAzPol = (az, pol) => new THREE.Vector3(
 const UV_PELE = [0.5, 0.012];
 
 // Anéis da cabeça (graus a partir do alto): mais juntos no rosto (olhos, boca, queixo)
-const ANEIS_CABECA = [0, 24, 46, 66, 80, 91, 101, 109, 116, 123, 133, 150, 180];
+const ANEIS_CABECA = [0, 24, 46, 66, 80, 91, 101, 109, 116, 123, 131, 140, 151, 164, 180];
+const ANEIS_CABECA_BAIXO = [0, 24, 46, 66, 80, 91, 101, 109, 116, 123, 133, 150, 180];
 
 // Crânio, rosto, nariz e orelhas numa peça só (o pescoço é feito à parte, porque dobra entre a cabeça e o
 // tronco). A barba (cheia, bigode, cavanhaque) é volume da própria cabeça: a pele sobe onde ela cobre, e a
@@ -1977,11 +1984,12 @@ const ANEIS_CABECA = [0, 24, 46, 66, 80, 91, 101, 109, 116, 123, 133, 150, 180];
 function geoCabeca(mand, barba = null, fino = true) {
   const esp = ESPESSURA_BARBA[barba] || 0;
   return peca(`cabeca:${mand}:${esp ? barba : ''}:${fino ? 1 : 0}`, () => {
-    const seg = fino ? 16 : 12;
+    const seg = fino ? 24 : 12;
+    const aneis = fino ? ANEIS_CABECA : ANEIS_CABECA_BAIXO;
     const pos = [];
     const uv = [];
     const idx = [];
-    ANEIS_CABECA.forEach((pol, j) => {
+    aneis.forEach((pol, j) => {
       const th = pol * GRAUS;
       for (let i = 0; i <= seg; i++) {
         const phi = (i / seg) * Math.PI * 2;
@@ -1995,14 +2003,14 @@ function geoCabeca(mand, barba = null, fino = true) {
       }
     });
     const linha = seg + 1;
-    for (let j = 0; j < ANEIS_CABECA.length - 1; j++) {
+    for (let j = 0; j < aneis.length - 1; j++) {
       for (let i = 0; i < seg; i++) {
         const a = j * linha + i + 1;
         const b = j * linha + i;
         const c = (j + 1) * linha + i;
         const d = (j + 1) * linha + i + 1;
         if (j > 0) idx.push(a, b, d);
-        if (j < ANEIS_CABECA.length - 2) idx.push(b, c, d);
+        if (j < aneis.length - 2) idx.push(b, c, d);
       }
     }
     const cranio = new THREE.BufferGeometry();
@@ -2017,9 +2025,9 @@ function geoCabeca(mand, barba = null, fino = true) {
     const sobre = (az, pol, f) => pontoCabeca(...dirAzPol(az, pol).toArray(), f, 1, mand);
     const P = [
       sobre(0, 84, 0.001),       // 0 raiz, entre os olhos
-      sobre(-6.5, 91, -0.001),   // 1 lado direito da ponte
-      sobre(6.5, 91, -0.001),    // 2 lado esquerdo da ponte
-      sobre(0, 101.5, 0.019),    // 3 ponta
+      sobre(-8, 92, -0.0015),    // 1 lado direito da ponte
+      sobre(8, 92, -0.0015),     // 2 lado esquerdo da ponte
+      sobre(0, 101.5, 0.0165),   // 3 ponta
       sobre(-10, 104.5, 0.002),  // 4 asa direita
       sobre(10, 104.5, 0.002),   // 5 asa esquerda
       sobre(0, 107, 0.005),      // 6 base (entre as narinas)
@@ -2044,8 +2052,24 @@ function geoCabeca(mand, barba = null, fino = true) {
       }
     }
     nariz.computeVertexNormals();
-    comCor(nariz, (x, y) => (y < P[6].y + 0.004 ? 0.78 : 1));
-    uvFixo(nariz, ...UV_PELE);
+    // Embaixo do nariz mais escuro; as narinas, bem escuras
+    comCor(nariz, (x, y, z, i) => (i === 7 || i === 8 ? 0.5 : i === 6 ? 0.7 : i === 4 || i === 5 ? 0.86 : i === 1 || i === 2 ? 0.93 : 1));
+    // O nariz usa a pintura do rosto no lugar onde ele fica (mesmo tom e sombras dos vizinhos) e a luz dele
+    // é meio a meio a da cunha e a do rosto em volta: deixa de parecer uma peça colada
+    {
+      const pn = nariz.attributes.position;
+      const nn = nariz.attributes.normal;
+      const uvN = new Float32Array(pn.count * 2);
+      const dir = new THREE.Vector3();
+      const cruz = new THREE.Vector3();
+      for (let i = 0; i < pn.count; i++) {
+        dir.set(pn.getX(i) / CRANIO.rx, (pn.getY(i) - CRANIO.y) / CRANIO.ry, (pn.getZ(i) - CRANIO.z) / CRANIO.rz).normalize();
+        uvN.set(uvDaDirecao(dir.x, dir.y, dir.z), i * 2);
+        cruz.fromBufferAttribute(nn, i).multiplyScalar(0.55).addScaledVector(dir, 0.45).normalize();
+        nn.setXYZ(i, cruz.x, cruz.y, cruz.z);
+      }
+      nariz.setAttribute('uv', new THREE.BufferAttribute(uvN, 2));
+    }
 
     // Orelhas: achatadas, inclinadas para trás, com a concha mais escura
     const orelhas = [];
@@ -2057,6 +2081,21 @@ function geoCabeca(mand, barba = null, fino = true) {
     }
     cranio.computeVertexNormals();
     suavizarCostura(cranio);
+    // Atrás e embaixo, o crânio entra no pescoço: ali a normal fica deitada como a dele, senão a luz muda de
+    // repente na emenda e aparece uma linha na nuca (careca e raspado)
+    {
+      const p = cranio.attributes.position;
+      const n = cranio.attributes.normal;
+      for (let i = 0; i < p.count; i++) {
+        const w = suave((CRANIO.y - 0.04 - p.getY(i)) / 0.045) * suave((0.03 - p.getZ(i)) / 0.05);
+        if (w <= 0) continue;
+        const nx = n.getX(i);
+        const ny = n.getY(i) * (1 - w);
+        const nz = n.getZ(i) - 0.6 * w * Math.max(0, -n.getY(i)); // (e um pouco mais para trás)
+        const comp = Math.hypot(nx, ny, nz) || 1;
+        n.setXYZ(i, nx / comp, ny / comp, nz / comp);
+      }
+    }
     return fundir([cranio, nariz, ...orelhas]);
   });
 }
@@ -2094,9 +2133,16 @@ function anguloFaixa(x, z) {
 //   pontaSolta: a ponta dos fios que caem fica longe da pele (cabelo comprido); sem ela, a beirada afina
 function mapaCabelo({
   linha, base = 0.012, topo = 0, tras = 0, lados = 0, frenteTopo = 0, borda = 12, ondas = null,
-  ruido = null, caida = null, volumeExtra = null, faixa = false, pontaSolta = false,
+  ruido = null, caida = null, volumeExtra = null, faixa = false, pontaSolta = false, volume = null,
 }) {
-  const thetaC = caida ? caida.inicio * GRAUS : Infinity;
+  const thetaC = caida ? caida.inicio * GRAUS : volume ? volume.inicio * GRAUS : Infinity;
+  // Mechas do cabelo em volume: 0 (vão entre duas mechas) a 1 (meio da mecha), em volta da cabeça. As mechas
+  // têm larguras diferentes (o ângulo é entortado), com o meio arredondado e o vão estreito.
+  const mecha = (phi) => {
+    if (!volume) return 1;
+    const a = phi + 0.22 * Math.sin(2 * phi + 1.3) + 0.1 * Math.sin(5 * phi);
+    return Math.sqrt(0.5 + 0.5 * Math.cos(volume.mechas * a + 0.6));
+  };
   // Linha do cabelo pintada (com os fiapos do 'ruido') e a beirada da casca: nos cortes rentes a casca tem a
   // beirada lisa, encostada na cabeça (dente de polígono parece capacete); quando os fios caem, as pontas
   // são as mechas
@@ -2130,7 +2176,35 @@ function mapaCabelo({
       f = 0.0015 + (f - 0.0015) * b;
     }
     const q = pontoCabeca(sx, sy, sz, f + extra);
-    if (theta > thetaC) {
+    ponto.tom = ondas && volume && volume.cachos ? 0.72 + 0.28 * limitar(rel / ondas.amplitude, 0, 1) : 1;
+    if (volume && theta > thetaC) {
+      // Cabelo em volume: da altura das orelhas para baixo ele cai junto do pescoço e se apoia na gola, nos
+      // ombros e nas costas (raioDoCorpo), em mechas grossas de pontas redondas
+      const azG = Math.abs(Math.atan2(ax, az)) / GRAUS;            // 0 = frente, 180 = nuca
+      const m = mecha(phi);
+      const u = (theta - thetaC) / (lim - thetaC);
+      const yPonta = alturaDaPonta(volume.pontas, azG) + volume.fundo * (1 - m);
+      const L = Math.max(0.003, q.y - yPonta) * suave((lim - thetaC) / (20 * GRAUS));
+      const d = u * L;
+      const y = q.y - d;
+      const r0 = Math.hypot(q.x, q.z - EIXO_PESCOCO_Z) || 1;
+      const corpo = raioDoCorpo(y, azG);
+      // O cabelo cai quase a prumo (raio = uma fração do raio na altura das orelhas), sem entrar no corpo
+      let alvo = Math.max(corpo + volume.esp, r0 * volume.prumo) + volume.gomo * (m - 0.35) * suave(d / 0.05)
+        + (volume.vira || 0) * suave((u - 0.72) / 0.28) + 0.6 * rel + extra;
+      if (volume.cachos) {
+        // Cachos grandes: fileiras de calombos redondos, uma desencontrada da outra
+        const fileira = d / volume.cachos.passo + 0.5;
+        const desencontro = (Math.floor(fileira) % 2) * Math.PI;
+        const cacho = Math.abs(Math.sin(Math.PI * fileira)) * (0.5 + 0.5 * Math.cos(volume.cachos.n * phi + desencontro));
+        alvo += volume.cachos.altura * (cacho - 0.4) * suave(d / 0.03);
+        ponto.tom = 1 - 0.42 * (1 - cacho) * suave(d / 0.03); // os vãos entre os cachos ficam escuros
+      }
+      const r = Math.max(misturar(r0, alvo, suave(d / 0.075)), corpo + 0.006);
+      q.x *= r / r0;
+      q.z = EIXO_PESCOCO_Z + (q.z - EIXO_PESCOCO_Z) * (r / r0);
+      q.y = y;
+    } else if (theta > thetaC) {
       // Fios caindo: descem retos a partir de 'inicio', abrindo um pouco
       const d = ((theta - thetaC) / (Math.PI / 2)) * caida.comprimento;
       q.y -= d;
@@ -2155,7 +2229,54 @@ function mapaCabelo({
   };
   ponto.limite = limite;
   ponto.limiteCasca = limiteCasca;
+  if (volume) {
+    // Fecha o volume por baixo: da ponta de cada mecha a superfície vira para dentro (ponta redonda) e some
+    // dentro do pescoço ou das costas. k = 1, 2, 3: as três fileiras do fechamento.
+    const PASSOS = [[0.3, -0.007], [0.72, -0.004], [1, 0.02]];
+    ponto.fechar = (phi, k) => {
+      const q = ponto(phi, 1);
+      const ax = -Math.cos(phi);
+      const az = Math.sin(phi);
+      if (limiteCabelo(linha, ax, az) <= thetaC + 1e-6) return q; // na testa não há o que fechar
+      const azG = Math.abs(Math.atan2(ax, az)) / GRAUS;
+      const r0 = Math.hypot(q.x, q.z - EIXO_PESCOCO_Z) || 1;
+      const [fr, dy] = PASSOS[k - 1];
+      const dentro = Math.min(r0 - 0.004, raioDoCorpo(q.y + 0.03, azG) - 0.016);
+      const r = misturar(r0, dentro, fr);
+      q.x *= r / r0;
+      q.z = EIXO_PESCOCO_Z + (q.z - EIXO_PESCOCO_Z) * (r / r0);
+      q.y += dy;
+      return q;
+    };
+    ponto.mecha = mecha;
+    ponto.caindo = (phi, t) => {
+      const lim = limiteCabelo(linha, -Math.cos(phi), Math.sin(phi));
+      return lim > thetaC ? limitar((t * lim - thetaC) / (lim - thetaC), 0, 1) : 0;
+    };
+  }
   return ponto;
+}
+
+// O corpo em volta do pescoço, para o cabelo comprido se apoiar nele: raio (m, a partir do eixo do pescoço) da
+// pele ou da camisa na altura y (a partir da base do pescoço) e na direção azG (graus: 0 = frente, 180 =
+// nuca). Medido na malha do porte normal: pescoço, gola, e daí para baixo as costas (devagar) e os ombros
+// (depressa: o trapézio é quase deitado).
+const EIXO_PESCOCO_Z = -0.012;
+function raioDoCorpo(y, azG) {
+  const lado = Math.sin(azG * GRAUS) ** 2;
+  if (y >= 0.085) return 0.064;
+  if (y >= 0.06) return misturar(0.08, 0.064, (y - 0.06) / 0.025);
+  return 0.08 + (0.06 - y) * (0.22 + 1.5 * lado);
+}
+// Altura da ponta do cabelo em cada direção: lista [[graus, y]] em ordem (0 = frente, 180 = nuca)
+function alturaDaPonta(pontas, azG) {
+  if (azG <= pontas[0][0]) return pontas[0][1];
+  for (let k = 1; k < pontas.length; k++) {
+    if (azG <= pontas[k][0]) {
+      return misturar(pontas[k - 1][1], pontas[k][1], suave((azG - pontas[k - 1][0]) / (pontas[k][0] - pontas[k - 1][0])));
+    }
+  }
+  return pontas[pontas.length - 1][1];
 }
 
 // Coordenada da textura do rosto para uma direção na cabeça (a mesma da esfera do THREE)
@@ -2182,12 +2303,28 @@ function cascaCabelo(ponto, seg, aneis, { escurecePonta = 0 } = {}) {
       const theta = Math.min(179, t * ponto.limiteCasca(phi)) * GRAUS;
       uv.push(i / seg, 1 - theta / Math.PI);
       const mecha = 1 + (sorteioFixo(i % seg, j) - 0.5) * 0.22 * (1 - t ** 3);
-      const k = (1 - escurecePonta * t * t) * mecha;
+      let k = (1 - escurecePonta * t * t) * mecha;
+      // Cabelo em volume: os vãos entre as mechas são mais escuros
+      if (ponto.mecha) k *= (1 - 0.34 * (1 - ponto.mecha(phi)) * suave(ponto.caindo(phi, t) / 0.35)) * ponto.tom;
       cores.push(k, k, k);
     }
   }
+  let fileiras = aneis;
+  if (ponto.fechar) {
+    for (let k = 1; k <= 3; k++) {
+      for (let i = 0; i <= seg; i++) {
+        const phi = (i / seg) * Math.PI * 2;
+        const q = ponto.fechar(phi, k);
+        pos.push(q.x, q.y, q.z);
+        uv.push(i / seg, 1 - (Math.min(179, ponto.limiteCasca(phi)) * GRAUS) / Math.PI);
+        const tom = (1 - escurecePonta) * [0.72, 0.5, 0.4][k - 1];
+        cores.push(tom, tom, tom);
+      }
+    }
+    fileiras += 3;
+  }
   const linha = seg + 1;
-  for (let j = 0; j < aneis; j++) {
+  for (let j = 0; j < fileiras; j++) {
     for (let i = 0; i < seg; i++) {
       const a = j * linha + i + 1;
       const b = j * linha + i;
@@ -2314,7 +2451,7 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
   switch (estilo) {
     case 'curto':
       return {
-        fios: corte === 'arrepiado' ? 'curtos' : 'fios', seg: 16, aneis: 9,
+        fios: corte === 'arrepiado' ? 'curtos' : 'fios', seg: 24, aneis: 9,
         mapa: {
           // A casca desce até a base do crânio e afina até encostar na cabeça (sem degrau na nuca)
           linha: { frente: corte === 'frente' ? 50 : 45, lado: 96, tras: 143 },
@@ -2333,7 +2470,7 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
     case 'topete':
       // Lados bem curtos (pintados) e volume em cima, penteado para cima e para trás na frente
       return {
-        fios: 'fios', seg: 16, aneis: 9,
+        fios: 'fios', seg: 24, aneis: 9,
         mapa: {
           linha: { frente: 44, lado: 76, tras: 104 }, base: 0.009, topo: 0.017, borda: 14,
           volumeExtra: (x, y, z) => 0.034 * Math.max(0, z + 0.15) ** 1.4 * sino(y - 0.72, 0.32) * sino(x, 0.6),
@@ -2343,7 +2480,7 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
       };
     case 'medio':
       return {
-        fios: 'fios', seg: 16, aneis: 11,
+        fios: 'fios', seg: 24, aneis: 11,
         mapa: corte === 'franja' ? {
           // Anos 80: franja cheia e desfiada na testa, cobre metade das orelhas, nuca até a gola
           linha: { frente: 62, lado: 110, tras: 150 },
@@ -2368,7 +2505,7 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
       // Preso: puxado para trás, rente à cabeça, com coque e rabo atrás (geoRabo)
       if (preso) {
         return {
-          fios: 'fios', seg: 16, aneis: 9, rabo: true,
+          fios: 'fios', seg: 24, aneis: 9, rabo: true,
           mapa: {
             linha: { frente: 46, lado: 99, tras: 143 }, base: 0.008, topo: 0.004, borda: 14,
             ondas: { amplitude: 0.003, frequencia: 9 },
@@ -2377,14 +2514,17 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
           },
         };
       }
-      // Comprido até os ombros, repartido no meio: cobre as orelhas e desce junto do pescoço, em mechas largas
+      // Comprido até os ombros, repartido no meio: um volume fechado que cobre as orelhas, desce junto do
+      // pescoço e se apoia na gola e nos ombros, em mechas largas de pontas um pouco viradas
       return {
-        fios: 'fios', seg: 32, aneis: 13, escurecePonta: 0.2,
+        fios: 'fios', seg: 48, aneis: 13, escurecePonta: 0.12,
         mapa: {
-          linha: { frente: 47, lado: 130, tras: 164 }, base: 0.013, topo: 0.006, lados: 0.005, borda: 8,
-          ondas: { amplitude: 0.004, frequencia: 9 },
-          caida: { inicio: 96, comprimento: 0.2, abre: 0.03, paraTras: 0.05, fecha: 0.094, ondula: 0.004 }, pontaSolta: true,
-          ruido: (phi) => 8 * Math.sin(phi * 5 + 1) + 4 * Math.sin(phi * 11),
+          linha: { frente: 47, lado: 132, tras: 166 }, base: 0.013, topo: 0.005, lados: 0.006, tras: 0.004, borda: 8,
+          ondas: { amplitude: 0.003, frequencia: 9 }, pontaSolta: true,
+          volume: {
+            inicio: 93, mechas: 7, esp: 0.012, prumo: 0.9, gomo: 0.007, fundo: 0.024, vira: 0.002,
+            pontas: [[48, 0.15], [68, 0.085], [95, 0.058], [135, 0.03], [180, 0.012]],
+          },
           volumeExtra: (x, y, z) => -0.006 * sino(x, 0.06) * Math.max(0, y) * Math.max(0, z + 0.2),
           faixa: comFaixa,
         },
@@ -2392,7 +2532,7 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
     case 'cacheado':
       // Cachos curtos: casca irregular com calombos (os cachos em si são pintados)
       return {
-        fios: 'cachos', seg: 32, aneis: 11,
+        fios: 'cachos', seg: 48, aneis: 11,
         mapa: {
           linha: { frente: 44, lado: 98, tras: 138 }, base: 0.016, topo: 0.01, borda: 13,
           ondas: { amplitude: 0.017, frequencia: 15 }, faixa: comFaixa,
@@ -2401,22 +2541,26 @@ function parametrosCabelo(estilo, corte, comFaixa, preso = false) {
         },
       };
     case 'cacheadoLongo':
-      // Cachos grandes e compridos (descem pela nuca até os ombros), presos pela faixa na testa
+      // Cachos grandes e compridos, presos pela faixa na testa: um volume fechado de lóbulos redondos, mais
+      // cheio dos lados e atrás do que em cima, apoiado no pescoço e nos ombros (os cachos em si são pintados)
       return {
-        fios: 'cachos', seg: 32, aneis: 13, escurecePonta: 0.18,
+        fios: 'cachos', seg: 48, aneis: 20, escurecePonta: 0.05,
         mapa: {
-          linha: { frente: 47, lado: 128, tras: 164 }, base: 0.021, topo: 0.012, lados: 0.01, borda: 7,
-          ondas: { amplitude: 0.011, frequencia: 12 },
-          caida: { inicio: 94, comprimento: 0.17, abre: 0.07, paraTras: 0.04, fecha: 0.108, ondula: 0.007 }, pontaSolta: true,
-          ruido: (phi) => 7 * Math.sin(phi * 5 + 0.5) + 3 * Math.sin(phi * 11),
-          volumeExtra: calombosDeCachos(11, 58, 94, 0.009, 0.3, 4),
+          linha: { frente: 47, lado: 132, tras: 166 }, base: 0.017, topo: 0.004, lados: 0.012, tras: 0.01, borda: 7,
+          ondas: { amplitude: 0.012, frequencia: 13 }, pontaSolta: true,
+          volume: {
+            inicio: 92, mechas: 8, esp: 0.018, prumo: 0.98, gomo: 0.014, fundo: 0.03,
+            cachos: { passo: 0.046, n: 9, altura: 0.016 },
+            pontas: [[48, 0.15], [68, 0.095], [95, 0.066], [135, 0.04], [180, 0.022]],
+          },
+          volumeExtra: calombosDeCachos(9, 62, 92, 0.008, 0.34, 4),
           faixa: comFaixa,
         },
       };
     case 'volumoso':
       // Volume grande e redondo (anos 70/80), cachos que descem até a nuca
       return {
-        fios: 'cachos', seg: 32, aneis: 12,
+        fios: 'cachos', seg: 48, aneis: 12,
         mapa: {
           linha: { frente: 50, lado: 112, tras: 148 }, base: 0.03, topo: 0.03, lados: 0.012, borda: 9,
           ondas: { amplitude: 0.022, frequencia: 9 },
@@ -2492,10 +2636,11 @@ function geoCabelo(estilo, corte, comFaixa, preso = false, fino = true) {
     const p = parametrosCabelo(estilo, corte, comFaixa, preso);
     if (!p) return []; // careca e raspado: pintados na pele da cabeça
     const ponto = mapaCabelo(p.mapa);
-    // Os gomos da casca coincidem com os da cabeça (16 no detalhe alto, 12 no baixo) ou são o dobro: se não,
+    // Os gomos da casca coincidem com os da cabeça (24 no detalhe alto, 12 no baixo) ou são o dobro: se não,
     // a beirada, que encosta na pele, entra e sai dela em dentes
-    const seg = fino ? p.seg : 12;
+    const seg = fino ? p.seg : p.mapa.volume ? 24 : 12;
     const aneis = fino ? p.aneis : Math.max(5, Math.round(p.aneis * 0.6));
+    // (avesso: o cabelo que cai solto é visto por dentro; o cabelo em volume é fechado por baixo)
     const partes = [{ geometria: cascaCabelo(ponto, seg, aneis, { escurecePonta: p.escurecePonta || 0 }), tipo: 'casca', avesso: !!p.mapa.caida }];
     if (p.rabo) partes.push({ geometria: geoRabo(fino), tipo: 'liso' });
     return partes;
@@ -2521,7 +2666,8 @@ function coberturaBarba(estilo, az, pol) {
       // Bigodão anos 70: grosso, descendo nos cantos da boca
       return Math.max(dentro(a, -99, 24, 4) * dentro(pol, 106, 118, 2.5), dentro(a, 15, 25, 3) * dentro(pol, 110, 126, 3)) * (1 - labios);
     case 'cavanhaque':
-      return Math.max(bigode, cantos * 0.9, dentro(a, -99, 21, 5) * dentro(pol, 126, 162, 5)) * (1 - labios);
+      return Math.max(dentro(a, -99, 22, 7) * dentro(pol, 106.5, 118, 4), dentro(a, 11, 28, 6) * dentro(pol, 109, 136, 7) * 0.9,
+        dentro(a, -99, 23, 9) * dentro(pol, 124, 164, 8)) * (1 - labios);
     default:
       return 0;
   }
@@ -2626,7 +2772,7 @@ function pintarRosto(ctx, r, e = 1) {
   const parametros = parametrosCabelo(r.estilo, r.corte, r.comFaixa, r.preso);
   const casca = parametros ? mapaCabelo(parametros.mapa) : null;
   const tipoFio = parametros ? parametros.fios : 'fios';
-  const brilhoFio = (tipoFio === 'cachos' ? 30 : 42) * (1 - luminancia(r.cabelo) * 0.6);
+  const brilhoFio = (tipoFio === 'cachos' ? 46 : 42) * (1 - luminancia(r.cabelo) * 0.6);
   const ruido = tabRuido();
   const ruido2 = tabRuido2();
   const rosado = tabRosado();
@@ -2692,7 +2838,7 @@ function pintarRosto(ctx, r, e = 1) {
       if (crista) kCabelo = Math.max(kCabelo, crista[i] / 255);
       if (kCabelo > 0) {
         const n = fios[i] / 255;
-        const brilho = Math.max(0, n - 0.78) * 4 * brilhoFio;
+        const brilho = tipoFio === 'cachos' ? Math.max(0, n - 0.5) * 2 * brilhoFio : Math.max(0, n - 0.78) * 4 * brilhoFio;
         c0 = misturar(c0, cabelo[0] * (0.62 + 0.48 * n) + brilho, kCabelo);
         c1 = misturar(c1, cabelo[1] * (0.62 + 0.48 * n) + brilho, kCabelo);
         c2 = misturar(c2, cabelo[2] * (0.62 + 0.48 * n) + brilho * 0.95, kCabelo);
@@ -2700,7 +2846,9 @@ function pintarRosto(ctx, r, e = 1) {
       // Barba: rala (pontinhos) ou cheia (pelos encaracolados)
       if (cob && cob[i] > 0) {
         const c = cob[i] / 255;
-        const k = c * (rala ? 0.42 * (0.45 + 0.55 * (ruido2[i] / 255)) : 0.95);
+        // (a cheia não acaba numa linha: perto da borda só os pelos mais fortes aparecem)
+        const k = rala ? c * 0.42 * (0.45 + 0.55 * (ruido2[i] / 255))
+          : 0.95 * suave((c - 0.34 * (1 - (pelos ? pelos[i] / 255 : 1))) / 0.62);
         const n = pelos ? pelos[i] / 255 : 1;
         c0 = misturar(c0, barba[0] * (0.7 + 0.4 * n), k);
         c1 = misturar(c1, barba[1] * (0.7 + 0.4 * n), k);
@@ -2730,12 +2878,24 @@ function pintarRosto(ctx, r, e = 1) {
     ctx.ellipse(x, y - 2, 28, 15, 0, 0, Math.PI * 2);
     ctx.fill();
     // Branco do olho (amêndoa)
-    ctx.fillStyle = '#ece5da';
+    // (a pálpebra faz sombra em cima; os cantos são mais escuros que o meio)
+    const branco = ctx.createLinearGradient(0, y - 7, 0, y + 6);
+    branco.addColorStop(0, '#9c9289');
+    branco.addColorStop(0.45, '#ddd5ca');
+    branco.addColorStop(1, '#cfc6ba');
+    ctx.fillStyle = branco;
     ctx.beginPath();
-    ctx.moveTo(x - 14, y + 0.5);
-    ctx.quadraticCurveTo(x - 2 * s, y - 8, x + 14, y - 0.5 * s);
-    ctx.quadraticCurveTo(x + 1 * s, y + 7, x - 14, y + 0.5);
+    ctx.moveTo(x - 13, y + 0.5);
+    ctx.quadraticCurveTo(x - 2 * s, y - 7, x + 13, y - 0.5 * s);
+    ctx.quadraticCurveTo(x + 1 * s, y + 6, x - 13, y + 0.5);
     ctx.fill();
+    for (const lado of [-1, 1]) {
+      const canto = ctx.createRadialGradient(x + lado * 13, y, 0, x + lado * 13, y, 7);
+      canto.addColorStop(0, css(escura, 0.5));
+      canto.addColorStop(1, css(escura, 0));
+      ctx.fillStyle = canto;
+      ctx.fillRect(x + lado * 13 - 7, y - 6, 14, 12);
+    }
     // Íris e pupila (olhando para a frente)
     const ix = x + s * 0.5;
     ctx.fillStyle = r.olhos;
@@ -2758,11 +2918,17 @@ function pintarRosto(ctx, r, e = 1) {
     ctx.moveTo(x - 14, y + 1);
     ctx.quadraticCurveTo(x - 2 * s, y - 9, x + 15, y - 1);
     ctx.stroke();
-    ctx.strokeStyle = css(escura, 0.35);
-    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = css(pele.map((c) => Math.min(255, c * 1.08)), 0.5);
+    ctx.lineWidth = 2.6;
     ctx.beginPath();
-    ctx.moveTo(x - 11, y - 5);
-    ctx.quadraticCurveTo(x - 2 * s, y - 13, x + 12, y - 5);
+    ctx.moveTo(x - 11, y - 3);
+    ctx.quadraticCurveTo(x - 2 * s, y - 11, x + 12, y - 3.5);
+    ctx.stroke();
+    ctx.strokeStyle = css(escura, 0.4);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x - 12, y - 5.5);
+    ctx.quadraticCurveTo(x - 2 * s, y - 14, x + 13, y - 5.5);
     ctx.stroke();
     ctx.strokeStyle = css(escura, 0.3);
     ctx.lineWidth = 1.2;
@@ -2774,30 +2940,75 @@ function pintarRosto(ctx, r, e = 1) {
     const [x0, y0] = noRosto(s * 8, 76.5);
     const [x1, y1] = noRosto(s * 26, 73.5);
     const [x2, y2] = noRosto(s * 38, 77.5);
-    ctx.fillStyle = r.sobrancelha;
+    // (uma base fraca e, por cima, pelos curtos inclinados para fora: mais cheia por dentro, afina na ponta)
+    const corPelo = rgb255(r.sobrancelha);
+    ctx.fillStyle = css(corPelo, 0.78);
     ctx.beginPath();
-    ctx.moveTo(x0, y0 + 2.6 * r.grossura);
-    ctx.quadraticCurveTo(x1, y1 + 2.2 * r.grossura, x2, y2 + 0.5);
-    ctx.quadraticCurveTo(x1, y1 - 2.4 * r.grossura, x0 + s * 1.5, y0 - 1.8 * r.grossura);
+    ctx.moveTo(x0, y0 + 2.4 * r.grossura);
+    ctx.quadraticCurveTo(x1, y1 + 2 * r.grossura, x2, y2 + 0.5);
+    ctx.quadraticCurveTo(x1, y1 - 2.2 * r.grossura, x0 + s * 1.5, y0 - 1.6 * r.grossura);
     ctx.closePath();
     ctx.fill();
+    ctx.lineCap = 'round';
+    for (let k = 0; k < 64; k++) {
+      const t = (k + 0.5) / 64;
+      const bx0 = (1 - t) * (1 - t) * x0 + 2 * t * (1 - t) * x1 + t * t * x2;
+      const by0 = (1 - t) * (1 - t) * y0 + 2 * t * (1 - t) * y1 + t * t * y2;
+      const meia = (2.5 * (1 - t) ** 0.7 + 0.4) * r.grossura;
+      const dy = (sorteioFixo(k, 61) - 0.5) * 2.3 * meia;
+      const comp = 2 + 1.6 * sorteioFixo(k, 67);
+      ctx.strokeStyle = css(corPelo.map((c) => Math.round(c * (0.85 + 0.3 * sorteioFixo(k, 71)))), 0.6);
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(bx0 - s * comp * 0.4, by0 + dy + 0.9);
+      ctx.lineTo(bx0 + s * comp * 0.6, by0 + dy - 0.9 - 1.2 * (1 - t));
+      ctx.stroke();
+    }
+  }
+  // Nariz: sombra que ele faz embaixo (até o lábio) e, mais fraca, dos dois lados da ponte
+  {
+    const [nx, ny] = noRosto(0, 109.5);
+    let gn = ctx.createRadialGradient(nx, ny, 1, nx, ny, 15);
+    gn.addColorStop(0, css(escura, 0.5));
+    gn.addColorStop(0.5, css(escura, 0.22));
+    gn.addColorStop(1, css(escura, 0));
+    ctx.save();
+    ctx.translate(nx, ny);
+    ctx.scale(1.25, 0.55);
+    ctx.translate(-nx, -ny);
+    ctx.fillStyle = gn;
+    ctx.fillRect(nx - 16, ny - 16, 32, 32);
+    ctx.restore();
+    for (const s of [-1, 1]) {
+      const [lx, ly] = noRosto(s * 11.5, 98);
+      gn = ctx.createRadialGradient(lx, ly, 1, lx, ly, 9);
+      gn.addColorStop(0, css(escura, 0.2));
+      gn.addColorStop(1, css(escura, 0));
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.scale(0.6, 1.6);
+      ctx.translate(-lx, -ly);
+      ctx.fillStyle = gn;
+      ctx.fillRect(lx - 10, ly - 10, 20, 20);
+      ctx.restore();
+    }
   }
   // Boca: lábio de cima mais escuro, de baixo com brilho, e a linha da boca
   const comBarba = r.estiloBarba && r.estiloBarba !== 'rala';
-  const labio = pele.map((c, i) => Math.round((c * 0.78 + [150, 60, 55][i] * 0.22 * (pele[0] > 150 ? 1 : 0.5)) * (comBarba ? 0.82 : 1)));
+  const labio = pele.map((c, i) => Math.round((c * 0.58 + [176, 74, 70][i] * 0.42 * (pele[0] > 150 ? 1 : 0.6)) * (comBarba ? 0.84 : 1)));
   const [bx, by] = noRosto(0, 121);
   const lw = comBarba ? 16 : 21; // meia largura da boca (px)
   ctx.fillStyle = css(labio, 0.95);
   ctx.beginPath();
   ctx.moveTo(bx - lw, by);
-  ctx.quadraticCurveTo(bx - lw * 0.43, by - 7, bx, by - 4);
-  ctx.quadraticCurveTo(bx + lw * 0.43, by - 7, bx + lw, by);
+  ctx.quadraticCurveTo(bx - lw * 0.43, by - 9, bx, by - 5);
+  ctx.quadraticCurveTo(bx + lw * 0.43, by - 9, bx + lw, by);
   ctx.quadraticCurveTo(bx, by + 1.5, bx - lw, by);
   ctx.fill();
   ctx.fillStyle = css(labio.map((c) => Math.min(255, c * 1.06)), 0.9);
   ctx.beginPath();
   ctx.moveTo(bx - lw * 0.9, by + 0.5);
-  ctx.quadraticCurveTo(bx, by + (comBarba ? 8 : 10), bx + lw * 0.9, by + 0.5);
+  ctx.quadraticCurveTo(bx, by + (comBarba ? 10 : 13), bx + lw * 0.9, by + 0.5);
   ctx.quadraticCurveTo(bx, by + 2, bx - lw * 0.9, by + 0.5);
   ctx.fill();
   ctx.strokeStyle = css(pele.map((c) => c * 0.3), 0.85);
@@ -3796,6 +4007,16 @@ function camadaPele() {
     ctx.beginPath();
     ctx.rect(R.x - FOLGA, R.y - FOLGA, R.w + 2 * FOLGA, R.h + 2 * FOLGA);
     ctx.clip();
+    // Sombra da boca da manga (BARRA_MANGA) no braço
+    {
+      const [, ym] = P(0, BARRA_MANGA - 0.004);
+      const [, yf] = P(0, BARRA_MANGA + 0.045);
+      const g = ctx.createLinearGradient(0, ym, 0, yf);
+      g.addColorStop(0, 'rgba(0,0,0,0.3)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(R.x - FOLGA, R.y - FOLGA, R.w + 2 * FOLGA, yf - R.y + FOLGA);
+    }
     let [x, y] = P(0.27, 0.19);
     mancha(ctx, x, y, 14, 30, 0.1);                     // bíceps
     [x, y] = P(0.25, 0.287);
@@ -3824,6 +4045,16 @@ function camadaPele() {
     ctx.beginPath();
     ctx.rect(R.x - FOLGA, R.y - FOLGA, R.w + 2 * FOLGA, R.h + 2 * FOLGA);
     ctx.clip();
+    // Sombra da gola (ela sobe atrás: subidaDaGola): escura junto do tecido, some uns 3 cm acima
+    for (let px = -FOLGA; px < R.w + FOLGA; px += 2) {
+      const u = px / R.w;
+      const [x, yGola] = P(u, 0.022 + 0.04 * (0.5 - 0.5 * Math.sin(2 * Math.PI * u)));
+      const g = ctx.createLinearGradient(0, yGola - 10, 0, yGola + 2);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(1, 'rgba(0,0,0,0.3)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x, yGola - 10, 2.2, R.y + R.h + FOLGA - yGola + 10);
+    }
     // Os dois músculos em V na frente (descem de trás das orelhas até o meio, embaixo) e a cova entre eles
     for (const s of [-1, 1]) {
       const [x0, y0] = P(0.25 + s * 0.17, 0.11);
@@ -3863,6 +4094,17 @@ function camadaPele() {
     ctx.beginPath();
     ctx.rect(R.x - FOLGA, R.y - FOLGA, R.w + 2 * FOLGA, R.h + 2 * FOLGA);
     ctx.clip();
+    // Sombra da barra do calção (BARRA_CALCAO) na coxa
+    {
+      const hBarra = COXA + BARRA_CALCAO;
+      const [, ym] = P(0, hBarra + 0.004);
+      const [, yf] = P(0, hBarra - 0.05);
+      const g = ctx.createLinearGradient(0, ym, 0, yf);
+      g.addColorStop(0, 'rgba(0,0,0,0.3)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(R.x - FOLGA, R.y - FOLGA, R.w + 2 * FOLGA, yf - R.y + FOLGA);
+    }
     let [x, y] = P(0.25, 0.006);
     mancha(ctx, x, y, 11, 19, 0.16);                    // rótula
     mancha(ctx, x - 13, y + 4, 5, 20, -0.2);            // sombras dos lados da rótula
@@ -4031,6 +4273,37 @@ function pintarCabelos(ctx, r) {
   for (let x = L.x - 5; x < L.x + L.w + 5; x += 3) ctx.fillRect(x, L.y - 5, 1, L.h + 10);
 }
 
+// Variação de tom da pele: onde ela é mais grossa e gasta fica um pouco mais escura e avermelhada (cotovelos,
+// joelhos, nós dos dedos), e a nuca um pouco mais queimada de sol
+function pintarTomDaPele(ctx, r) {
+  const quente = rgb255(corMisturada(corMisturada(r.pele, '#000000', 0.22), '#a8402c', 0.3));
+  const marca = (R, x, y, rx, ry, forca) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(R.x - FOLGA, R.y - FOLGA, R.w + 2 * FOLGA, R.h + 2 * FOLGA);
+    ctx.clip();
+    ctx.translate(x, y);
+    ctx.scale(rx, ry);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+    g.addColorStop(0, css(quente, forca));
+    g.addColorStop(0.6, css(quente, forca * 0.45));
+    g.addColorStop(1, css(quente, 0));
+    ctx.fillStyle = g;
+    ctx.fillRect(-1, -1, 2, 2);
+    ctx.restore();
+  };
+  let [x, y] = pxRet(RET.braco, 0.75, 1 - (0.292 - 0.125) / 0.413);
+  marca(RET.braco, x, y, 17, 20, 0.42);                               // cotovelo
+  [x, y] = pxRet(RET.perna, 0.25, (0.006 + 0.088) / 0.353);
+  marca(RET.perna, x, y, 22, 26, 0.36);                               // joelho
+  for (const u of [0.38, 0.46, 0.54, 0.62]) {
+    [x, y] = pxRet(RET.mao, u, 0.5);
+    marca(RET.mao, x, y, 5, 6, 0.4);                                  // nós dos dedos
+  }
+  [x, y] = pxRet(RET.pescoco, 0.75, 0.55);
+  marca(RET.pescoco, x, y, 46, 30, 0.2);                              // nuca
+}
+
 // A linha do cabelo na nuca: o cabelo continua pintado no alto de trás do pescoço e se desfaz em fios, para a
 // beirada da casca não ser um degrau (e, no cabelo comprido, para não aparecer um vão claro por baixo dele)
 function pintarNuca(ctx, r) {
@@ -4087,6 +4360,7 @@ function texturaAparencia(r, tamanho) {
   ctx.drawImage(camadaPele(), 0, ROSTO_H, ATLAS, ATLAS - ROSTO_H, 0, ROSTO_H, ATLAS, ATLAS - ROSTO_H);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
+  pintarTomDaPele(ctx, r);
   pintarChuteira(ctx, r.chuteira);
   pintarCabelos(ctx, r);
   pintarNuca(ctx, r);
@@ -4132,9 +4406,10 @@ function partesDaCabeca(c, det, mand, barba, estilo, corte, comFaixa, preso) {
   const M = matriz(0, CABECA_Y, 0);
   const naCabeca = (u, v) => [u, 0.5 + 0.5 * limitar(v, 0.004, 1)];
   c.receber(geoCabeca(mand, barba, det.fino), { matriz: M, ossos: (x, y) => ossosDoPescoco(y), uv: naCabeca, brilho: BRILHO.pele });
-  // Cabelo comprido: as pontas que passam da nuca encostam nas costas (seguem um pouco o tronco)
+  // Cabelo comprido: do pé da orelha para baixo ele vai deixando de seguir a cabeça e passa a seguir o tronco
+  // (as pontas ficam apoiadas no pescoço e nos ombros quando a cabeça abaixa ou vira, em vez de levantar)
   const ossosDoCabelo = (x, y) => {
-    const k = 0.75 * suave((CABECA_Y + 0.045 - y) / 0.09);
+    const k = 0.85 * suave((CABECA_Y + 0.125 - y) / 0.1);
     return ossosDe(O.cabeca, 1 - k, O.tronco, k);
   };
   for (const parte of geoCabelo(estilo, corte, comFaixa, preso, det.fino)) {
@@ -4166,6 +4441,17 @@ const TAREFAS_AQUECIMENTO = [
   () => geoSilhueta('magro', 'normais', false, 4), () => tabCrista(), () => tabBarba('bigode'),
   () => geoUniforme('forte', 'normais', true, DETALHES.alto), () => geoSilhueta('forte', 'normais', true, 4),
   () => mascaraPadrao('diagonal'), () => mascaraPadrao('v'),
+  // O pintor de rosto: o navegador só deixa as contas dele rápidas depois de vê-las rodar com cada tipo de
+  // cabelo e de barba (sem isso, a primeira lenda de moicano levava 80 ms). Pinta rostos de ensaio, pequenos.
+  ...[
+    { estilo: 'curto', corte: 'frente' }, { estilo: 'moicano' }, { estilo: 'raspado', barba: 'cheia' },
+    { estilo: 'cacheadoLongo', faixa: '#ffffff' }, { estilo: 'careca', barba: 'cavanhaque' }, { estilo: 'longo', barba: 'rala' },
+    { estilo: 'topete' }, { estilo: 'moicano', barba: 'rala' },
+  ].map((e) => () => {
+    const v = { ...VISUAL_PADRAO, cabelo: { estilo: e.estilo, cor: '#3a2a1f', corte: e.corte }, barba: e.barba || 'nenhuma', faixa: e.faixa || null };
+    const [, ctx] = novoCanvas(ROSTO_W / 2, ROSTO_H / 2);
+    pintarRosto(ctx, dadosDaAparencia(v, e.estilo, e.corte || '', !!e.faixa), 0.5);
+  }),
 ];
 let aquecimento = null;
 // Devolve uma promessa que termina quando tudo estiver aquecido. Começa sozinho (veja abaixo); chamar de novo
