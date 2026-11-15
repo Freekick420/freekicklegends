@@ -21,7 +21,7 @@
 //   5. Depois do chute cada um dá uns passos para o rebote (função só do tempo desde o chute: o replay repete).
 
 export const PADRAO_FIGURANTES = {
-  quantidade: 10,       // quantos jogadores além do cobrador, da barreira e do goleiro (0 = campo vazio; até 14)
+  quantidade: 10,       // quantos jogadores além do cobrador, da barreira e do goleiro (0 = campo vazio; até 12)
   colisao: true,        // a bola bate neles (false = só enfeite)
   // Os números abaixo não estão no painel (valem para todo mundo; mude aqui ou no config.js)
   folgaTrave: 1.0,      // m para fora de cada trave que ainda contam como corredor do chute
@@ -34,7 +34,9 @@ export const PADRAO_FIGURANTES = {
   movimento: true,      // depois do chute eles dão uns passos para o rebote (false = estátuas)
 };
 
-export const MAXIMO_FIGURANTES = 14;
+// (12 e não mais: com 14 o jogo encosta no teto de triângulos por quadro; os postos além do 12º ficam de reserva
+// para quando um posto mais importante não cabe)
+export const MAXIMO_FIGURANTES = 12;
 
 const limitar = (v, min, max) => Math.min(max, Math.max(min, v));
 const misturar = (a, b, k) => a + (b - a) * k;
@@ -299,6 +301,7 @@ export function montarFigurantes(posBola, barreira, cfg = {}, aleatorio = Math.r
     ultimaBatida: null,   // { jogador, time, parte, impacto }
     fimDoMovimento: 0,    // s depois do chute em que o último para de andar
     caixa: null,          // { x0, x1, z0, z1 }: onde eles ficam e andam (descarte rápido na colisão)
+    obstaculos: [],       // [{ x, z }] barreira e goleiro: o desenho desvia deles na corrida da comemoração
     _t: null,
     _anterior: null,      // posição da bola na última checagem (para a bola rápida não atravessar)
     _bola: null,
@@ -335,6 +338,8 @@ export function montarFigurantes(posBola, barreira, cfg = {}, aleatorio = Math.r
   const ladoCamera = Math.abs(latCobrador) > 0.15 ? Math.sign(latCobrador) : ladoPe;
 
   const ctx = { c, B, ax, az, lx, lz, meia, muro, cobrador, goleiro, corredor, penalti };
+  for (const j of muro) f.obstaculos.push({ x: j.x, z: j.z });
+  f.obstaculos.push({ x: goleiro.x, z: goleiro.z });
 
   // Quem já está na tela da câmera de trás: o cobrador, a barreira e o goleiro
   const ocupados = [];
