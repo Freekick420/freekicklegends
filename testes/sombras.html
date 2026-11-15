@@ -47,7 +47,8 @@
     // Endereço: testes/sombras.html?cam=a (a..g) · &ui=0 esconde os botões · &teste: cada quadro vale 1/60 s
     // · &pausa: o tempo só anda com avancar() · &qualidade=1 | 0.5 | 0 · &t=1.2 começa nesse instante
     // · &silhuetas=destaque | todos | nenhuma (quem ganha a silhueta provisória; lido pelo js/sombras.js)
-    // · &simular=1: cada boneco ganha um criarSilhueta de mentira (o caminho rápido, como o boneco novo terá)
+    // · &planob=1: tira o criarSilhueta dos bonecos (o caminho rápido), para ver o plano B: silhueta provisória
+    //   no cobrador (ou em todos, com &silhuetas=todos) e borrões em cruz nos outros
     // · &sombras=0: refletores desligados (CONFIG.cenario.sombras)
     // · &orcamento=30000: teto de triângulos de silhueta por quadro (os mais longe da câmera ficam com a cruz)
     // No console: avancar(segundos), posicionar(pos, alvo, fov), definirCamera(letra), qualidade(n), info(),
@@ -76,13 +77,12 @@
     if (parametros.has('qualidade')) sombras.qualidade(Number(parametros.get('qualidade')));
 
     // ----- Bonecos -----
-    const SIMULAR = parametros.get('simular') === '1';
+    const PLANO_B = parametros.get('planob') === '1';
     const Z = 20;
     const bonecos = [];
     function boneco(opcoes, x, z, giro, destaque, animar) {
       const personagem = criarPersonagem(opcoes);
-      // O caminho rápido: o boneco novo terá este método (aqui, de mentira, com as peças do boneco de hoje)
-      if (SIMULAR) personagem.criarSilhueta = (material, copias) => silhuetaDasPecas(personagem.grupo, material, copias);
+      if (PLANO_B) delete personagem.criarSilhueta;
       personagem.grupo.position.set(x, 0, z);
       personagem.grupo.rotation.y = giro;
       scene.add(personagem.grupo);

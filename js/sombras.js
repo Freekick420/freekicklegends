@@ -21,9 +21,12 @@ const ALTURA_PONTA = 1.9; // m: a sombra do que está a esta altura (a cabeça) 
 const FORCA_PONTA = 0.66; // quanto da força sobra na ponta da sombra (a luz espalhada clareia longe dos pés)
 const CONTATO_PE = 0.4;   // escurecimento da grama embaixo de cada pé apoiado (0 a 1)
 const SOLA_PE = [0, -0.07, 0.07]; // meio da sola no espaço do tornozelo (m), como em js/jogadores.js (SOLA)
-// Teto de triângulos de silhueta por quadro, somando todos os bonecos (cada silhueta tem o corpo 4 vezes).
-// Se passar, os bonecos mais longe da câmera ficam com os borrões em cruz no lugar da silhueta.
-const ORCAMENTO_SILHUETAS = 64000;
+// Teto de triângulos de silhueta por quadro, somando todos os bonecos (cada silhueta tem o corpo 4 vezes:
+// uns 4 mil triângulos por boneco). Se passar, os bonecos mais longe da câmera ficam com os borrões em cruz
+// no lugar da silhueta (de longe mal se nota a troca). 36 mil = o cobrador e os 8 mais perto da câmera.
+// Quem está fora da tela não gasta nada.
+const ORCAMENTO_SILHUETAS = 36000;
+const RAIO_NA_TELA = 3.2; // m em volta do boneco (corpo e sombras) que têm de estar fora da tela para ele não contar
 
 // Se o cenário não disser de onde vem a luz: os quatro cantos, como em js/estadio.js
 const REFLETORES_PADRAO = [[0.6, 0.8, 1.22, 0.36], [-0.6, 0.8, 1.22, 0.3], [-0.76, -0.65, 0.96, 0.33], [0.76, -0.65, 0.96, 0.27]]
@@ -79,11 +82,74 @@ function criarMaterialSilhueta(uniformes) {
   return material;
 }
 
-// Silhueta provisória para bonecos sem criarSilhueta: junta as peças do boneco (as malhas penduradas nas
-// juntas) numa malha com pele só, repetida `copias` vezes. Cada peça vira um "osso": a malha acompanha as
-// juntas sem conta nenhuma por quadro aqui. Devolve null se o boneco não tiver peças soltas.
-// (Exportada para a página de teste simular o criarSilhueta do boneco: testes/sombras.html.)
+// Silhueta provisória de um boneco com pele (THREE.SkinnedMesh, o boneco de hoje): junta as malhas dele (que
+// usam o mesmo esqueleto) numa só, repetida `copias` vezes e presa ao mesmo esqueleto. É o corpo inteiro com
+// todo o detalhe: pesa umas 4 vezes mais que a silhueta própria do boneco (criarSilhueta).
+function silhuetaComPele(malhas, material, copias) {
+  let vertices = 0;
+  let indices = 0;
+  for (const m of malhas) {
+    const g = m.geometry;
+    vertices += g.attributes.position.count;
+    indices += g.index ? g.index.count : g.attributes.position.count;
+  }
+  const total = vertices * copias;
+  const posicao = new Float32Array(total * 3);
+  const osso = new Uint16Array(total * 4);
+  const peso = new Float32Array(total * 4);
+  const copia = new Float32Array(total);
+  const indice = new (total > 65535 ? Uint32Array : Uint16Array)(indices * copias);
+  let v = 0;
+  let k = 0;
+  for (let c = 0; c < copias; c++) {
+    for (const m of malhas) {
+      const g = m.geometry;
+      const { position, skinIndex, skinWeight } = g.attributes;
+      const base = v;
+      for (let i = 0; i < position.count; i++, v++) {
+        posicao[3 * v] = position.getX(i);
+        posicao[3 * v + 1] = position.getY(i);
+        posicao[3 * v + 2] = position.getZ(i);
+        for (let j = 0; j < 4; j++) {
+          osso[4 * v + j] = skinIndex.getComponent(i, j);
+          peso[4 * v + j] = skinWeight.getComponent(i, j);
+        }
+        copia[v] = c;
+      }
+      if (g.index) {
+        const ix = g.index.array;
+        for (let i = 0; i < ix.length; i++) indice[k++] = base + ix[i];
+      } else {
+        for (let i = 0; i < position.count; i++) indice[k++] = base + i;
+      }
+    }
+  }
+  const geometria = new THREE.BufferGeometry();
+  geometria.setAttribute('position', new THREE.BufferAttribute(posicao, 3));
+  geometria.setAttribute('skinIndex', new THREE.BufferAttribute(osso, 4));
+  geometria.setAttribute('skinWeight', new THREE.BufferAttribute(peso, 4));
+  geometria.setAttribute('copia', new THREE.BufferAttribute(copia, 1));
+  geometria.setIndex(new THREE.BufferAttribute(indice, 1));
+  const malha = new THREE.SkinnedMesh(geometria, material);
+  malha.bind(malhas[0].skeleton, malhas[0].bindMatrix);
+  malha.userData.esqueletoEmprestado = true; // o esqueleto é do boneco: quem solta é ele
+  malhas[0].parent.add(malha);
+  return malha;
+}
+
+// Silhueta provisória para bonecos sem criarSilhueta (ou quando ele falha): uma malha com pele só, com o corpo
+// repetido `copias` vezes. Boneco com pele: as malhas dele juntas, no mesmo esqueleto (silhuetaComPele).
+// Boneco de peças soltas (malhas penduradas nas juntas): cada peça vira um "osso", e a malha acompanha as
+// juntas sem conta nenhuma por quadro aqui. Devolve null se o boneco não tiver nem uma coisa nem outra.
+// (Exportada para a página de teste: testes/sombras.html.)
 export function silhuetaDasPecas(grupo, material, copias = 1) {
+  const comPele = [];
+  grupo.traverse((o) => {
+    if (o.isSkinnedMesh && o.name !== 'silhueta' && o.skeleton && o.geometry.attributes.skinIndex) comPele.push(o);
+  });
+  if (comPele.length && comPele.every((o) => o.skeleton === comPele[0].skeleton)) {
+    return silhuetaComPele(comPele, material, copias);
+  }
   const pecas = [];
   grupo.traverse((o) => {
     if (!o.isMesh || o.isSkinnedMesh || o.name === 'silhueta' || o.name === 'sombra') return;
@@ -320,12 +386,18 @@ export function criarSombras(scene, opcoes = {}) {
   // Na hora do desenho: guarda onde a câmera está (para escolher quem fica com silhueta no quadro seguinte)
   // e confere, uma vez, se a tela tem estêncil (sem ele a silhueta escureceria em dobro)
   const olho = { x: 0, y: 0, z: 0 };
+  const campoDeVisao = new THREE.Frustum();
+  const matrizDaCamera = new THREE.Matrix4();
+  const esfera = new THREE.Sphere();
+  let temCamera = false;
   let conferido = false;
   borroes.malha.onBeforeRender = (renderer, _cena, camera) => {
     const e = camera.matrixWorld.elements;
     olho.x = e[12];
     olho.y = e[13];
     olho.z = e[14];
+    campoDeVisao.setFromProjectionMatrix(matrizDaCamera.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    temCamera = true;
     if (conferido) return;
     conferido = true;
     const atributos = renderer.getContext().getContextAttributes();
@@ -395,7 +467,7 @@ export function criarSombras(scene, opcoes = {}) {
         if (b.provisoria) {
           if (malha.parent) malha.parent.remove(malha);
           malha.geometry.dispose();
-          malha.skeleton.dispose();
+          if (!malha.userData.esqueletoEmprestado) malha.skeleton.dispose();
         } else {
           malha.visible = false; // a malha é do boneco: some de vez no dispose() dele
         }
@@ -454,6 +526,15 @@ export function criarSombras(scene, opcoes = {}) {
         b.malha.visible = false;
         continue;
       }
+      // Fora da tela (corpo e sombras): não desenha nem conta no orçamento
+      esfera.center.set(b.x, 0.9, b.z);
+      esfera.radius = RAIO_NA_TELA;
+      const grupo = b.personagem.grupo;
+      if (!b.visto || (grupo && (!grupo.visible || !grupo.parent)) || (temCamera && !campoDeVisao.intersectsSphere(esfera))) {
+        b.comSilhueta = false;
+        b.malha.visible = false;
+        continue;
+      }
       total += b.triangulos;
       b.distancia = b.destaque ? -1 : Math.hypot(b.x - olho.x, olho.y, b.z - olho.z);
       fila.push(b);
@@ -479,8 +560,8 @@ export function criarSombras(scene, opcoes = {}) {
       if (!b.visto || (grupo && (!grupo.visible || !grupo.parent))) continue;
       if (m === 'simples') {
         // O borrão de sempre: encolhe quando o boneco pula
-        const r = b.raio * Math.max(0.45, 1 - b.altura * 1.2);
-        borroes.por(b.x, b.z, 1, 0, -r, r, r, 0.5, 0.5, 0);
+        const r = b.raio * 1.3 * Math.max(0.45, 1 - b.altura * 1.2);
+        borroes.por(b.x, b.z, 1, 0, -r, r, r, 0.62, 0.62, 0);
         continue;
       }
       if (!contatoDosPes(b, CONTATO_PE)) {
