@@ -103,6 +103,24 @@ export const CONFIG = {
     replayAltura: 3.2,    // atrás do gol: m do chão
     replayAtras: 8,       // atrás do gol: m atrás da linha do gol
 
+    // Pênalti: os outros jogadores ficam na risca da grande área e em volta da meia-lua, ao lado e atrás da
+    // câmera do jogo. Duas câmeras só do pênalti mostram essa gente (a do jogo, antes do chute e no voo, não muda):
+    // o replay, do alto atrás do gol (goleiro embaixo, cobrador no meio, a fila na risca da área ao fundo), e a
+    // reação, um corte no fim do lance para o cobrador comemorando ou lamentando com os outros atrás dele.
+    replayPenalti: true,        // desligado: o replay do pênalti usa a câmera de replay das faltas
+    replayPenaltiAltura: 14.5,  // m do chão
+    replayPenaltiAtras: 11,     // m atrás da linha do gol
+    replayPenaltiLado: 0.8,     // m para o lado (o contrário do canto em que a bola vai); muito = o gol sai da tela no celular
+    replayPenaltiLargura: 36,   // graus de campo de visão horizontal (mais = cabe mais gente da fila, tudo menor)
+    replayPenaltiTravessao: 0.76, // em que altura da tela fica o travessão (0 = topo, 1 = base): logo abaixo do letreiro do resultado
+    reacaoPenalti: true,        // corte para o cobrador no fim do pênalti
+    reacaoPenaltiGol: 0.8,      // s depois do gol em que o corte acontece (antes disso, a rede estufando)
+    reacaoPenaltiErro: 0.45,    // s depois da defesa, da trave ou da bola fora
+    reacaoPenaltiFrente: 5,     // m que a câmera fica à frente do cobrador (do lado do gol, olhando para trás)
+    reacaoPenaltiLado: 4.5,     // m para o lado (o contrário do lado em que estão os companheiros mais perto)
+    reacaoPenaltiAltura: 2,     // m do chão
+    reacaoPenaltiLargura: 26,   // graus de campo de visão horizontal
+
     // Câmera aérea depois do chute (como nos jogos de falta do Click Jogos)
     aerea: true,
     aereaAltura: 11,      // m do chão

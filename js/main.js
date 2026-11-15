@@ -480,6 +480,67 @@ function poseReplay() {
   return { pos, olhar, larguraVisivel };
 }
 
+// Replay do pênalti: câmera alta atrás do gol, parada. O gol fica embaixo e o campo sobe pela tela: goleiro,
+// marca, cobrador, meia-lua e a fila de jogadores na risca da grande área (no celular em pé sobra a
+// arquibancada lá em cima). É a câmera em que os outros jogadores aparecem: na do jogo eles ficam ao lado e
+// atrás de quem cobra.
+const FOV_MIN_REPLAY_PENALTI = 54; // graus na vertical: em tela larga, o que precisa para caber da rede do gol à risca da área
+function poseReplayPenalti() {
+  const c = CONFIG.camera;
+  const lado = (registro && registro.mira < 0 ? 1 : -1) * c.replayPenaltiLado;
+  const pos = new THREE.Vector3(lado, c.replayPenaltiAltura, -c.replayPenaltiAtras);
+  const fov = fovParaLargura(c.replayPenaltiLargura, FOV_MIN_REPLAY_PENALTI);
+  // Inclinação: o travessão fica numa altura fixa da tela, logo abaixo do letreiro do resultado (GOL!), que
+  // assim cai no gramado vazio entre o cobrador e o gol, sem tapar nenhum dos dois
+  const travessao = Math.atan2(c.replayPenaltiAltura - CONFIG.golAltura, c.replayPenaltiAtras);
+  const inclinacao = travessao - Math.atan((2 * c.replayPenaltiTravessao - 1) * Math.tan((fov * GRAUS) / 2));
+  // Virada para o meio do caminho entre o gol e a marca do pênalti (a câmera fica um pouco para o lado, e o
+  // gol, que está mais perto dela, não pode sair pela borda da tela)
+  const marca = posicaoDaFalta(falta);
+  const d = Math.hypot(marca.x / 2 - pos.x, marca.z / 2 - pos.z);
+  const olhar = new THREE.Vector3(marca.x / 2, pos.y - d * Math.tan(inclinacao), marca.z / 2);
+  return { pos, olhar, fov };
+}
+
+// Reação do pênalti: no fim do lance (um instante depois do resultado, para dar tempo de ver a rede ou a
+// defesa), corte para o cobrador visto do lado do gol, de viés, comemorando ou lamentando, com os outros
+// jogadores (que invadiram a área depois do chute) ao fundo. Só no lance ao vivo: o replay tem a câmera dele.
+let reacao = null; // { pos, lado } enquanto a câmera da reação está no ar
+function querReacaoDoPenalti() {
+  const c = CONFIG.camera;
+  if (!c.reacaoPenalti || modoDaCobranca !== 'penalti' || replay || estado.fase !== 'fim' || !cobradorBoneco) return false;
+  return estado.tFim >= (jogada.resultado === 'gol' ? c.reacaoPenaltiGol : c.reacaoPenaltiErro);
+}
+function poseReacaoPenalti() {
+  const c = CONFIG.camera;
+  const k = cobradorBoneco.grupo.position;
+  if (!reacao) {
+    // De que lado estão os companheiros mais perto do cobrador: a câmera vai para o outro lado e olha de viés,
+    // para a fila aparecer ao lado e atrás dele (de frente, no celular em pé, só caberia o cobrador)
+    let lado = 1;
+    let perto = Infinity;
+    for (const j of figurantes.jogadores) {
+      const d = Math.hypot(j.x - k.x, j.z - k.z);
+      if (j.time === 'ataque' && d < perto) {
+        perto = d;
+        lado = j.x >= k.x ? 1 : -1;
+      }
+    }
+    reacao = { lado, pos: new THREE.Vector3(k.x - lado * c.reacaoPenaltiLado, c.reacaoPenaltiAltura, k.z - c.reacaoPenaltiFrente) };
+  }
+  // O cobrador fica num terço da tela e os outros ocupam o resto: o olhar passa um pouco ao lado dele, baixo
+  // (cobrador e companheiros ficam na metade de cima da tela, acima do letreiro do resultado)
+  const olhar = new THREE.Vector3(k.x + reacao.lado * 0.7, 0.4, k.z - 0.3);
+  return { pos: reacao.pos, olhar, fov: fovParaLargura(c.reacaoPenaltiLargura) };
+}
+// Volta o campo de visão do jogo depois da reação (a próxima cobrança enquadra com ele)
+function largarReacao() {
+  if (!reacao) return;
+  reacao = null;
+  camera.fov = fovParaLargura(CONFIG.camera.larguraVisivel);
+  camera.updateProjectionMatrix();
+}
+
 // Campo de visão a partir da largura visível (graus na horizontal), respeitando o mínimo vertical
 // (o replay lateral pode fechar mais o zoom, para a falta do outro lado do campo não ficar minúscula)
 function fovParaLargura(larguraVisivel, minimo = CONFIG.camera.fovMin) {
@@ -543,20 +604,38 @@ function atualizarCamera(dt) {
 
   // No replay a câmera é outra: lateral (acompanha a bola) ou atrás do gol (parada, só olhando a bola)
   if (replay) {
-    const rp = c.replayLateral ? poseReplayLateral(inicio) : poseReplay();
+    // (o pênalti tem a câmera dele: alta atrás do gol, parada, com a fila de jogadores ao fundo)
+    const doPenalti = modoDaCobranca === 'penalti' && c.replayPenalti;
+    const rp = doPenalti ? poseReplayPenalti() : c.replayLateral ? poseReplayLateral(inicio) : poseReplay();
     // Primeiro quadro do replay: corte seco para a câmera nova; depois ela desliza atrás da bola
     const corte = !replay.cameraPronta;
     replay.cameraPronta = true;
-    camera.position.lerp(rp.pos, corte || !c.replayLateral ? 1 : 1 - Math.exp(-dt * 6));
+    camera.position.lerp(rp.pos, corte || doPenalti || !c.replayLateral ? 1 : 1 - Math.exp(-dt * 6));
     if (corte) olharAtual.copy(rp.olhar);
     else olharAtual.lerp(rp.olhar, 1 - Math.exp(-dt * 7));
     camera.lookAt(olharAtual);
-    if (estado.fase !== 'fim') {
-      const fovAlvo = fovParaLargura(rp.larguraVisivel, c.replayLateral ? 20 : c.fovMin);
+    if (estado.fase !== 'fim' || doPenalti) {
+      const fovAlvo = doPenalti ? rp.fov : fovParaLargura(rp.larguraVisivel, c.replayLateral ? 20 : c.fovMin);
       camera.fov += (fovAlvo - camera.fov) * (corte ? 1 : 1 - Math.exp(-dt * 4));
       camera.updateProjectionMatrix();
     }
     misturaAerea = 0;
+    return;
+  }
+
+  // Pênalti, fim do lance: corte seco para a reação do cobrador (com os outros jogadores ao fundo); depois o
+  // olhar acompanha o cobrador de leve
+  if (querReacaoDoPenalti()) {
+    const corte = !reacao;
+    const rc = poseReacaoPenalti();
+    camera.position.copy(rc.pos);
+    if (corte) olharAtual.copy(rc.olhar);
+    else olharAtual.lerp(rc.olhar, 1 - Math.exp(-dt * 4));
+    camera.lookAt(olharAtual);
+    if (camera.fov !== rc.fov) {
+      camera.fov = rc.fov;
+      camera.updateProjectionMatrix();
+    }
     return;
   }
 
@@ -1020,6 +1099,7 @@ function novaCobranca() {
   vestirCobrador(cobrador);
   montarAdversarios();
   montarFigurantesDaCobranca();
+  largarReacao();
   posicionarCamera();
 
   if (emReplay) {
@@ -1716,6 +1796,7 @@ if (MODO_TESTE) {
       tempoVoo: estado.tempo, tempoDeJogo: window.tempoDeJogo, passoDoResultado: jogada.passoDoResultado,
     }),
     desenho: () => ({ ...renderer.info.render, geometrias: renderer.info.memory.geometries, texturas: renderer.info.memory.textures }),
+    cameraPos: () => ({ pos: camera.position.toArray(), olhar: olharAtual.toArray(), fov: camera.fov, reacao: Boolean(reacao) }),
     cobradorPos: () => cobradorBoneco && { x: cobradorBoneco.grupo.position.x, z: cobradorBoneco.grupo.position.z, giro: cobradorBoneco.grupo.rotation.y },
     bolaPos: () => ({ ...bola.pos }),
     figurantes: () => figurantes.jogadores.map((j) => ({ x: j.x, z: j.z, time: j.time })),
