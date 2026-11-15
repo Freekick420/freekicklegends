@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { CONFIG, VERSAO } from './config.js?v=10';
-import { criarBola, chutar, passo, coneDeErro, preverTecnica } from './physics.js?v=10';
-import { ELENCO, RIVAIS, sugerirCobradores } from './elenco.js?v=10';
-import { criarCenario, PADRAO_CENARIO } from './estadio.js?v=10';
-import { montarBarreira, semBarreira, atualizarBarreira, colidirBolaBarreira, PADRAO_BARREIRA } from './barreira.js?v=10';
-import { criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, guardarGoleiro, retomarGoleiro, alturaDoGoleiro, fecharPalpite, PADRAO_GOLEIRO, PADRAO_PENALTI } from './goleiro.js?v=10';
-import { criarPersonagem, visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, UNIFORMES, misturarPoses } from './jogadores.js?v=10';
-import { criarCobranca, PADRAO_COBRANCA, poseChute, poseComemoracao, poseLamento } from './cobranca.js?v=10';
-import { criarAnimadorGoleiro, criarAnimadorBarreira } from './animacaoDefesa.js?v=10';
-import { montarFigurantes, atualizarFigurantes, colidirBolaFigurantes, PADRAO_FIGURANTES } from './figurantes.js?v=10';
-import { criarAnimadorFigurantes } from './animacaoFigurantes.js?v=10';
-import { criarBolaVisual } from './bola.js?v=10';
-import { criarSombras } from './sombras.js?v=10';
-import { criarAudio, PADRAO_AUDIO } from './audio.js?v=10';
-import { criarGravador, salvarVideo } from './replay.js?v=10';
-import { criarInterface } from './interface.js?v=10';
-import { criarPainel } from './painel.js?v=10';
-import { criarRanking } from './ranking.js?v=10';
+import { CONFIG, VERSAO } from './config.js?v=11';
+import { criarBola, chutar, passo, coneDeErro, preverTecnica } from './physics.js?v=11';
+import { ELENCO, RIVAIS, sugerirCobradores } from './elenco.js?v=11';
+import { criarCenario, PADRAO_CENARIO } from './estadio.js?v=11';
+import { montarBarreira, semBarreira, atualizarBarreira, colidirBolaBarreira, PADRAO_BARREIRA } from './barreira.js?v=11';
+import { criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, guardarGoleiro, retomarGoleiro, alturaDoGoleiro, fecharPalpite, PADRAO_GOLEIRO, PADRAO_PENALTI } from './goleiro.js?v=11';
+import { criarPersonagem, visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, UNIFORMES, misturarPoses } from './jogadores.js?v=11';
+import { criarCobranca, PADRAO_COBRANCA, poseChute, poseComemoracao, poseLamento } from './cobranca.js?v=11';
+import { criarAnimadorGoleiro, criarAnimadorBarreira } from './animacaoDefesa.js?v=11';
+import { montarFigurantes, atualizarFigurantes, colidirBolaFigurantes, PADRAO_FIGURANTES } from './figurantes.js?v=11';
+import { criarAnimadorFigurantes } from './animacaoFigurantes.js?v=11';
+import { criarBolaVisual } from './bola.js?v=11';
+import { criarSombras } from './sombras.js?v=11';
+import { criarAudio, PADRAO_AUDIO } from './audio.js?v=11';
+import { criarGravador, salvarVideo } from './replay.js?v=11';
+import { criarInterface } from './interface.js?v=11';
+import { criarPainel } from './painel.js?v=11';
+import { criarRanking } from './ranking.js?v=11';
 
 // Os padrões de goleiro, barreira, cobrador, som e cenário moram nos próprios módulos;
 // entram no CONFIG aqui (o que estiver escrito no config.js tem prioridade)
@@ -1837,13 +1837,16 @@ function querCameraLenta() {
 // ainda menos pixels (1,25 e 1) e, só no fim, um borrão por jogador. A medida é por tempo (1,5 s de jogo), não
 // por número de quadros: celular lento não demora mais para ser ajudado. Os 3 primeiros segundos e os engasgos
 // soltos (montar uma falta, aquecer os bonecos) não contam. O degrau fica guardado no aparelho; ao abrir de
-// novo o jogo tenta um degrau acima do guardado, para um dia ruim não rebaixar o celular para sempre.
+// novo o jogo tenta um degrau acima do guardado (e guarda essa tentativa), para um dia ruim não rebaixar o
+// celular para sempre: cada abertura que corre bem sobe um degrau. Se descer duas vezes seguidas não deixar o
+// jogo ao menos 10% mais rápido, o limite é do aparelho (economia de bateria que trava em 30 quadros por
+// segundo, por exemplo): o jogo volta ao degrau de antes e para de descer até ser aberto de novo.
 // (A quantidade de jogadores em campo nunca é degrau: a bola bate neles e o Desafio do Dia é igual para todos.)
 const DEGRAUS_DE_QUALIDADE = [
   { pixel: 2, sombras: 1 }, { pixel: 1.5, sombras: 1 }, { pixel: 1.5, sombras: 0.5 },
   { pixel: 1.25, sombras: 0.5 }, { pixel: 1, sombras: 0.5 }, { pixel: 1, sombras: 0 },
 ];
-const qualidade = { degrau: 0, tempo: 0, soma: 0, quadros: 0, engasgos: 0 };
+const qualidade = { degrau: 0, tempo: 0, soma: 0, quadros: 0, engasgos: 0, antes: null, falhas: 0, volta: 0, travada: false };
 function aplicarQualidade(degrau) {
   qualidade.degrau = Math.max(0, Math.min(DEGRAUS_DE_QUALIDADE.length - 1, degrau));
   const d = DEGRAUS_DE_QUALIDADE[qualidade.degrau];
@@ -1855,7 +1858,7 @@ function aplicarQualidade(degrau) {
   sombras.qualidade(d.sombras);
 }
 function ajustarQualidade(dtReal) {
-  if (MODO_TESTE) return;
+  if (MODO_TESTE || qualidade.travada) return;
   if (window.tempoDeJogo < 3) return;
   qualidade.tempo += dtReal;
   // (o relógio do jogo corta cada quadro em 50 ms: quadro "cheio" é engasgo, ou celular abaixo de 20 por segundo)
@@ -1868,6 +1871,22 @@ function ajustarQualidade(dtReal) {
   // Mais da metade dos quadros no teto: não é engasgo, é o ritmo do aparelho
   const media = qualidade.engasgos > qualidade.quadros ? 0.05 : qualidade.quadros ? qualidade.soma / qualidade.quadros : 0;
   qualidade.tempo = qualidade.soma = qualidade.quadros = qualidade.engasgos = 0;
+  if (qualidade.antes) {
+    // Desceu na medida anterior: adiantou?
+    const antes = qualidade.antes;
+    qualidade.antes = null;
+    // (com a média no teto de 50 ms não dá para medir ganho: celular lento demais continua descendo)
+    if (media > antes.media * 0.9 && media < 0.049) {
+      if (qualidade.falhas === 0) qualidade.volta = antes.degrau;
+      qualidade.falhas++;
+      if (qualidade.falhas >= 2) {
+        aplicarQualidade(qualidade.volta);
+        salvar('fkl-qualidade', qualidade.degrau);
+        qualidade.travada = true;
+        return;
+      }
+    } else qualidade.falhas = 0;
+  }
   if (media <= 1 / 45 || qualidade.degrau >= DEGRAUS_DE_QUALIDADE.length - 1) return;
   // (o que já está no limite de pixels do aparelho pula os degraus que não mudariam nada)
   const atual = DEGRAUS_DE_QUALIDADE[qualidade.degrau];
@@ -1876,12 +1895,16 @@ function ajustarQualidade(dtReal) {
   while (degrau < DEGRAUS_DE_QUALIDADE.length - 1
     && Math.min(limite, DEGRAUS_DE_QUALIDADE[degrau].pixel) === Math.min(limite, atual.pixel)
     && DEGRAUS_DE_QUALIDADE[degrau].sombras === atual.sombras) degrau++;
+  qualidade.antes = { degrau: qualidade.degrau, media };
   aplicarQualidade(degrau);
   salvar('fkl-qualidade', qualidade.degrau);
 }
 if (!MODO_TESTE) {
   const guardado = lerSalvo('fkl-qualidade', 0);
-  if (Number.isInteger(guardado) && guardado > 1) aplicarQualidade(guardado - 1);
+  if (Number.isInteger(guardado) && guardado > 0) {
+    aplicarQualidade(guardado - 1);
+    salvar('fkl-qualidade', qualidade.degrau);
+  }
 }
 
 // Física, barreira e goleiro em passos pequenos (a ordem importa)

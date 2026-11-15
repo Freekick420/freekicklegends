@@ -219,7 +219,7 @@ Várias ligas, duelo entre jogadores, multiplayer, moedas, loja, anúncios, comp
     Feito (15/11/2026).
 14. Depois: transformar em PWA para instalar na tela inicial do celular.
 
-Estado em 15/11/2026: publicado `v0.1 · etapa 9`. Amigos e família já jogam pelo link (o critério de sucesso da
+Estado em 15/11/2026: publicado `v0.1 · etapa 9.1` (a 9.1 corrige a qualidade automática, que rebaixava o celular e não subia mais). Amigos e família já jogam pelo link (o critério de sucesso da
 v0.1 está sendo cumprido na prática). Agora: teste no celular real (a etapa 9 só foi vista no navegador de testes,
 sem placa de vídeo) e ajuste fino pelo painel.
 

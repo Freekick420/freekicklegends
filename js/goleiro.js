@@ -27,8 +27,8 @@
 //   às cegas, antes do contato, e as mãos se ajeitam no ar.
 // - Ficou: lê a bola como sempre, com o reflexo do pênalti. Pega o que vem no meio e o chute fraco.
 
-import { passo } from './physics.js?v=10';
-import { CONFIG } from './config.js?v=10';
+import { passo } from './physics.js?v=11';
+import { CONFIG } from './config.js?v=11';
 
 export const PADRAO_GOLEIRO = {
   reflexo: 0.3,             // s entre o chute e a primeira reação

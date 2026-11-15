@@ -20,7 +20,7 @@
 // Eixos do boneco: pés em y = 0, de frente para +z local; a direita do jogador fica em −x local.
 
 import * as THREE from 'three';
-import { misturarPoses, espelhar, porChaves, posePadrao, PEITO_DO_PE, SOLA } from './jogadores.js?v=10';
+import { misturarPoses, espelhar, porChaves, posePadrao, PEITO_DO_PE, SOLA } from './jogadores.js?v=11';
 
 const GRAUS = Math.PI / 180;
 const limitar = (v, min, max) => Math.min(max, Math.max(min, v));

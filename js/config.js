@@ -1,7 +1,7 @@
 // Todos os números ajustáveis do jogo ficam aqui.
 // Unidades: metros, segundos, graus.
 
-export const VERSAO = 'v0.1 · etapa 9';
+export const VERSAO = 'v0.1 · etapa 9.1';
 
 export const CONFIG = {
   // Mundo

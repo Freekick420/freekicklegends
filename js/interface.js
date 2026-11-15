@@ -1,7 +1,7 @@
 // Interface (HUD): cartão do cobrador, lista "Quem bate?", resultado, placar e botões do topo.
 // Só mexe na página (HTML); não sabe nada de 3D nem de física.
 
-import { overall } from './elenco.js?v=10';
+import { overall } from './elenco.js?v=11';
 
 const ATRIBUTOS = [
   ['FOR', 'Força'],
