@@ -5,9 +5,9 @@
 // - Silhueta: uma malha com o corpo inteiro do boneco repetido 4 vezes (personagem.criarSilhueta, de
 //   js/jogadores.js; se o boneco não tiver esse método, uma malha provisória montada aqui com as peças dele).
 //   O shader achata cada cópia no gramado ao longo da direção de um refletor: pernas e braços mexem na
-//   sombra, e quem pula descola dela sozinho. Uma chamada de desenho por boneco. O estêncil (cada boneco marca
-//   os pixels que já escureceu) impede a sombra de escurecer em dobro onde as cópias se cruzam; sombras de
-//   bonecos diferentes se somam.
+//   sombra, e quem pula descola dela sozinho. Uma chamada de desenho por boneco. O estêncil (as silhuetas
+//   marcam os pixels que já escureceram) impede a sombra de escurecer em dobro onde se cruzam, seja entre as
+//   cópias de um boneco, seja entre vizinhos (a barreira): a sombra de todos junta tem um escuro só.
 // - Borrões: manchas macias numa malha só para todo mundo: o contato de cada pé com a grama, as quatro
 //   sombrinhas da bola (que se juntam quando ela desce) e, para quem não tem silhueta, as quatro sombras
 //   alongadas em cruz. Uma chamada de desenho no total.
@@ -19,13 +19,16 @@ const Y_SOMBRA = 0.012;   // m acima do gramado: as sombras não brigam com a gr
 const MAX_LUZES = 4;      // cópias do corpo na silhueta (uma por refletor)
 const ALTURA_PONTA = 1.9; // m: a sombra do que está a esta altura (a cabeça) é a mais clara
 const FORCA_PONTA = 0.66; // quanto da força sobra na ponta da sombra (a luz espalhada clareia longe dos pés)
+const ABRE_BOLA = 0.9;     // m: até onde as quatro sombrinhas da bola se afastam do ponto embaixo dela
+const FORCA_PECAS = 0.6;  // as sombras das traves e do travessão são mais fracas e macias que as dos jogadores
 const CONTATO_PE = 0.4;   // escurecimento da grama embaixo de cada pé apoiado (0 a 1)
 const SOLA_PE = [0, -0.07, 0.07]; // meio da sola no espaço do tornozelo (m), como em js/jogadores.js (SOLA)
 // Teto de triângulos de silhueta por quadro, somando todos os bonecos (cada silhueta tem o corpo 4 vezes:
 // uns 4 mil triângulos por boneco). Se passar, os bonecos mais longe da câmera ficam com os borrões em cruz
-// no lugar da silhueta (de longe mal se nota a troca). 36 mil = o cobrador e os 8 mais perto da câmera.
+// no lugar da silhueta (de longe mal se nota a troca). 28 mil = o cobrador e os 6 mais perto da câmera.
 // Quem está fora da tela não gasta nada.
-const ORCAMENTO_SILHUETAS = 36000;
+const ORCAMENTO_SILHUETAS = 28000;
+const FOLGA_DISTANCIA = 0.88; // quem já tem silhueta conta como se estivesse 12% mais perto (não fica trocando)
 const RAIO_NA_TELA = 3.2; // m em volta do boneco (corpo e sombras) que têm de estar fora da tela para ele não contar
 
 // Se o cenário não disser de onde vem a luz: os quatro cantos, como em js/estadio.js
@@ -45,7 +48,7 @@ function criarMaterialSilhueta(uniformes) {
   const material = new THREE.MeshBasicMaterial({
     color: 0x000000, transparent: true, depthWrite: false, side: THREE.DoubleSide,
     polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4,
-    // Estêncil: desenha só onde este boneco ainda não desenhou (o número do boneco é posto na hora do desenho)
+    // Estêncil: desenha só onde nenhuma silhueta desenhou ainda neste quadro (a mesma marca para todos os bonecos)
     stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc,
     stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp, stencilZPass: THREE.ReplaceStencilOp,
   });
@@ -328,7 +331,9 @@ function criarBorroes(scene) {
 //   bola(raio)   sombra da bola. Devolve { atualizar(pos, raioBola) } (pos: {x, y, z} do centro da bola).
 //   qualidade(nivel)  1 = completo; 0 = o mais barato possível (um borrão por boneco e um para a bola);
 //                     entre os dois (0.5) = quatro borrões alongados em cruz, sem silhueta.
-//   atualizar(dt)     uma vez por quadro, depois de mover os bonecos, a bola e a câmera.
+//   atualizar(dt, camera)  uma vez por quadro, depois de mover os bonecos, a bola e a câmera. camera (opcional):
+//                     a câmera que vai desenhar o quadro; sem ela, vale a do quadro anterior (num corte de
+//                     câmera, a escolha de quem tem silhueta atrasa um quadro).
 //   estado()          para conferir: { modo, nivel, bonecos, silhuetas, provisorias, triangulos, borroes, estencil }
 // opcoes.silhuetas (ou ?silhuetas= no endereço, para testar): 'destaque' (padrão: sem criarSilhueta, só o
 // cobrador ganha a silhueta provisória), 'todos' ou 'nenhuma'. opcoes.orcamento: teto de triângulos de
@@ -381,7 +386,6 @@ export function criarSombras(scene, opcoes = {}) {
   const bolas = [];
   let nivel = 1;
   let temEstencil = true;
-  let numero = 0; // cada silhueta marca o estêncil com um número (1 a 255)
 
   // Na hora do desenho: guarda onde a câmera está (para escolher quem fica com silhueta no quadro seguinte)
   // e confere, uma vez, se a tela tem estêncil (sem ele a silhueta escureceria em dobro)
@@ -389,15 +393,27 @@ export function criarSombras(scene, opcoes = {}) {
   const campoDeVisao = new THREE.Frustum();
   const matrizDaCamera = new THREE.Matrix4();
   const esfera = new THREE.Sphere();
+  const inversa = new THREE.Matrix4();
+  const frente = { x: 0, y: 0, z: 0 };
   let temCamera = false;
+  let cameraDada = false; // a câmera veio em atualizar(dt, camera): não precisa da do quadro anterior
+  let corte = false;      // a câmera pulou de lugar: a escolha das silhuetas recomeça, sem folga para quem já tinha
   let conferido = false;
-  borroes.malha.onBeforeRender = (renderer, _cena, camera) => {
+  function lerCamera(camera) {
     const e = camera.matrixWorld.elements;
+    if (temCamera && (Math.hypot(e[12] - olho.x, e[13] - olho.y, e[14] - olho.z) > 2.5
+      || e[8] * frente.x + e[9] * frente.y + e[10] * frente.z < 0.9)) corte = true;
     olho.x = e[12];
     olho.y = e[13];
     olho.z = e[14];
-    campoDeVisao.setFromProjectionMatrix(matrizDaCamera.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    frente.x = e[8];
+    frente.y = e[9];
+    frente.z = e[10];
+    campoDeVisao.setFromProjectionMatrix(matrizDaCamera.multiplyMatrices(camera.projectionMatrix, inversa.copy(camera.matrixWorld).invert()));
     temCamera = true;
+  }
+  borroes.malha.onBeforeRender = (renderer, _cena, camera) => {
+    if (!cameraDada) lerCamera(camera);
     if (conferido) return;
     conferido = true;
     const atributos = renderer.getContext().getContextAttributes();
@@ -432,20 +448,13 @@ export function criarSombras(scene, opcoes = {}) {
     malha.material = materialSilhueta;
     malha.frustumCulled = false; // a sombra cai longe do corpo: não dá para cortar pela esfera do boneco
     malha.renderOrder = 1;
-    numero = (numero % 255) + 1;
-    const marca = numero;
-    b.antesDeDesenhar = malha.onBeforeRender;
-    malha.onBeforeRender = function antesDeDesenhar(...argumentos) {
-      materialSilhueta.stencilRef = marca;
-      b.antesDeDesenhar.apply(this, argumentos);
-    };
     b.malha = malha;
   }
 
   function boneco(personagem, { raio = 0.42, destaque = false } = {}) {
     const b = {
       personagem, raio, destaque, x: 0, z: 0, altura: 0, visto: false, malha: null, provisoria: false,
-      antesDeDesenhar: null, corpo: (personagem && personagem.altura) || 1.8, triangulos: 0, comSilhueta: false,
+      corpo: (personagem && personagem.altura) || 1.8, triangulos: 0, comSilhueta: false,
       distancia: 0,
     };
     criarSilhueta(b);
@@ -463,7 +472,6 @@ export function criarSombras(scene, opcoes = {}) {
         const malha = b.malha;
         if (!malha) return;
         b.malha = null;
-        malha.onBeforeRender = b.antesDeDesenhar;
         if (b.provisoria) {
           if (malha.parent) malha.parent.remove(malha);
           malha.geometry.dispose();
@@ -536,15 +544,15 @@ export function criarSombras(scene, opcoes = {}) {
         continue;
       }
       total += b.triangulos;
-      b.distancia = b.destaque ? -1 : Math.hypot(b.x - olho.x, olho.y, b.z - olho.z);
+      b.distancia = b.destaque ? -1 : Math.hypot(b.x - olho.x, olho.y, b.z - olho.z) * (b.comSilhueta && !corte ? FOLGA_DISTANCIA : 1);
       fila.push(b);
     }
+    corte = false;
     if (total > orcamento) fila.sort((a, b) => a.distancia - b.distancia);
     let gasto = 0;
     let acabou = false;
     for (const b of fila) {
-      const teto = orcamento * (b.comSilhueta ? 1.15 : 1);
-      if (gasto > 0 && gasto + b.triangulos > teto) acabou = true;
+      if (gasto > 0 && gasto + b.triangulos > orcamento) acabou = true;
       b.comSilhueta = !acabou;
       b.malha.visible = b.comSilhueta;
       if (b.comSilhueta) gasto += b.triangulos;
@@ -575,7 +583,7 @@ export function criarSombras(scene, opcoes = {}) {
         if (l.forca <= 0) continue;
         const x = b.x + l.ox * b.altura;
         const z = b.z + l.oz * b.altura;
-        borroes.por(x, z, l.ux, l.uz, -0.3, l.comprimento * b.corpo * 1.02, 0.3, l.forca * 1.25, l.forca * 0.9, 1);
+        borroes.por(x, z, l.ux, l.uz, -0.22, l.comprimento * b.corpo * 1.02, 0.21, Math.min(1, l.forca * 1.45), l.forca, 1);
       }
     }
     for (const s of bolas) {
@@ -588,25 +596,32 @@ export function criarSombras(scene, opcoes = {}) {
         continue;
       }
       // Uma sombrinha por refletor: a bola no alto espalha as quatro; descendo, elas se juntam embaixo dela
-      const r = s.raio * 0.55 * (1 + altura * 0.03);
+      // (não na distância de verdade: bola alta teria as sombrinhas a 4 m dela, parecendo sujeira no gramado.
+      // Elas abrem até uns 0,9 m e somem acima de 2 m; quem mostra onde a bola está é a mancha de baixo)
+      const r = s.raio * 0.55;
+      const abre = ABRE_BOLA * (1 - Math.exp(-s.y / ABRE_BOLA));
+      const some = 1 - limitar((altura - 1.1) / 1.1, 0, 1);
       for (const l of luzes) {
-        if (l.forca <= 0) continue;
+        if (l.forca <= 0 || some <= 0) continue;
         const longa = r * Math.sqrt(1 + l.comprimento * l.comprimento); // a sombra de uma esfera é uma elipse
-        const forca = l.forca * 0.95;
-        borroes.por(s.x + l.ox * s.y, s.z + l.oz * s.y, l.ux, l.uz, -longa, longa, r, forca, forca, 2);
+        const forca = l.forca * 0.95 * some;
+        borroes.por(s.x + l.ox * abre, s.z + l.oz * abre, l.ux, l.uz, -longa, longa, r, forca, forca, 2);
       }
-      // Bem embaixo da bola: o contato com a grama (forte, só no chão ou quase) e, em qualquer altura, uma
-      // mancha fraca da luz que vem de cima (mostra em que ponto do campo a bola está)
-      const contato = 0.16 + 0.3 * (1 - limitar(altura / 0.35, 0, 1));
-      const rc = s.raio * (0.62 + Math.min(0.5, altura * 0.08));
-      borroes.por(s.x, s.z, 1, 0, -rc, rc, rc, contato, contato, 0);
+      // Bem embaixo da bola, em qualquer altura: a mancha que mostra em que ponto do campo ela está (forte;
+      // abre e clareia só um pouco com a altura) e, no chão ou quase, o contato com a grama por cima
+      const central = 0.46 - 0.1 * limitar(altura / 4, 0, 1);
+      const rc = s.raio * (0.8 + 0.3 * limitar(altura / 4, 0, 1));
+      borroes.por(s.x, s.z, 1, 0, -rc, rc, rc, central, central, 2);
+      const contato = 0.3 * (1 - limitar(altura / 0.35, 0, 1));
+      const rk = s.raio * 0.62;
+      borroes.por(s.x, s.z, 1, 0, -rk, rk, rk, contato, contato, 0);
     }
     // Traves, travessão e outras peças finas do cenário (refletores.segmentos): uma faixa por refletor
     const segmentos = m !== 'simples' && Array.isArray(refletores.segmentos) ? refletores.segmentos : [];
     for (const g of segmentos) {
       const ya = Math.max(0, g.a[1] - Y_SOMBRA);
       const yb = Math.max(0, g.b[1] - Y_SOMBRA);
-      const meia = g.raio * 1.5 + 0.015;
+      const meia = g.raio * 2.2 + 0.03;
       for (const l of luzes) {
         if (l.forca <= 0) continue;
         const xa = g.a[0] + l.ox * ya;
@@ -615,7 +630,7 @@ export function criarSombras(scene, opcoes = {}) {
         const dz = g.b[2] + l.oz * yb - za;
         const comprimento = Math.hypot(dx, dz);
         if (comprimento < 1e-4) continue;
-        const forca = l.forca * (g.forca ?? 1);
+        const forca = l.forca * (g.forca ?? 1) * FORCA_PECAS;
         borroes.por(
           xa, za, dx / comprimento, dz / comprimento, 0, comprimento, meia,
           forca * (1 + (FORCA_PONTA - 1) * limitar(ya / ALTURA_PONTA, 0, 1)),
@@ -632,8 +647,13 @@ export function criarSombras(scene, opcoes = {}) {
     qualidade(n) {
       nivel = Number.isFinite(n) ? n : 1;
     },
-    atualizar() {
+    atualizar(_dt, camera) {
       lerRefletores();
+      cameraDada = Boolean(camera && camera.isCamera);
+      if (cameraDada) {
+        camera.updateMatrixWorld();
+        lerCamera(camera);
+      }
       montarBorroes();
     },
     estado() {
