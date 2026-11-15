@@ -158,13 +158,13 @@ function conferir(m) {
 
 // ---------- Posicionamento ----------
 
-teste('quantidade: 0 = campo vazio; o padrão é 10; o máximo é 14; times equilibrados', () => {
+teste('quantidade: 0 = campo vazio; o padrão é 10; o máximo é 12; times equilibrados', () => {
   assert.equal(PADRAO_FIGURANTES.quantidade, 10);
   assert.equal(PADRAO_FIGURANTES.colisao, true);
   assert.equal(montar({ quantidade: 0 }).f.jogadores.length, 0);
   assert.equal(montar({ quantidade: 99 }).f.jogadores.length, MAXIMO_FIGURANTES);
-  assert.equal(MAXIMO_FIGURANTES, 14);
-  for (const q of [1, 2, 5, 10, 14]) {
+  assert.equal(MAXIMO_FIGURANTES, 12);
+  for (const q of [1, 2, 5, 10, 12]) {
     const { f, barreira } = montar({ quantidade: q });
     assert.equal(f.jogadores.length, q);
     const ataque = f.jogadores.filter((j) => j.time === 'ataque').length;
@@ -182,10 +182,10 @@ teste('quantidade: 0 = campo vazio; o padrão é 10; o máximo é 14; times equi
   assert.deepEqual(montar({ quantidade: 0 }).f.obstaculos, []);
 });
 
-teste(`falta: ${COMPLETO ? 1500 : 400} faltas sorteadas (18 a 33 m, −32° a 32°, destros e canhotos, 1 a 14 jogadores): ninguém no corredor, nas zonas proibidas ou em cima de outro`, () => {
+teste(`falta: ${COMPLETO ? 1500 : 400} faltas sorteadas (18 a 33 m, −32° a 32°, destros e canhotos, 1 a 12 jogadores): ninguém no corredor, nas zonas proibidas ou em cima de outro`, () => {
   let total = 0;
   let jogadores = 0;
-  const quantidades = [10, 10, 14, 7, 12, 4, 1, 10];
+  const quantidades = [10, 10, 12, 7, 11, 4, 1, 10];
   for (const caso of faltasSorteadas(COMPLETO ? 1500 : 400)) {
     const quantidade = quantidades[total % quantidades.length];
     const m = { ...caso, ...montar({ ...caso, quantidade }) };
@@ -204,12 +204,12 @@ teste('falta: cantos da faixa de sorteio e faltas fixas esquisitas (dentro da á
   let n = 0;
   for (const caso of casos) {
     for (const jogador of [ELENCO.find((j) => j.pe === 'D'), ELENCO.find((j) => j.pe === 'E'), ELENCO.find((j) => j.numero === 3)]) {
-      const m = { ...caso, jogador, semente: 0.31 + n * 0.0137, ...montar({ ...caso, jogador, semente: 0.31 + n * 0.0137, quantidade: 14 }) };
+      const m = { ...caso, jogador, semente: 0.31 + n * 0.0137, ...montar({ ...caso, jogador, semente: 0.31 + n * 0.0137, quantidade: MAXIMO_FIGURANTES }) };
       const erros = conferir(m);
       assert.deepEqual(erros, [], `${descrever(m)}:\n  ${erros.join('\n  ')}`);
       // Nas faltas que o jogo sorteia (18 a 33 m, até 32°) a montagem é sempre completa
       const sorteavel = caso.distancia >= 18 && caso.distancia <= 33 && Math.abs(caso.angulo) <= 32;
-      if (sorteavel) assert.equal(m.f.jogadores.length, 14, descrever(m));
+      if (sorteavel) assert.equal(m.f.jogadores.length, MAXIMO_FIGURANTES, descrever(m));
       else assert.ok(m.f.jogadores.length >= 10, `${descrever(m)}: só ${m.f.jogadores.length}`);
       n++;
     }
@@ -219,7 +219,7 @@ teste('falta: cantos da faixa de sorteio e faltas fixas esquisitas (dentro da á
 teste('pênalti: todo mundo fora da área e da meia-lua, atrás da linha da bola, em fila para o rebote', () => {
   for (let i = 0; i < 60; i++) {
     const jogador = ELENCO[i % ELENCO.length];
-    const quantidade = [10, 14, 6, 10][i % 4];
+    const quantidade = [10, 12, 6, 10][i % 4];
     const m = { penalti: true, jogador, semente: 0.05 + i * 0.0151, ...montar({ penalti: true, jogador, semente: 0.05 + i * 0.0151, quantidade }) };
     assert.equal(m.f.jogadores.length, quantidade);
     const erros = conferir(m);
@@ -238,10 +238,10 @@ teste('pênalti: todo mundo fora da área e da meia-lua, atrás da linha da bola
 
 teste('mesma semente = mesma montagem; outra semente = outra; com menos gente saem os menos importantes', () => {
   for (const caso of faltasSorteadas(40, 0.4242)) {
-    const a = montar({ ...caso, quantidade: 14 });
-    const b = montar({ ...caso, quantidade: 14 });
+    const a = montar({ ...caso, quantidade: MAXIMO_FIGURANTES });
+    const b = montar({ ...caso, quantidade: MAXIMO_FIGURANTES });
     assert.deepEqual(a.f, b.f, 'mesma semente, mesma montagem');
-    const outra = montar({ ...caso, semente: (caso.semente + 0.37) % 1, quantidade: 14 });
+    const outra = montar({ ...caso, semente: (caso.semente + 0.37) % 1, quantidade: MAXIMO_FIGURANTES });
     assert.notDeepEqual(a.f.jogadores.map((j) => [j.x, j.z]), outra.f.jogadores.map((j) => [j.x, j.z]));
     // Os k primeiros da montagem grande são a montagem de k jogadores (posição, time, papel, número)
     for (const k of [10, 6, 3]) {
@@ -301,8 +301,8 @@ teste('papéis: duplas atacante + marcador na área, sobra, gente dos dois lados
 teste('depois do chute: uns passos para o rebote, sem teleporte, sem entrar no corredor nem atropelar ninguém; o replay repete', () => {
   let andaram = 0;
   let total = 0;
-  const casos = [...faltasSorteadas(COMPLETO ? 300 : 120, 0.2468)].map((c) => ({ ...c, quantidade: 14 }));
-  for (let i = 0; i < 20; i++) casos.push({ penalti: true, jogador: ELENCO[i], semente: 0.11 + i * 0.041, quantidade: 14 });
+  const casos = [...faltasSorteadas(COMPLETO ? 300 : 120, 0.2468)].map((c) => ({ ...c, quantidade: MAXIMO_FIGURANTES }));
+  for (let i = 0; i < 20; i++) casos.push({ penalti: true, jogador: ELENCO[i], semente: 0.11 + i * 0.041, quantidade: MAXIMO_FIGURANTES });
   for (const caso of casos) {
     const m = { ...caso, ...montar(caso) };
     const js = m.f.jogadores;
@@ -383,7 +383,7 @@ teste('colisão: a bola que vai num jogador bate, desvia, perde força e registr
   let conferidos = 0;
   let emCheio = 0;
   for (const caso of faltasSorteadas(25, 0.8642)) {
-    const m = montar({ ...caso, quantidade: 14 });
+    const m = montar({ ...caso, quantidade: MAXIMO_FIGURANTES });
     m.f.jogadores.forEach((j, i) => {
       // De 4 m de distância, na altura do peito, a 22 m/s, vindo do lado da bola
       const dx = j.x - m.bola.x;
@@ -391,7 +391,7 @@ teste('colisão: a bola que vai num jogador bate, desvia, perde força e registr
       const d = Math.hypot(dx, dz);
       const de = { x: j.x - (dx / d) * 4, y: 1.15, z: j.z - (dz / d) * 4 };
       const vel = { x: (dx / d) * 22, y: 0.9, z: (dz / d) * 22 };
-      const novo = montar({ ...caso, quantidade: 14 });
+      const novo = montar({ ...caso, quantidade: MAXIMO_FIGURANTES });
       const r = lancar(novo, de, vel, { ate: 0.6 });
       const ev = r.eventos[0];
       assert.ok(ev, `a bola atravessou o jogador #${i} (${j.papel})`);
@@ -409,7 +409,7 @@ teste('colisão: a bola que vai num jogador bate, desvia, perde força e registr
       assert.ok(ev.impacto > 10 && ev.impacto < 25, `impacto ${ev.impacto}`);
       assert.ok(novo.f.jogadores[i].batida > 10);
       // Rebote com pouca força: logo depois da batida a bola está bem mais lenta e não seguiu em frente
-      const semColisao = lancar(montar({ ...caso, quantidade: 14 }), de, vel, { ate: 0.6, colisao: false });
+      const semColisao = lancar(montar({ ...caso, quantidade: MAXIMO_FIGURANTES }), de, vel, { ate: 0.6, colisao: false });
       const v = Math.hypot(r.bola.vel.x, r.bola.vel.y, r.bola.vel.z);
       assert.ok(v < 12, `depois da batida a bola ainda a ${v.toFixed(1)} m/s`);
       assert.ok(Math.hypot(r.bola.pos.x - semColisao.bola.pos.x, r.bola.pos.z - semColisao.bola.pos.z) > 2, 'a bola desviou');
@@ -521,8 +521,7 @@ teste('chute bom no ângulo nunca bate em figurante: curva para os dois lados, d
   for (const caso of faltasSorteadas(COMPLETO ? 160 : 36, 0.5151)) {
     for (const quem of cobradores) {
       // A montagem é a do cobrador da vez (a corrida dele muda os lugares)
-      const semente = caso.semente;
-      const base = montar({ ...caso, jogador: quem, quantidade: 14 });
+      const base = montar({ ...caso, jogador: quem, quantidade: MAXIMO_FIGURANTES });
       const corredor = corredorDoChute(base.bola, base.cfg);
       for (const j of base.f.jogadores) menorFolga = Math.min(menorFolga, corredor.fora(j.x, j.z));
       for (const [cx, cy] of contatos) {
@@ -535,7 +534,9 @@ teste('chute bom no ângulo nunca bate em figurante: curva para os dois lados, d
               chutes++;
               if (!mira || mira.y > CONFIG.golAltura) continue; // não chega ou vai por cima: não é chute bom
               noGol++;
-              const m = montar({ ...caso, jogador: quem, semente, quantidade: 14 });
+              // (a mesma montagem serve para todos os chutes: os figurantes só dependem do tempo desde o chute, e
+              // o teste para no primeiro toque; montar de novo a cada chute era metade do tempo deste teste)
+              const m = base;
               const r = cobrar(m, { ...chute, alvo: mira.alvo });
               assert.ok(r && !r.bateu, `${descrever({ ...caso, jogador: quem })}: chute bom (contato ${cx}/${cy}, força ${forca}, canto ${xFinal.toFixed(2)}) bateu no figurante `
                 + `${r && r.bateu ? `#${r.bateu.jogador} ${m.f.jogadores[r.bateu.jogador].papel} em (${m.f.jogadores[r.bateu.jogador].x.toFixed(2)}, ${m.f.jogadores[r.bateu.jogador].z.toFixed(2)}) t=${r.t.toFixed(2)}` : ''}`);
@@ -578,16 +579,80 @@ teste('chute torto bate: mirando num figurante que está fora do corredor, a bol
   assert.ok(tentados > 20 && bateram / tentados > 0.9);
 });
 
+// ---------- Gol depois de desvio ----------
+
+teste('desvio que entra: a bola que ia para fora bate num figurante na borda do corredor, registra o evento e cruza a linha entre as traves', () => {
+  // Um figurante posto à mão colado na borda do corredor, perto da trave; a bola vem rasteira da falta e
+  // passaria por fora da trave. Varrendo a pontaria de raspão até em cheio, parte das bolas desvia para dentro.
+  const m = montar({ distancia: 22, angulo: 0, semente: 0.4242, quantidade: 1, cfg: comQuantidade(1, { movimento: false }) });
+  const corredor = corredorDoChute(m.bola, m.cfg);
+  const j = m.f.jogadores[0];
+  let desviadas = 0;
+  let gols = 0;
+  let exemplo = null;
+  for (const lado of [-1, 1]) {
+    for (const z of [2.5, 3.5, 5]) {
+      // o mais perto que a montagem deixaria (fora da borda + folga)
+      j.z = z;
+      j.x = lado * corredor.borda(0, z, lado, 0, 0.02);
+      j.base = { x: j.x, z: j.z };
+      j.plano = null;
+      j.time = lado > 0 ? 'defesa' : 'ataque';
+      m.f.caixa = { x0: j.x - 0.8, x1: j.x + 0.8, z0: j.z - 0.8, z1: j.z + 0.8 };
+      assert.ok(!corredor.dentro(j.x, j.z), 'o figurante posto à mão está fora do corredor');
+      for (let k = 0; k <= 24; k++) {
+        // mira de 0,34 m por dentro do centro do figurante (de raspão) até o centro
+        const alvoX = j.x - lado * (0.34 - 0.34 * (k / 24));
+        for (const rapidez of [14, 20, 26]) {
+          const bola = criarBola({ x: m.bola.x, y: m.cfg.raioBola, z: m.bola.z });
+          const d = Math.hypot(alvoX - m.bola.x, j.z - m.bola.z);
+          bola.vel = { x: ((alvoX - m.bola.x) / d) * rapidez, y: 1.2, z: ((j.z - m.bola.z) / d) * rapidez };
+          m.f.batidas = 0;
+          let evento = null;
+          let cruzou = null;
+          for (let t = H; t < 4 && !cruzou; t += H) {
+            const antes = { ...bola.pos };
+            atualizarFigurantes(m.f, t);
+            passo(bola, H, m.cfg);
+            colidirBolaFigurantes(bola, m.f, m.cfg);
+            for (const e of bola.eventos) if (e.tipo === 'jogador' && !evento) evento = { ...e };
+            bola.eventos.length = 0;
+            if (bola.pos.z <= 0 && antes.z > 0) {
+              const u = antes.z / (antes.z - bola.pos.z);
+              cruzou = { x: antes.x + (bola.pos.x - antes.x) * u, y: antes.y + (bola.pos.y - antes.y) * u };
+            }
+          }
+          if (!evento) continue;
+          desviadas++;
+          assert.equal(evento.time, j.time);
+          assert.equal(evento.jogador, 0);
+          assert.ok(evento.impacto > 0.5);
+          // sem o figurante, esta bola ia para fora (a reta passa por fora da trave)
+          const semDesvio = m.bola.x + ((alvoX - m.bola.x) * m.bola.z) / (m.bola.z - j.z);
+          assert.ok(Math.abs(semDesvio) > MEIA + 0.3, 'sem o desvio a bola não entrava');
+          if (cruzou && Math.abs(cruzou.x) < MEIA - m.cfg.raioBola && cruzou.y < CONFIG.golAltura - m.cfg.raioBola) {
+            gols++;
+            if (!exemplo) exemplo = `figurante em (${j.x.toFixed(2)}, ${j.z.toFixed(2)}), bola a ${rapidez} m/s mirada em x = ${alvoX.toFixed(2)}: cruzou em x = ${cruzou.x.toFixed(2)}, y = ${cruzou.y.toFixed(2)}`;
+          }
+        }
+      }
+    }
+  }
+  console.log(`    ${desviadas} bolas desviadas num figurante na borda do corredor, ${gols} entraram no gol depois do desvio` + (exemplo ? ` (ex.: ${exemplo})` : ''));
+  assert.ok(desviadas > 100);
+  assert.ok(gols >= 5, 'pelo menos algumas bolas desviadas entram');
+});
+
 // ---------- Custo ----------
 
 teste('custo: montar é rápido e a colisão quase não pesa no passo da física', () => {
   const casos = [...faltasSorteadas(200, 0.3333)];
-  for (const caso of casos.slice(0, 30)) montar({ ...caso, quantidade: 14 }); // aquece
+  for (const caso of casos.slice(0, 30)) montar({ ...caso, quantidade: MAXIMO_FIGURANTES }); // aquece
   let t0 = performance.now();
-  for (const caso of casos) montar({ ...caso, quantidade: 14 });
+  for (const caso of casos) montar({ ...caso, quantidade: MAXIMO_FIGURANTES });
   const porMontagem = (performance.now() - t0) / casos.length;
-  // Um voo inteiro (2 s = 480 passos) com 14 figurantes: quanto a mais custa por passo
-  const m = montar({ distancia: 24, angulo: 8, semente: 0.2, quantidade: 14 });
+  // Um voo inteiro (2 s = 480 passos) com 12 figurantes: quanto a mais custa por passo
+  const m = montar({ distancia: 24, angulo: 8, semente: 0.2, quantidade: MAXIMO_FIGURANTES });
   const voar = (comFigurantes) => {
     const inicio = performance.now();
     for (let k = 0; k < 200; k++) {
@@ -605,7 +670,7 @@ teste('custo: montar é rápido e a colisão quase não pesa no passo da física
   voar(true);
   const sem = voar(false);
   const com = voar(true);
-  console.log(`    montar 14 figurantes: ${porMontagem.toFixed(2)} ms · passo da física: ${(sem * 1000).toFixed(2)} µs sem figurantes, ${(com * 1000).toFixed(2)} µs com (4 passos por quadro)`);
+  console.log(`    montar ${MAXIMO_FIGURANTES} figurantes: ${porMontagem.toFixed(2)} ms · passo da física: ${(sem * 1000).toFixed(2)} µs sem figurantes, ${(com * 1000).toFixed(2)} µs com (4 passos por quadro)`);
   assert.ok(porMontagem < 8, `montagem lenta: ${porMontagem.toFixed(2)} ms`);
   assert.ok(com - sem < 0.02, `colisão cara: ${((com - sem) * 1000).toFixed(2)} µs por passo`);
 });
