@@ -88,6 +88,7 @@ export const CONFIG = {
     fovMin: 40,           // campo de visão vertical mínimo
     larguraVisivel: 32,   // campo de visão horizontal mínimo (graus): no celular em pé, mais = mais afastada
     seguir: 0.25,         // quanto a câmera acompanha a bola depois do chute (0 = parada)
+    seguraChute: 0.3,     // s que a câmera fica atrás do cobrador depois do contato, para ver a terminação do chute, antes de ir atrás da bola (0 = vai na hora; nunca passa de 40% do voo; no pênalti não vale)
 
     // Câmera do replay. Lateral (padrão): do lado direito de quem cobra, sempre o mesmo lado, com o gol
     // à direita da tela, como no treino do PES de PS2. Acompanha a bola, porque no celular em pé não cabe
@@ -99,6 +100,15 @@ export const CONFIG = {
     replayLateralLargura: 36, // graus de campo de visão horizontal (menos = mais zoom)
     replayLateralSegue: 0.4,  // quanto a câmera anda junto com a bola em direção ao gol (0 = parada, 1 = sempre ao lado da bola)
     replayLateralFrente: 4,   // m que a câmera fica adiantada em relação à bola, na direção do gol
+    // Tomada do chute: o replay da falta começa de perto, com a câmera baixa, de lado e um pouco à frente do
+    // cobrador (do lado do pé que chuta), mostrando a corrida, a perna armando, o contato e a terminação;
+    // um instante depois do contato corta para a câmera do voo (a lateral de cima, ou a de trás do gol).
+    replayChute: true,        // desligado: o replay inteiro com a câmera do voo
+    replayChuteDist: 5,       // m da bola até a câmera
+    replayChuteAltura: 1.1,   // m do chão (baixa, na altura da cintura)
+    replayChuteAngulo: 35,    // graus: 0 = bem de lado; 90 = de frente para o cobrador (na linha do chute)
+    replayChuteLargura: 25,   // graus de campo de visão horizontal (menos = mais zoom)
+    replayChuteDepois: 0.3,   // s depois do contato em que corta para a câmera do voo (nunca passa de 40% do voo)
     replayLado: 7,        // atrás do gol: m para o lado (do lado contrário ao canto em que a bola vai)
     replayAltura: 3.2,    // atrás do gol: m do chão
     replayAtras: 8,       // atrás do gol: m atrás da linha do gol

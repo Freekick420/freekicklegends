@@ -11,7 +11,7 @@ import {
 } from '../js/barreira.js';
 import {
   criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, partesDoGoleiro, guardarGoleiro, retomarGoleiro, alturaDoGoleiro,
-  PADRAO_GOLEIRO, PADRAO_PENALTI,
+  fecharPalpite, PADRAO_GOLEIRO, PADRAO_PENALTI,
 } from '../js/goleiro.js';
 
 const COMPLETO = process.argv.includes('--completo');
@@ -1131,6 +1131,50 @@ teste('pênalti: errou o canto, ou se jogou com a bola no meio: gol', () => {
   assert.ok(meio.gol >= 0.9, `bola no meio: só ${pct(meio.gol)} de gols`);
   assert.equal(errou.acertou, 0);
   assert.equal(meio.acertou, 0, 'bola no meio com ele se jogando não conta como acerto');
+});
+
+// O jogo decide o resultado dentro do passo da física em que o goleiro toca na bola (js/main.js, simular) e
+// monta o texto ali mesmo ("adivinhou o canto" / "foi no canto errado"): o palpite tem de estar fechado no toque
+teste('pênalti: no passo em que ele toca na bola já se sabe se acertou o canto (texto do resultado)', () => {
+  let defesas = 0;
+  for (const lado of [-1, 1]) {
+    for (let s = 1; s <= 12; s++) {
+      const cfg = { ...CONFIG, goleiro: {}, penalti: {} };
+      const g = criarGoleiro(MARCA, null, cfg, { penalti: { historico: [], aleatorio: sorteio(s + 7000), forcar: { vai: 'lado', lado } } });
+      const bola = criarBola({ x: MARCA.x, y: CONFIG.raioBola, z: MARCA.z });
+      for (let t = 0; t < 1.4; t += 1 / 60) atualizarGoleiro(g, bola, 1 / 60, cfg, { chutou: false });
+      for (let falta = 0.6; falta > 1e-9; falta -= 1 / 60) atualizarGoleiro(g, bola, 1 / 60, cfg, { chutou: false, tempoAteChute: falta });
+      atualizarGoleiro(g, bola, 1 / 60, cfg, { chutou: false, tempoAteChute: 0 });
+      montarChute(bola, mirar(MARCA, { x: UM_METRO_DA_TRAVE * lado, y: 1.0 }, { velocidade: 20 }));
+      const aleatorio = sorteio(s);
+      let t = 0;
+      for (let i = 0; i < 2 * 240; i++) {
+        t += H;
+        atualizarGoleiro(g, bola, H, cfg, { chutou: true, tempoDesdeChute: t, aleatorio });
+        passo(bola, H, CONFIG);
+        colidirBolaGoleiro(bola, g, cfg);
+        if (bola.eventos.some((ev) => ev.tipo === 'defesa')) {
+          // (sem chamar atualizarGoleiro de novo: é assim que o jogo lê)
+          assert.equal(g.penalti.acertou, true, `lado ${lado}, semente ${s}: tocou na bola e o palpite está ${g.penalti.acertou}`);
+          defesas++;
+          break;
+        }
+        bola.eventos.length = 0;
+      }
+    }
+  }
+  assert.ok(defesas >= 12, `só ${defesas} defesas em 24 para conferir`);
+
+  // fecharPalpite: responde na hora mesmo com a bola longe (lance que acaba antes de ela chegar nele), e não é pênalti = null
+  const cfg = { ...CONFIG, goleiro: {}, penalti: {} };
+  const g = criarGoleiro(MARCA, null, cfg, { penalti: { historico: [], aleatorio: sorteio(1), forcar: { vai: 'lado', lado: 1 } } });
+  const bola = criarBola({ x: 2.5, y: CONFIG.raioBola, z: 6 });
+  assert.equal(g.penalti.acertou, null);
+  assert.equal(fecharPalpite(g, bola), true);
+  assert.equal(g.penalti.acertou, true);
+  const outro = criarGoleiro(MARCA, null, cfg, { penalti: { historico: [], aleatorio: sorteio(1), forcar: { vai: 'lado', lado: -1 } } });
+  assert.equal(fecharPalpite(outro, bola), false);
+  assert.equal(fecharPalpite(criarGoleiro({ x: 0, z: 22 }, null, cfg), bola), null);
 });
 
 teste('pênalti: ficou no meio: pega a bola no meio e sofre no canto', () => {

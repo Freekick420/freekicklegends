@@ -247,6 +247,23 @@ export function criarInterface({
     });
   }
 
+  // Letreiro do resultado: texto comprido ("NO COMPANHEIRO!", "NO TRAVESSÃO!") tomava a largura inteira do
+  // celular em pé. A fonte diminui o que for preciso para o texto caber em LARGURA_LETREIRO da tela (os curtos
+  // ficam como estão). A medida é do texto no tamanho normal; a conta em vw acompanha a tela se ela girar.
+  const LARGURA_LETREIRO = 88; // % da largura da tela, no máximo
+  function ajustarLetreiro(letreiro) {
+    letreiro.style.fontSize = '';
+    letreiro.style.whiteSpace = 'nowrap'; // uma linha só (e a medida é do texto inteiro)
+    const tamanho = parseFloat(getComputedStyle(letreiro).fontSize);
+    const faixa = document.createRange();
+    faixa.selectNodeContents(letreiro);
+    const largura = faixa.getBoundingClientRect().width;
+    if (!(largura > 0) || !(tamanho > 0)) return;
+    if (largura > (window.innerWidth * LARGURA_LETREIRO) / 100) {
+      letreiro.style.fontSize = `min(${tamanho}px, ${((LARGURA_LETREIRO * tamanho) / largura).toFixed(3)}vw)`;
+    }
+  }
+
   const api = {
     // opcoes: lista ordenada [{ jogador, nota }] (a primeira é a sugerida)
     mostrarCobrador(jogador, nota, listaOrdenada) {
@@ -289,10 +306,14 @@ export function criarInterface({
     mostrarMensagem(texto) {
       $('mensagem').textContent = texto;
     },
-    mostrarResultado({ tipo, titulo, sub }) {
-      $('resultado-titulo').textContent = titulo;
+    // topo (opcional): fração da altura da tela onde o letreiro fica; sem ele, o lugar de sempre (o do CSS)
+    mostrarResultado({ tipo, titulo, sub, topo = null }) {
+      resultado.style.top = typeof topo === 'number' ? `${(topo * 100).toFixed(1)}%` : '';
+      const letreiro = $('resultado-titulo');
+      letreiro.textContent = titulo;
       $('resultado-sub').textContent = sub || '';
       resultado.className = tipo;
+      ajustarLetreiro(letreiro);
       void resultado.offsetWidth; // reinicia a animação
       resultado.classList.add('mostrar');
     },
@@ -319,7 +340,8 @@ export function criarInterface({
 
   // No modo teste (?teste), as capturas automáticas abrem a folha do ranking sem passar pela internet
   if (new URLSearchParams(location.search).has('teste')) {
-    window.interfaceTeste = { mostrarRanking, fecharRanking, rankingAberto, folhaAberta };
+    // (e mostram um letreiro de resultado qualquer, para conferir se cabe na tela)
+    window.interfaceTeste = { mostrarRanking, fecharRanking, rankingAberto, folhaAberta, mostrarResultado: (r) => api.mostrarResultado(r) };
   }
 
   return api;

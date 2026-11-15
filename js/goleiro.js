@@ -805,14 +805,24 @@ function dispararPalpite(g, c, cp, L, t) {
 
 // Pênalti: assim que a bola chega no plano dele (ou ele toca nela), diz se acertou. Quem se jogou
 // acertou se a bola foi para o lado dele, fora do meio; quem ficou acertou se a bola veio no meio.
-function conferirPalpite(g, bola) {
+// agora = true: o lance acabou, responde com a bola onde estiver (fecharPalpite).
+function conferirPalpite(g, bola, agora = false) {
   const p = g.penalti;
   if (p.acertou !== null) return;
   const tocou = Number.isFinite(g.ultimoContato);
-  if (!tocou && bola.pos.z > g.z + PLANO_MAOS) return;
+  if (!agora && !tocou && bola.pos.z > g.z + PLANO_MAOS) return;
   const x = bola.cruzamento ? bola.cruzamento.x : bola.pos.x;
   const noMeio = Math.abs(x) < MEIO_PENALTI;
   p.acertou = p.vai === 'lado' ? !noMeio && Math.sign(x) === p.lado : noMeio;
+}
+
+// Pênalti: o goleiro acertou o canto? Para quem monta o texto do resultado: o lance pode acabar no mesmo passo
+// da física em que ele toca na bola, antes da próxima chamada de atualizarGoleiro. Fecha o palpite na hora
+// (se ainda estiver em aberto) e devolve true/false; null se não for pênalti. Não muda nada no lance.
+export function fecharPalpite(g, bola) {
+  if (!g.penalti) return null;
+  conferirPalpite(g, bola, true);
+  return g.penalti.acertou;
 }
 
 // Freia os passos e volta para a altura de espera
@@ -1314,6 +1324,8 @@ export function colidirBolaGoleiro(bola, g, cfg = CONFIG) {
     }
   }
 
+  // Pênalti: tocou na bola, já dá para dizer se acertou o canto (o resultado pode sair neste mesmo passo)
+  if (tocou && g.penalti) conferirPalpite(g, bola);
   g._anterior = { x: pos.x, y: pos.y, z: pos.z };
   g._bola = bola;
   return tocou;
