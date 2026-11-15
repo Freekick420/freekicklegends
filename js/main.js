@@ -4,7 +4,7 @@ import { criarBola, chutar, passo, noChao, coneDeErro, preverTecnica } from './p
 import { ELENCO, RIVAIS, sugerirCobradores } from './elenco.js?v=9';
 import { criarCenario, PADRAO_CENARIO } from './estadio.js?v=9';
 import { montarBarreira, semBarreira, atualizarBarreira, colidirBolaBarreira, PADRAO_BARREIRA } from './barreira.js?v=9';
-import { criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, PADRAO_GOLEIRO, PADRAO_PENALTI } from './goleiro.js?v=9';
+import { criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, guardarGoleiro, retomarGoleiro, alturaDoGoleiro, PADRAO_GOLEIRO, PADRAO_PENALTI } from './goleiro.js?v=9';
 import { criarPersonagem, visualAdversario, VISUAL_GOLEIRO_ADVERSARIO, UNIFORMES, misturarPoses } from './jogadores.js?v=9';
 import { criarCobranca, PADRAO_COBRANCA, poseChute, poseComemoracao, poseLamento } from './cobranca.js?v=9';
 import { criarAnimadorGoleiro, criarAnimadorBarreira } from './animacaoDefesa.js?v=9';
@@ -675,14 +675,15 @@ const jogada = {};
 function zerarJogada() {
   Object.assign(jogada, {
     batida: null, redeFora: false, barreira: false, jogador: null, defesa: null, barreiraPulou: false, porBaixo: false,
-    resultado: null, somRede: false, quiques: 0, lentaUsada: false, lentaAte: 0,
+    resultado: null, passoDoResultado: -1, somRede: false, quiques: 0, lentaUsada: false, lentaAte: 0,
   });
 }
 
 const audio = criarAudio(CONFIG);
 
-// Replay: a última cobrança guardada (falta, cobrador, chute e sementes) roda de novo com a câmera
-// atrás do gol. O vídeo é gravado durante o replay (tela e som), e depois dá para salvar ou compartilhar.
+// Replay: a última cobrança guardada (falta, cobrador, chute, sementes e o goleiro do instante do chute) roda
+// de novo com a câmera atrás do gol. O vídeo é gravado durante o replay (tela e som), e depois dá para salvar
+// ou compartilhar.
 const gravador = criarGravador({ canvas: renderer.domElement, audio });
 let registro = null;   // a última cobrança feita
 let replay = null;     // { gravar } enquanto o replay roda
@@ -1033,6 +1034,7 @@ function novaCobranca() {
     sorteioChute = criarSorteio(registro.sementeChute);
     elementos.dica.style.visibility = 'hidden';
     prepararCobranca();
+    acertarGoleiroDoReplay();
     audio.torcidaTensao(animacao.tempoContato + PAUSA_REPLAY);
     if (replay.gravar) gravador.comecar();
   } else {
@@ -1044,6 +1046,24 @@ function novaCobranca() {
   audio.torcidaAmbiente(0.45);
   ui.mostrarPlacar(placar());
   mostrarAcoes();
+}
+
+// Replay: o goleiro de antes do chute repete o do lance. O relógio dele é acertado para chegar ao chute
+// marcando a mesma hora (mesmo balanço, passo para o lado no mesmo compasso); se no lance ele já estava em
+// campo havia mais tempo do que o replay mostra, esse tempo passa de uma vez aqui. No instante do chute ele
+// retoma o goleiro guardado (executarChute); o que sobra de diferença nessa hora é menos de um décimo de
+// milímetro a 60 quadros por segundo (uns 2 mm num celular a 20), e ninguém vê.
+let saltoGoleiroReplay = 0; // m: quanto o goleiro do replay estava longe do guardado na hora do chute
+function acertarGoleiroDoReplay() {
+  const guardado = registro.goleiro;
+  if (!guardado) return;
+  const inicio = guardado.relogio - (PAUSA_REPLAY + registro.tContato);
+  const adiantar = Math.min(8, Math.max(0, inicio)); // 8 s bastam: o passo para o lado acaba bem antes
+  goleiro.relogio = inicio - adiantar;
+  const n = Math.round(adiantar * 60);
+  for (let i = 0; i < n; i++) {
+    atualizarGoleiro(goleiro, bola, adiantar / n, cfgDefesa, { chutou: false, tempoDesdeChute: -1, cfgFisica: CONFIG, aleatorio });
+  }
 }
 
 function iniciarReplay({ gravar }) {
@@ -1126,6 +1146,16 @@ function soltarChute() {
 
 // O pé encontra a bola: a física assume daqui
 function executarChute() {
+  // O goleiro de antes do chute (balanço, passo para o lado, gesto do pênalti) depende de quanto tempo se
+  // levou para bater e de como os quadros caíram. Ele faz parte da cobrança: o lance guarda o goleiro deste
+  // instante e o replay recomeça exatamente dele (daqui em diante tudo anda em passos fixos)
+  if (!replay) {
+    registro.goleiro = guardarGoleiro(goleiro);
+    registro.tContato = estado.tCobranca;
+  } else if (registro.goleiro) {
+    saltoGoleiroReplay = Math.hypot(goleiro.cx - registro.goleiro.cx, goleiro.cy - registro.goleiro.cy);
+    retomarGoleiro(goleiro, registro.goleiro);
+  }
   tiro = chutar(bola, { alvo: { x: mira.x, z: 0 }, forca: estado.forca, contato, cobrador, pressao: registro.pressao || 0 }, CONFIG, sorteioChute);
   estado.fase = 'voo';
   estado.tempo = 0;
@@ -1453,7 +1483,8 @@ function animarAdversarios(t, dt) {
   });
   const p = goleiro.pose;
   const centro = p.centro || p;
-  sombraGoleiro.atualizar({ x: centro.x, z: p.z });
+  // (no mergulho ele sai do chão: a sombra abre e a mancha dos pés some, como na barreira que pula)
+  sombraGoleiro.atualizar({ x: centro.x, z: p.z, altura: alturaDoGoleiro(goleiro) });
 }
 
 // ---------- Loop principal ----------
@@ -1517,8 +1548,35 @@ function simular(dt) {
     if (CONFIG.figurantes.colisao) colidirBolaFigurantes(bola, figurantes, CONFIG);
     colidirBolaGoleiro(bola, goleiro, cfgDefesa);
     verificarPorBaixo(anteriorZ);
+    if (diarioFisica) diarioFisica.push(fotoDoPasso());
+    // O resultado sai no passo em que dá para saber (e não no fim do quadro): assim o lance acaba no mesmo
+    // passo em qualquer celular e no replay, mesmo quando a bola muda de rumo duas vezes dentro de um quadro
+    processarEventos();
+    if (estado.fase === 'voo') {
+      const parada = Math.hypot(bola.vel.x, bola.vel.y, bola.vel.z) < 0.3;
+      const resultado = decidirResultado(parada || estado.tempo > CONFIG.tempoMaxVoo);
+      if (resultado) {
+        jogada.passoDoResultado = Math.round(estado.tempo / h);
+        mostrarResultado(resultado);
+        encerrarJogada(resultado === 'gol' ? CONFIG.esperaGol : CONFIG.esperaRecomeco);
+      }
+    }
   }
-  processarEventos();
+}
+
+// Modo teste: diário da física, uma linha por passo (bola, goleiro, barreira e figurantes). Serve para
+// conferir que o replay repete o lance número por número (jogoTeste.diario)
+let diarioFisica = null;
+function fotoDoPasso() {
+  const g = goleiro;
+  const linha = [
+    bola.pos.x, bola.pos.y, bola.pos.z, bola.vel.x, bola.vel.y, bola.vel.z, bola.giro.x, bola.giro.y, bola.giro.z,
+    g.cx, g.cy, g.z, g.vx, g.rolagem, g.rotacaoY, g.bracos, g.progresso, g.velCorpo.x, g.velCorpo.y,
+  ];
+  for (const m of g.maos) linha.push(m.x, m.y, m.z);
+  for (const j of barreira.jogadores) linha.push(j.x, j.z, j.yPes, j.batida);
+  for (const j of figurantes.jogadores) linha.push(j.x, j.z, j.batida || 0);
+  return linha;
 }
 
 // Um quadro do jogo: dtReal segundos de relógio. desenhar = false só anda o tempo (os testes automáticos
@@ -1545,6 +1603,7 @@ function passoDoJogo(dtReal, desenhar = true) {
   }
 
   if (estado.fase === 'corrida' || estado.fase === 'voo' || estado.fase === 'fim') estado.tCobranca += dt;
+  const jaNoFim = estado.fase === 'fim'; // o quadro em que o lance acaba ainda não conta na espera
   if (estado.fase === 'voo' || estado.fase === 'fim') {
     simular(dt);
     rastro.adicionar(bola.pos, dt);
@@ -1552,18 +1611,14 @@ function passoDoJogo(dtReal, desenhar = true) {
     atualizarBarreira(barreira, -1);
     atualizarFigurantes(figurantes, -1);
     // No pênalti o goleiro vê a corrida do cobrador: se firma e, se for o caso, parte antes do contato
-    const tempoAteChute = goleiro.penalti && estado.fase === 'corrida' ? Math.max(0, animacao.tempoContato - estado.tCobranca) : undefined;
+    // (na pausa do começo do replay o cobrador ainda está parado: o goleiro segue no gesto, como no lance)
+    const correndo = estado.fase === 'corrida' && estado.tCobranca >= 0;
+    const tempoAteChute = goleiro.penalti && correndo ? Math.max(0, animacao.tempoContato - estado.tCobranca) : undefined;
     atualizarGoleiro(goleiro, bola, dt, cfgDefesa, { chutou: false, tempoDesdeChute: -1, tempoAteChute, cfgFisica: CONFIG, aleatorio });
   }
 
-  if (estado.fase === 'voo') {
-    const parada = Math.hypot(bola.vel.x, bola.vel.y, bola.vel.z) < 0.3;
-    const resultado = decidirResultado(parada || estado.tempo > CONFIG.tempoMaxVoo);
-    if (resultado) {
-      mostrarResultado(resultado);
-      encerrarJogada(resultado === 'gol' ? CONFIG.esperaGol : CONFIG.esperaRecomeco);
-    }
-  } else if (estado.fase === 'fim') {
+  // (o resultado do lance é decidido dentro de simular, passo a passo)
+  if (jaNoFim && estado.fase === 'fim') {
     estado.tFim += dt;
     estado.espera -= dt;
     if (estado.espera <= 0) (replay ? encerrarReplay() : novaCobranca());
@@ -1574,7 +1629,7 @@ function passoDoJogo(dtReal, desenhar = true) {
   animarAdversarios(tempoTotal, dt);
   atualizarBolaNaTela(dt);
   atualizarCamera(dt);
-  sombras.atualizar(dt);
+  sombras.atualizar(dt, camera); // a câmera já está no lugar deste quadro (do jogo, do replay ou do teste)
   cenario.rede.bola(bola.pos, CONFIG.raioBola * bolaMesh.scale.x); // a rede de pano envolve a bola desenhada
   cenario.atualizar(dt);
   audio.atualizar(dt);
@@ -1618,7 +1673,7 @@ if (MODO_TESTE) {
     gravador: () => ({ disponivel: gravador.disponivel, formato: gravador.formato, gravando: gravador.gravando }),
     replay: (gravar) => iniciarReplay({ gravar }),
     emReplay: () => Boolean(replay),
-    registro: () => registro && { ...registro, cobrador: registro.cobrador.numero },
+    registro: () => registro && { ...registro, cobrador: registro.cobrador.numero, goleiro: Boolean(registro.goleiro) },
     cruzamento: () => bola.cruzamento && { x: bola.cruzamento.x, y: bola.cruzamento.y },
     modo: (nome) => trocarModo(nome),
     // Tempo: pausar(true) congela o jogo (os quadros continuam desenhando); avancar(s) anda s segundos de
@@ -1626,10 +1681,20 @@ if (MODO_TESTE) {
     pausar: (sim = true) => {
       testePausado = Boolean(sim);
     },
-    avancar: (segundos) => {
-      const n = Math.max(0, Math.round(segundos * 60));
-      for (let i = 0; i < n; i++) passoDoJogo(1 / 60, false);
+    avancar: (segundos, quadro = 1 / 60) => {
+      const n = Math.max(0, Math.round(segundos / quadro));
+      for (let i = 0; i < n; i++) passoDoJogo(quadro, false);
       return window.tempoDeJogo;
+    },
+    // Um quadro só, do tamanho que quiser (para imitar celular lento ou rápido: os quadros mudam, o lance não)
+    quadro: (dt = 1 / 60) => passoDoJogo(dt, false),
+    // Diário da física: diario(true) começa a anotar uma linha de números por passo (bola, goleiro, barreira,
+    // figurantes); diario() devolve o que anotou; diario(false) para
+    saltoGoleiroReplay: () => saltoGoleiroReplay,
+    diario: (ligar) => {
+      const anotado = diarioFisica;
+      if (ligar !== undefined) diarioFisica = ligar ? [] : null;
+      return anotado;
     },
     // Avança quadro a quadro até a condição (função sem argumentos) valer, no máximo limite segundos
     avancarAte: (condicao, limite = 10) => {
@@ -1648,7 +1713,7 @@ if (MODO_TESTE) {
     },
     tempos: () => ({
       fase: estado.fase, tCobranca: estado.tCobranca, tempoContato: animacao.tempoContato, duracao: animacao.duracao,
-      tempoVoo: estado.tempo, tempoDeJogo: window.tempoDeJogo,
+      tempoVoo: estado.tempo, tempoDeJogo: window.tempoDeJogo, passoDoResultado: jogada.passoDoResultado,
     }),
     desenho: () => ({ ...renderer.info.render, geometrias: renderer.info.memory.geometries, texturas: renderer.info.memory.textures }),
     cobradorPos: () => cobradorBoneco && { x: cobradorBoneco.grupo.position.x, z: cobradorBoneco.grupo.position.z, giro: cobradorBoneco.grupo.rotation.y },

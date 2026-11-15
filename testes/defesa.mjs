@@ -10,7 +10,8 @@ import {
   montarBarreira, atualizarBarreira, colidirBolaBarreira, quantidadeNaBarreira, PADRAO_BARREIRA,
 } from '../js/barreira.js';
 import {
-  criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, partesDoGoleiro, PADRAO_GOLEIRO, PADRAO_PENALTI,
+  criarGoleiro, atualizarGoleiro, colidirBolaGoleiro, partesDoGoleiro, guardarGoleiro, retomarGoleiro, alturaDoGoleiro,
+  PADRAO_GOLEIRO, PADRAO_PENALTI,
 } from '../js/goleiro.js';
 
 const COMPLETO = process.argv.includes('--completo');
@@ -1197,4 +1198,173 @@ teste('pênalti: mesma semente e mesmo histórico, mesmo lance (o replay repete 
       assert.equal(a.trilha[i].centro.y, b.trilha[i].centro.y);
     }
   }
+});
+
+// ---------- Replay: o lance repete número por número ----------
+// No jogo, antes do chute o goleiro anda com o relógio dos quadros (balanço, passo para o lado, gesto do
+// pênalti) e com o tempo que o cobrador leva para bater; depois do chute tudo anda em passos fixos. O replay
+// espera outro tempo (e o celular pode estar em outro ritmo), então o goleiro do instante do chute é guardado
+// no lance (guardarGoleiro) e retomado no replay (retomarGoleiro). Estes testes imitam isso.
+
+// Um lance: `espera` segundos antes do chute em quadros de `quadro` s (no pênalti, com a corrida no fim),
+// o chute e 2,5 s de voo em passos fixos. Com `guardado`, o goleiro retoma esse estado na hora do chute.
+// Devolve o goleiro guardado no chute e a trilha (uma linha de números por passo: bola e goleiro).
+function lanceGuardado({ origem = { x: 0, z: 22 }, alvo, velocidade, lateral = 0, semente = 1, espera, quadro, guardado = null, penalti = null }) {
+  const cfg = { ...CONFIG, goleiro: {}, barreira: {}, ...(penalti ? { penalti: { ...penalti.cfg } } : {}) };
+  const b = penalti ? null : montarBarreira(origem, cfg, sorteio(semente + 500));
+  const g = criarGoleiro(origem, b, cfg, penalti ? { penalti: { historico: [], aleatorio: sorteio(semente + 7000), forcar: penalti.forcar } } : {});
+  const bola = criarBola({ x: origem.x, y: CONFIG.raioBola, z: origem.z });
+  const corrida = 0.9;
+  for (let t = 0; t < espera; t += quadro) atualizarGoleiro(g, bola, quadro, cfg, { chutou: false });
+  if (penalti) {
+    for (let falta = corrida; falta > 0; falta -= quadro) atualizarGoleiro(g, bola, quadro, cfg, { chutou: false, tempoAteChute: Math.max(0, falta) });
+  } else {
+    for (let t = 0; t < corrida; t += quadro) atualizarGoleiro(g, bola, quadro, cfg, { chutou: false });
+  }
+  const noChute = { cx: g.cx, cy: g.cy };
+  if (guardado) retomarGoleiro(g, guardado);
+  const foto = guardarGoleiro(g);
+  montarChute(bola, mirar(origem, alvo, { velocidade, lateral }));
+
+  const aleatorio = sorteio(semente);
+  const trilha = [];
+  const eventos = [];
+  let t = 0;
+  for (let i = 0; i < 600; i++) {
+    t += H;
+    if (b) atualizarBarreira(b, t);
+    atualizarGoleiro(g, bola, H, cfg, { chutou: true, tempoDesdeChute: t, aleatorio });
+    passo(bola, H, CONFIG);
+    if (b) colidirBolaBarreira(bola, b, cfg);
+    colidirBolaGoleiro(bola, g, cfg);
+    for (const ev of bola.eventos) eventos.push(`${i}:${ev.tipo}:${ev.modo || ev.parte || ''}`);
+    bola.eventos.length = 0;
+    const linha = [bola.pos.x, bola.pos.y, bola.pos.z, bola.vel.x, bola.vel.y, bola.vel.z, g.cx, g.cy, g.vx, g.rolagem, g.rotacaoY, g.bracos];
+    for (const m of g.maos) linha.push(m.x, m.y, m.z);
+    trilha.push(linha);
+  }
+  const resultado = bola.gol ? 'gol' : eventos.some((e) => e.includes(':defesa:')) ? 'defesa' : eventos.some((e) => e.includes(':barreira:')) ? 'barreira' : 'fora';
+  return { foto, trilha, eventos, resultado, g, b, noChute };
+}
+
+// Em quantos passos as duas trilhas diferem (0 = o lance repetiu número por número)
+function passosDiferentes(a, b) {
+  assert.equal(a.length, b.length);
+  let n = 0;
+  for (let i = 0; i < a.length; i++) if (a[i].some((v, k) => v !== b[i][k])) n++;
+  return n;
+}
+
+const LANCES_REPLAY = [
+  { nome: 'no meio do gol, devagar (encaixa)', alvo: { x: 0.6, y: 1.0 }, velocidade: 17 },
+  { nome: 'no canto do goleiro, forte (espalma)', alvo: { x: -2.6, y: 1.3 }, velocidade: 25, semente: 3 },
+  { nome: 'no ângulo, forte (gol)', alvo: { x: 3.4, y: 2.2 }, velocidade: 29, semente: 5 },
+  { nome: 'de lado, com curva, na trave e para dentro', origem: { x: 7, z: 21 }, alvo: { x: -3.5, y: 2.2 }, velocidade: 28, lateral: 40, semente: 7 },
+  { nome: 'de lado, com curva, no meio do gol', origem: { x: 7, z: 21 }, alvo: { x: -2.2, y: 1.6 }, velocidade: 24, lateral: 40, semente: 7 },
+  { nome: 'rasteira na barreira', alvo: { x: -1.6, y: 0.2 }, velocidade: 24, semente: 9 },
+  { nome: 'rasteira que o goleiro espalma', alvo: { x: 1.6, y: 0.2 }, velocidade: 24, semente: 9 },
+  { nome: 'pênalti no canto, goleiro acerta o lado', origem: { x: 0, z: 11 }, alvo: { x: 2.5, y: 1.0 }, velocidade: 21, semente: 2, penalti: { cfg: {}, forcar: { vai: 'lado', lado: 1 } } },
+  { nome: 'pênalti rasteiro no canto, goleiro vai para o outro lado (gol)', origem: { x: 0, z: 11 }, alvo: { x: 3.3, y: 0.4 }, velocidade: 26, semente: 2, penalti: { cfg: {}, forcar: { vai: 'lado', lado: -1 } } },
+  { nome: 'pênalti no meio, goleiro fica', origem: { x: 0, z: 11 }, alvo: { x: 0.2, y: 1.1 }, velocidade: 18, semente: 4, penalti: { cfg: {}, forcar: { vai: 'fica' } } },
+  { nome: 'pênalti, goleiro se joga antes do contato', origem: { x: 0, z: 11 }, alvo: { x: -2.6, y: 0.8 }, velocidade: 22, semente: 6, penalti: { cfg: { atraso: -0.15, variacaoAtraso: 0 }, forcar: { vai: 'lado', lado: -1 } } },
+];
+
+teste('replay: com o goleiro do chute guardado e retomado, bola e goleiro repetem em todos os passos (diferença zero)', () => {
+  let semGuardar = 0;
+  const resultados = [];
+  for (const caso of LANCES_REPLAY) {
+    // O lance: o cobrador levou 2,3 s para bater, a 60 quadros por segundo
+    const vivo = lanceGuardado({ ...caso, espera: 2.3, quadro: 1 / 60 });
+    resultados.push(vivo.resultado);
+    // O replay espera outro tempo (0,8 s) e roda em outro ritmo (45 quadros por segundo, e depois 20)
+    const solto = lanceGuardado({ ...caso, espera: 0.8, quadro: 1 / 45 });
+    if (passosDiferentes(vivo.trilha, solto.trilha) > 0) semGuardar++;
+    for (const quadro of [1 / 45, 1 / 20, 1 / 144]) {
+      const replay = lanceGuardado({ ...caso, espera: 0.8, quadro, guardado: vivo.foto });
+      assert.equal(passosDiferentes(vivo.trilha, replay.trilha), 0, `${caso.nome}: o replay a ${Math.round(1 / quadro)} quadros/s saiu diferente do lance`);
+      assert.deepEqual(replay.eventos, vivo.eventos, `${caso.nome}: eventos`);
+      assert.equal(replay.resultado, vivo.resultado);
+      assert.deepEqual(replay.g.pose, vivo.g.pose, `${caso.nome}: pose final`);
+      // O goleiro do replay chega ao chute perto do guardado (o balanço é de centímetros): retomar não dá tranco
+      if (!caso.penalti) assert.ok(Math.hypot(replay.noChute.cx - vivo.foto.cx, replay.noChute.cy - vivo.foto.cy) < 0.12, `${caso.nome}: tranco`);
+    }
+  }
+  console.log(`    ${LANCES_REPLAY.length} lances (${resultados.join(', ')}); sem guardar o goleiro do chute, ${semGuardar} deles não repetiam`);
+  // É este o defeito que o teste pega: sem guardar, o goleiro do replay sai de outro lugar e o lance muda
+  assert.ok(semGuardar >= 3, `só ${semGuardar} lances mudam sem o goleiro guardado: o teste deixou de pegar o defeito`);
+  for (const r of ['defesa', 'gol', 'barreira']) assert.ok(resultados.includes(r), `faltou um lance de ${r}: ${resultados.join(', ')}`);
+});
+
+teste('replay: o goleiro guardado é uma cópia (não muda com o lance) e não leva a barreira nem a bola', () => {
+  const caso = LANCES_REPLAY[1];
+  const vivo = lanceGuardado({ ...caso, espera: 1.7, quadro: 1 / 60 });
+  assert.ok(!('barreira' in vivo.foto) && !('_bola' in vivo.foto) && !('_anterior' in vivo.foto));
+  const copia = structuredClone(vivo.foto);
+  // Dois replays seguidos do mesmo guardado: os dois repetem, e o guardado continua igual
+  for (let k = 0; k < 2; k++) {
+    const replay = lanceGuardado({ ...caso, espera: 0.4 + k, quadro: 1 / 30, guardado: vivo.foto });
+    assert.equal(passosDiferentes(vivo.trilha, replay.trilha), 0, `replay ${k + 1}`);
+    assert.deepEqual(vivo.foto, copia, 'o guardado mudou');
+    assert.ok(replay.g.barreira === replay.b, 'o goleiro do replay continua com a barreira dele');
+    assert.ok(replay.g.mergulho !== vivo.g.mergulho, 'nada compartilhado com o goleiro do lance');
+  }
+  // Guardado no meio do mergulho (pênalti com o goleiro saindo antes do contato): leva o mergulho junto
+  const pen = lanceGuardado({ ...LANCES_REPLAY.at(-1), espera: 1.2, quadro: 1 / 60 });
+  assert.ok(pen.foto.mergulho && pen.foto.penalti.disparou, 'já estava mergulhando no chute');
+});
+
+teste('antes do chute: o passo para o lado termina parado no lugar com quadros de qualquer tamanho', () => {
+  const cfg = { ...CONFIG, goleiro: {}, barreira: {} };
+  const ritmos = { '144/s': [1 / 144], '60/s': [1 / 60], '30/s': [1 / 30], '20/s': [1 / 20], misturado: [1 / 30, 1 / 90, 1 / 50, 1 / 144, 1 / 20] };
+  for (const [nome, quadros] of Object.entries(ritmos)) {
+    for (const origem of [{ x: 0, z: 22 }, { x: 5, z: 20 }, { x: -8, z: 18 }, { x: 2, z: 30 }]) {
+      for (const s of [1, 2]) {
+        const b = montarBarreira(origem, cfg, sorteio(s));
+        const g = criarGoleiro(origem, b, cfg);
+        const bola = criarBola({ x: origem.x, y: CONFIG.raioBola, z: origem.z });
+        let t = 0;
+        let chegou = -1;
+        for (let i = 0; t < 4; i++) {
+          const dt = quadros[i % quadros.length];
+          t += dt;
+          const antes = g.ancora;
+          atualizarGoleiro(g, bola, dt, cfg, { chutou: false });
+          if (chegou < 0 && g.ancora === g.base.x) chegou = t;
+          // Depois de chegar não sai mais do lugar (com quadros compridos ele ficava pulando de um lado para o outro)
+          if (chegou >= 0) assert.equal(g.ancora, g.base.x, `${nome}: saiu do lugar em t=${t.toFixed(2)}`);
+          assert.ok(Math.abs(g.ancora - antes) <= 1.5 * dt + 1e-9, `${nome}: tranco de ${(g.ancora - antes).toFixed(3)} m`);
+        }
+        assert.ok(chegou > 0 && chegou < 2, `${nome}, falta em (${origem.x}, ${origem.z}): ${chegou < 0 ? 'não chegou' : `chegou em ${chegou.toFixed(2)} s`}`);
+        assert.equal(g.vx, 0);
+        assert.equal(alturaDoGoleiro(g), 0, 'de pé: altura zero');
+      }
+    }
+  }
+});
+
+teste('altura do goleiro (para a sombra): zero de pé e caído, sobe no meio do mergulho', () => {
+  const r = cobrar({ chute: mirar({ x: 0, z: 22 }, { x: 3.2, y: 1.9 }, { velocidade: 26 }), semente: 4, barreira: 'nenhuma' });
+  assert.equal(r.g.pose.estado, 'caido');
+  assert.equal(alturaDoGoleiro(r.g), 0, 'caído: no chão');
+  // No meio do voo: refaz o lance e mede a maior altura
+  const cfg = { ...CONFIG, goleiro: {}, barreira: {} };
+  const g = criarGoleiro({ x: 0, z: 22 }, null, cfg);
+  const bola = criarBola({ x: 0, y: CONFIG.raioBola, z: 22 });
+  for (let t = 0; t < 1.2; t += 1 / 60) atualizarGoleiro(g, bola, 1 / 60, cfg, { chutou: false });
+  montarChute(bola, mirar({ x: 0, z: 22 }, { x: 3.2, y: 1.9 }, { velocidade: 26 }));
+  const aleatorio = sorteio(4);
+  let maior = 0;
+  let t = 0;
+  for (let i = 0; i < 480; i++) {
+    t += H;
+    atualizarGoleiro(g, bola, H, cfg, { chutou: true, tempoDesdeChute: t, aleatorio });
+    passo(bola, H, CONFIG);
+    colidirBolaGoleiro(bola, g, cfg);
+    bola.eventos.length = 0;
+    const a = alturaDoGoleiro(g);
+    assert.ok(a >= 0 && a < 1.6, `altura ${a}`);
+    maior = Math.max(maior, a);
+  }
+  console.log(`    mergulho no ângulo: o ponto mais baixo do corpo chega a ${maior.toFixed(2)} m do chão`);
+  assert.ok(maior > 0.3, `no ar, só ${maior.toFixed(2)} m`);
 });

@@ -575,6 +575,27 @@ function comecarMergulho(g, plano, t, c, tChegada) {
   g.alto = plano.alto;
 }
 
+// ---------- Guardar e retomar (replay) ----------
+
+// Antes do chute o goleiro balança o peso, dá o passo para o lado aberto e, no pênalti, insinua um canto:
+// tudo isso anda com o relógio dele (quanto tempo o cobrador levou para bater) e com o tamanho dos quadros.
+// Por isso o goleiro do instante do chute faz parte da cobrança, como a mira e a força: o jogo guarda esse
+// goleiro (guardarGoleiro) e o replay recomeça dele (retomarGoleiro). Sem isso o replay solta a bola com o
+// goleiro uns centímetros fora do lugar e a defesa já não é a mesma.
+// A cópia é funda e não leva a barreira nem a bola (são de quem chama).
+export function guardarGoleiro(g) {
+  const { barreira, _bola, _anterior, ...resto } = g;
+  return copiar(resto);
+}
+
+// Põe em g tudo o que guardarGoleiro guardou (g continua com a barreira dele). Devolve g.
+export function retomarGoleiro(g, guardado) {
+  Object.assign(g, copiar(guardado));
+  g._bola = null;
+  g._anterior = null;
+  return g;
+}
+
 // ---------- Atualização ----------
 
 // Chamar a cada quadro (ou a cada passo da física). Devolve g.pose.
@@ -714,7 +735,11 @@ function antesDoChute(g, bola, dt, c, tempoAteChute, alvoX = g.base.x) {
     const desejada = Math.sign(dx) * Math.min(v, Math.sqrt(2 * a * Math.abs(dx)));
     g.vx += limitar(desejada - g.vx, -a * dt, a * dt);
     g.ancora += g.vx * dt;
-    if (Math.abs(alvoX - g.ancora) < 2e-3 && Math.abs(g.vx) < 0.1) {
+    // Chegou: para ali. Também quando passa do ponto devagar: com quadros compridos (celular a 20 quadros por
+    // segundo) o passo pulava de um lado para o outro do ponto, quase 1 cm, sem nunca parar
+    const falta = alvoX - g.ancora;
+    const passou = falta * dx < 0 && Math.abs(g.vx) <= 2 * a * dt;
+    if ((Math.abs(falta) < 2e-3 && Math.abs(g.vx) < 0.1) || passou) {
       g.ancora = alvoX;
       g.vx = 0;
     }
@@ -1132,6 +1157,16 @@ function pontoMaisPerto(q, p) {
   const l2 = ax * ax + ay * ay + az * az;
   const f = l2 > 1e-9 ? limitar(((p.x - q.x) * ax + (p.y - q.y) * ay + (p.z - q.z) * az) / l2, 0, 1) : 0;
   return { x: q.x + ax * f, y: q.y + ay * f, z: q.z + az * f };
+}
+
+// A que altura do gramado está o ponto mais baixo do corpo, em metros: 0 de pé ou caído, e o quanto ele
+// saiu do chão no meio do mergulho (ou no passinho de prontidão). Serve para a sombra dele.
+export function alturaDoGoleiro(g) {
+  let menor = Infinity;
+  for (const q of partesDoGoleiro(g)) {
+    menor = Math.min(menor, q.y - q.r, q.ate ? q.ate.y - q.r : Infinity);
+  }
+  return Math.max(0, menor) + (g.pulinho || 0);
 }
 
 // ---------- Colisão ----------
