@@ -31,14 +31,14 @@
                      ?zoom (rosto), ?corpo (corpo inteiro), ?pernas, ?tronco, ?pes, ?maos  enquadramento;
                      ?pose=parado|corrida|chute|bracos|agachado|barreira|goleiro  pose do retrato
       ?malha         mostra os triângulos por cima;  ?noite  luzes parecidas com as do jogo
-      ?detalhe=baixo bonecos com menos triângulos (como os figurantes)
+      ?detalhe=baixo|alto  todos os bonecos num detalhe só (sem isso é como no jogo: genéricos no baixo, o resto no alto)
       ?fila=1        rostos dos reservas;  ?nuca / ?perfil  gira os rostos
       ?cobrador=Nome quem bate em jogo-tras, jogo-aerea e sequencia (ex.: Pibe);  ?t=s  instante da cobrança
       ?caso=0|1|2    chute no goleiro-real (alto à direita, rasteiro à esquerda, no meio);  ?maos  mostra as mãos da colisão
       ?contas        triângulos e malhas de cada boneco
       ?tempos        mede quanto demora criar os bonecos de uma cobrança (com e sem cache)
-    No topo: checagens com números (pé na bola, pé de apoio, escorregão, barreira, sobras do dispose) e as
-    contas de cada boneco (chamadas de desenho e triângulos).
+    No topo: checagens com números (barreira, sobras do dispose, silhueta da sombra) e as contas de cada boneco
+    (chamadas de desenho e triângulos). As checagens da cobrança ficam em node testes/cobranca.mjs.
   -->
   <div id="info">carregando…</div>
   <div id="secoes"></div>
@@ -165,9 +165,10 @@
     }
 
     const todos = [];
-    const detalhe = params.get('detalhe') === 'baixo' ? 'baixo' : 'alto';
+    // Como no jogo: sem pedir, as lendas e o goleiro saem no detalhe alto e os genéricos no baixo
+    const detalhe = ['baixo', 'alto'].includes(params.get('detalhe')) ? params.get('detalhe') : 'auto';
     const matMalha = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true, transparent: true, opacity: 0.3 });
-    // Todo boneco da página nasce aqui (?detalhe=baixo e ?malha valem para todos)
+    // Todo boneco da página nasce aqui (?detalhe=baixo|alto e ?malha valem para todos)
     function criar(opcoes) {
       const p = criarPersonagem({ detalhe, ...opcoes });
       if (params.has('malha')) {
@@ -851,69 +852,9 @@
       };
     });
 
-    // Checagens com números: o pé chega na bola? o pé de apoio escorrega? algum pé entra no chão?
-    function verificarCobranca(apelido, bolaPos, alvo) {
-      const j = acha(apelido);
-      const p = criarPersonagem({ visual: j.visual, uniforme: UNIFORMES.lendas, numero: j.numero, nome: j.apelido });
-      const cob = criarCobranca(p, { bola: bolaPos, alvo, pe: j.pe });
-      const outro = j.pe === 'D' ? 'E' : 'D';
-      const mundo = (junta, x, y, z) => {
-        p.grupo.updateMatrixWorld(true);
-        return p.pontoNoGrupo(junta, x, y, z).applyMatrix4(p.grupo.matrixWorld);
-      };
-      const solas = [[0, -0.07, -0.055], [0, -0.07, 0.1], [0, -0.062, 0.19]];
-      let menorY = Infinity;
-      let maiorPulo = 0;
-      let apoioIni = null;
-      let escorrega = 0;
-      let anterior = null;
-      const dt = 1 / 60;
-      for (let t = 0; t <= cob.duracao + 1e-6; t += dt) {
-        const r = cob.atualizar(t);
-        for (const lado of ['E', 'D']) for (const sola of solas) menorY = Math.min(menorY, mundo(p.juntas[`tornozelo${lado}`], ...sola).y);
-        const pos = p.grupo.position.clone();
-        if (anterior) maiorPulo = Math.max(maiorPulo, pos.distanceTo(anterior));
-        anterior = pos;
-        if (r.etapa !== 'corrida' && r.progresso >= 0.3) {
-          const a = mundo(p.juntas[`tornozelo${outro}`], 0, -0.07, 0.06);
-          if (!apoioIni) apoioIni = a;
-          escorrega = Math.max(escorrega, Math.hypot(a.x - apoioIni.x, a.z - apoioIni.z));
-        }
-      }
-      cob.atualizar(cob.tempoContato);
-      const peito = mundo(p.juntas[`tornozelo${j.pe}`], 0, -0.005, 0.085);
-      const bolaC = new THREE.Vector3(bolaPos.x, 0.11, bolaPos.z);
-      const apoio = mundo(p.juntas[`tornozelo${outro}`], 0, -0.07, 0.06);
-      // Lado do pé de apoio em relação à direção do chute (+ = esquerda de quem chuta)
-      const f = new THREE.Vector3(alvo.x - bolaPos.x, 0, alvo.z - bolaPos.z).normalize();
-      const esq = new THREE.Vector3(f.z, 0, -f.x);
-      const rel = apoio.clone().sub(bolaC);
-      const r = {
-        jogador: apelido, pe: j.pe,
-        tempoContato: +cob.tempoContato.toFixed(3),
-        peNaBola_cm: +((peito.distanceTo(bolaC) - 0.11) * 100).toFixed(1),
-        alturaPeitoDoPe_cm: +(peito.y * 100).toFixed(1),
-        apoioAoLado_cm: +(rel.dot(esq) * 100).toFixed(1),
-        apoioAtras_cm: +(-rel.dot(f) * 100).toFixed(1),
-        escorregaoApoio_cm: +(escorrega * 100).toFixed(2),
-        peMaisBaixo_cm: +(menorY * 100).toFixed(2),
-        maiorPassoQuadro_cm: +(maiorPulo * 100).toFixed(1),
-        inicio: { x: +cob.inicio.x.toFixed(2), z: +cob.inicio.z.toFixed(2) },
-      };
-      p.dispose();
-      return r;
-    }
+    // Checagens com números. (As da cobrança — pé na bola, pé de apoio, escorregão — ficam no teste de Node,
+    // que acompanha a animação: node testes/cobranca.mjs. As que havia aqui mediam etapas que não existem mais.)
     const checagens = [];
-    for (const [apelido, bolaPos, alvo] of [
-      ['Becks', { x: 3, z: 22 }, { x: -2.5, z: 0 }], ['Canhão', { x: -6, z: 25 }, { x: 2, z: 0 }],
-      ['Zizou', { x: 0, z: 20 }, { x: 3, z: 0 }], ['Robozão', { x: 8, z: 28 }, { x: -3, z: 0 }],
-    ]) {
-      try {
-        checagens.push(verificarCobranca(apelido, bolaPos, alvo));
-      } catch (e) {
-        checagens.push({ jogador: apelido, erro: e.message });
-      }
-    }
     window.checagens = checagens;
 
     // Barreira: no pulo, o alto da cabeça e os pés batem com o modelo de colisão de js/barreira.js?
@@ -990,10 +931,32 @@
     };
     const contas = [
       ...ELENCO.map((j) => linhaDeContas(j.apelido, { visual: j.visual, uniforme: uniformeDaLenda(j), numero: j.numero, nome: nomeCurto(j) })),
-      linhaDeContas('genérico', { visual: visualAdversario(1), uniforme: UNIFORMES.adversario, numero: 4 }),
       linhaDeContas('goleiro adversário', { visual: VISUAL_GOLEIRO_ADVERSARIO, uniforme: UNIFORMES.goleiroAdversario, numero: 1 }),
-      linhaDeContas('figurante (baixo)', { visual: visualAdversario(2), uniforme: UNIFORMES.adversario, numero: 7, detalhe: 'baixo' }),
+      linhaDeContas('genérico (alto)', { visual: visualAdversario(1), uniforme: UNIFORMES.adversario, numero: 4, detalhe: 'alto' }),
+      // Sem pedir detalhe, os genéricos (barreira e figurantes) saem no baixo
+      linhaDeContas('genérico (auto = baixo)', { visual: visualAdversario(2), uniforme: UNIFORMES.adversario, numero: 7 }),
     ];
+
+    // Silhueta da sombra: uma malha só, presa ao mesmo esqueleto, com o atributo 'copia' (0 a copias − 1)
+    function verificarSilhueta() {
+      const p = criarPersonagem({ visual: ELENCO[0].visual, uniforme: uniformeDaLenda(ELENCO[0]), numero: 1 });
+      const antes = p.grupo.children.length;
+      const sil = p.criarSilhueta(matMalha, 4);
+      const g = sil.geometry;
+      const copia = g.attributes.copia;
+      const vistos = new Set();
+      for (let i = 0; i < copia.count; i++) vistos.add(copia.getX(i));
+      const r = {
+        silhueta_ok: sil.isSkinnedMesh && sil.skeleton === p.esqueleto && sil.parent === p.grupo && sil.frustumCulled === false
+          && p.grupo.children.length === antes + 1 && vistos.size === 4 && [0, 1, 2, 3].every((k) => vistos.has(k))
+          && !!g.attributes.skinIndex && !!g.attributes.skinWeight,
+        silhueta_triangulos: g.index.count / 3,
+      };
+      p.dispose();
+      r.silhueta_someNoDispose = sil.parent === null;
+      return r;
+    }
+    checagens.push(verificarSilhueta());
     const altos = contas.filter((c) => !c.nome.includes('baixo'));
     const maxTri = Math.max(...altos.map((c) => c.tri));
     const maxMalhas = Math.max(...contas.map((c) => c.malhas));
@@ -1034,10 +997,54 @@
       m.lista.forEach((p) => p.dispose());
       return r;
     }
-    const tempos = params.has('tempos') ? medirTempos() : null;
+    // O primeiro quadro com bonecos novos também custa (as texturas sobem para a placa de vídeo na hora de
+    // desenhar): cria um cobrador nunca visto + 5 da barreira e desenha um quadro, 4 vezes
+    function medirPrimeiroQuadro() {
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(390, 844);
+      const cena = new THREE.Scene();
+      cena.add(new THREE.HemisphereLight(0xffffff, 0x446644, 2));
+      const camera = new THREE.PerspectiveCamera(40, 390 / 844, 0.1, 100);
+      camera.position.set(0, 1.6, 7);
+      camera.lookAt(0, 1, 0);
+      const gl = renderer.getContext();
+      const desenhar = () => {
+        const t0 = performance.now();
+        renderer.render(cena, camera);
+        gl.finish();
+        return +(performance.now() - t0).toFixed(1);
+      };
+      const cor = (k) => '#' + ((k * 2654435761) >>> 8 & 0xffffff).toString(16).padStart(6, '0');
+      // Aquece os programas (não é o que se quer medir)
+      const primeiro = criarPersonagem({ visual: ELENCO[0].visual, uniforme: uniformeDaLenda(ELENCO[0]), numero: 1, nome: 'A' });
+      cena.add(primeiro.grupo);
+      desenhar();
+      const r = { criar: [], primeiroQuadro: [], quadroSeguinte: [] };
+      const vivos = [primeiro];
+      for (let k = 0; k < 4; k++) {
+        const j = ELENCO[3 + 4 * k];
+        const uniA = { padrao: 'listras', camisa: cor(k + 1), cores: [cor(k + 9)], calcao: cor(k + 3), meiao: cor(k + 4), numero: '#ffffff', gola: cor(k + 5) };
+        const uniB = { padrao: 'liso', camisa: cor(k + 21), calcao: cor(k + 23), meiao: cor(k + 24), numero: '#111111', gola: cor(k + 25) };
+        const t0 = performance.now();
+        const novos = [criarPersonagem({ visual: { ...j.visual, olhos: cor(k + 40) }, uniforme: uniA, numero: j.numero, nome: nomeCurto(j) })];
+        for (let i = 0; i < 5; i++) novos.push(criarPersonagem({ visual: visualAdversario(7 * k + i, 1.8011 + 0.0173 * i + 0.003 * k), uniforme: uniB, numero: 4 + i }));
+        r.criar.push(+(performance.now() - t0).toFixed(1));
+        novos.forEach((p, i) => { p.grupo.position.x = (i - 2.5) * 0.7; cena.add(p.grupo); });
+        r.primeiroQuadro.push(desenhar());
+        r.quadroSeguinte.push(desenhar());
+        vivos.push(...novos);
+      }
+      vivos.forEach((p) => p.dispose());
+      renderer.dispose();
+      renderer.forceContextLoss();
+      return r;
+    }
+    const tempos = params.has('tempos') ? { ...medirTempos(), primeiroQuadro: medirPrimeiroQuadro() } : null;
     window.tempos = tempos;
 
-    document.getElementById('info').textContent = `Por boneco: até ${maxMalhas} chamadas de desenho e ${maxTri} triângulos (detalhe baixo: ${baixo.tri}); silhueta da sombra: ${baixo.triSilhueta} triângulos por cópia\n`
+    const silhuetas = [...new Set(contas.map((c) => c.triSilhueta))].sort((a, b) => a - b).join(' a ');
+    document.getElementById('info').textContent = `Por boneco: até ${maxMalhas} chamadas de desenho e ${maxTri} triângulos (detalhe baixo: ${baixo.tri}); silhueta da sombra: ${silhuetas} triângulos por cópia (os goleiros, de luva, têm mais)\n`
       + (params.has('contas') ? contas.map((c) => c.texto).join('\n') + '\n' : '')
       + (tempos ? 'Tempo de criação (ms): ' + JSON.stringify(tempos) + '\n' : '')
       + checagens.map((c) => JSON.stringify(c)).join('\n');
